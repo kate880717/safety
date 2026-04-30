@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>안전 탐험</title>
-  
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script type="importmap">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>안전 탐험</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="importmap">
   {
     "imports": {
       "react": "https://esm.sh/react@18.3.1",
@@ -18,671 +19,693 @@
     }
   }
   </script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap');
-    body { font-family: 'Nanum Gothic', sans-serif; margin: 0; padding: 0; overflow: hidden; }
-    .pulse-record { animation: pulseRecord 1.5s infinite alternate; }
-    @keyframes pulseRecord {
-      0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.7); }
-      100% { box-shadow: 0 0 0 15px rgba(239,68,68,0); }
-    }
-  </style>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap');
+
+        body {
+            font-family: 'Nanum Gothic', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .pulse-record {
+            animation: pulseRecord 1.5s infinite alternate;
+        }
+
+        @keyframes pulseRecord {
+            0% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+
+            100% {
+                box-shadow: 0 0 0 15px rgba(239, 68, 68, 0);
+            }
+        }
+    </style>
 </head>
+
 <body>
-  <div id="root"></div>
+    <div id="root"></div>
 
-  <script type="text/babel" data-type="module">
-    import React, { useState, useEffect, useCallback, useRef } from 'react';
-    import { createRoot } from 'react-dom/client';
-    import { motion, AnimatePresence } from 'framer-motion';
-    import { 
-      Volume2, VolumeX, Star, ChevronRight, RotateCcw, Download, ShieldCheck, 
-      MapPin, UserX, CheckCircle2, Phone, Trash2, PenTool, Car, 
-      FlameKindling, Smartphone, Footprints, Wind, Trophy, Mic, Square, Save, Loader2, Search
-    } from 'lucide-react';
+    <script type="text/babel" data-type="module">
+        import React, { useState, useEffect, useCallback, useRef } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import { motion, AnimatePresence } from 'framer-motion';
+        import {
+            Volume2, VolumeX, Star, ChevronRight, RotateCcw, Download, ShieldCheck,
+            MapPin, UserX, CheckCircle2, Phone, Trash2, PenTool, Car,
+            FlameKindling, Smartphone, Footprints, Wind, Trophy, Mic, Square, Save, Loader2, Search
+        } from 'lucide-react';
 
-    // --- TTS & Sound ---
-    const speak = (text, rate = 0.9, pitch = 1.1) => {
-      if (typeof window === 'undefined' || !window.speechSynthesis) return;
-      const synth = window.speechSynthesis;
-      if (synth.speaking) synth.cancel();
-      const utterThis = new SpeechSynthesisUtterance(text);
-      const setVoice = () => {
-        const voices = synth.getVoices();
-        let voice = voices.find(v => v.lang === 'ko-KR' && v.name.includes('Google'));
-        if (!voice) voice = voices.find(v => v.lang === 'ko-KR');
-        if (voice) utterThis.voice = voice;
-      };
-      if (synth.getVoices().length === 0) window.speechSynthesis.onvoiceschanged = setVoice;
-      else setVoice();
-      utterThis.rate = rate; utterThis.pitch = pitch;
-      synth.speak(utterThis);
-    };
-
-    const playSound = (type) => {
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-      osc.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-      
-      if (type === 'correct') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.2);
-        gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-      } else if (type === 'wrong') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(300, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.3);
-        gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-      } else if (type === 'click') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-      }
-    };
-
-    // --- Character ---
-    const SubjectFairy = ({ className = "" }) => (
-      <motion.div animate={{ y: [0, -8, 0] }} transition={{ repeat: Infinity, duration: 2.5 }} className={`relative inline-block ${className}`}>
-        <svg width="80" height="100" viewBox="0 0 120 150" fill="none" xmlns="http://www.w3.org/2000/svg">
-          {/* Rabbit Ears */}
-          <path d="M40 70 C 30 20, 50 10, 55 40" fill="#FFF" stroke="#FFB6C1" strokeWidth="4" />
-          <path d="M80 70 C 90 20, 70 10, 65 40" fill="#FFF" stroke="#FFB6C1" strokeWidth="4" />
-          <path d="M45 55 C 40 25, 48 20, 50 45" fill="#FFC0CB" />
-          <path d="M75 55 C 80 25, 72 20, 70 45" fill="#FFC0CB" />
-          {/* Rabbit Face */}
-          <ellipse cx="60" cy="85" rx="35" ry="30" fill="#FFF" stroke="#FFB6C1" strokeWidth="4" />
-          {/* Eyes */}
-          <circle cx="48" cy="80" r="4" fill="#333" />
-          <circle cx="72" cy="80" r="4" fill="#333" />
-          {/* Cheeks */}
-          <ellipse cx="40" cy="88" rx="5" ry="3" fill="#FFB6C1" opacity="0.6" />
-          <ellipse cx="80" cy="88" rx="5" ry="3" fill="#FFB6C1" opacity="0.6" />
-          {/* Nose & Mouth */}
-          <circle cx="60" cy="86" r="3" fill="#FF69B4" />
-          <path d="M55 92 Q 60 98 65 92" stroke="#333" strokeWidth="2" fill="none" strokeLinecap="round" />
-        </svg>
-      </motion.div>
-    );
-
-    // --- Default Icons & Colors mapping ---
-    const getAreaInfo = (areaName) => {
-      if(areaName.includes('재난') && areaName.includes('화재')) return { icon: <FlameKindling/>, bg: 'bg-orange-500', pos: {x:88, y:25} };
-      if(areaName.includes('재난') && areaName.includes('지진')) return { icon: <MapPin/>, bg: 'bg-yellow-600', pos: {x:65, y:12} };
-      if(areaName.includes('교통')) return { icon: <Car/>, bg: 'bg-emerald-500', pos: {x:38, y:15} };
-      if(areaName.includes('신변')) return { icon: <UserX/>, bg: 'bg-purple-500', pos: {x:12, y:18} };
-      if(areaName.includes('사이버')) return { icon: <Smartphone/>, bg: 'bg-indigo-500', pos: {x:60, y:78} };
-      if(areaName.includes('보건')) return { icon: <Wind/>, bg: 'bg-slate-500', pos: {x:10, y:75} };
-      if(areaName.includes('실종')) return { icon: <Search/>, bg: 'bg-teal-500', pos: {x:75, y:40} };
-      return { icon: <ShieldCheck/>, bg: 'bg-blue-500', pos: {x: 50, y: 50} };
-    };
-
-    function App() {
-      // Data State
-      const [students, setStudents] = useState([]);
-      const [allQuestions, setAllQuestions] = useState([]);
-      const [groupedAreas, setGroupedAreas] = useState([]);
-      const [isLoading, setIsLoading] = useState(true);
-      const [isSubmitting, setIsSubmitting] = useState(false);
-
-      // App State
-      const [step, setStep] = useState('login'); // login -> intro -> prerecord -> map -> play -> eval -> postrecord -> result
-      const [studentName, setStudentName] = useState('');
-      const [isSpeakerOn, setIsSpeakerOn] = useState(false);
-      
-      // Progress State
-      const [completedAreas, setCompletedAreas] = useState(new Set());
-      const [currentAreaIndex, setCurrentAreaIndex] = useState(0);
-      const [currentQuestionsInArea, setCurrentQuestionsInArea] = useState([]);
-      const [currentQIndex, setCurrentQIndex] = useState(0);
-      const [feedback, setFeedback] = useState(null);
-      const [stars, setStars] = useState(0);
-
-      // Recording State
-      const [preRecordText, setPreRecordText] = useState('');
-      const [preRecordAudioBase64, setPreRecordAudioBase64] = useState('');
-      const [postRecordText, setPostRecordText] = useState('');
-      const [postRecordAudioBase64, setPostRecordAudioBase64] = useState('');
-      const [voiceAnswerText, setVoiceAnswerText] = useState('');
-      const [voiceAnswers, setVoiceAnswers] = useState({});
-      const [interimText, setInterimText] = useState('');
-      
-      const [isRecording, setIsRecording] = useState(false);
-      const mediaRecorderRef = useRef(null);
-      const recognitionRef = useRef(null);
-      const audioChunksRef = useRef([]);
-
-      useEffect(() => {
-        // Load data from Google Apps Script
-        if (typeof google !== 'undefined' && google.script && google.script.run) {
-          google.script.run.withSuccessHandler((data) => {
-            setStudents(data.students || []);
-            setAllQuestions(data.questions || []);
-            groupQuestions(data.questions || []);
-            setIsLoading(false);
-          }).withFailureHandler((err) => {
-            alert('데이터를 불러오는데 실패했습니다: ' + err);
-            setIsLoading(false);
-          }).getAppData();
-        } else {
-          // Local fallback
-          setTimeout(() => {
-            const mockStudents = ['홍길동', '김철수', '이영희'];
-            const mockQuestions = [
-              { area: '신변 안전', type: '음성', text: '모르는 사람이 "부모님 친구야, 같이 가자"고 하면 뭐라고 말해야 할까요?', options: [], answer: '안돼,싫어,아니요', correctFeedback: '씩씩하게 잘 거절했어요! 낯선 사람을 따라가지 않는 용기가 대단해요.', wrongFeedback: '위험한 상황일 수 있어요. 아는 사람이라고 해도 부모님 허락 없이는 따라가면 안 돼요.' },
-              { area: '학용품 안전', type: '객관식', text: '친구에게 가위를 줄 때 올바른 방법은?', options: ['뾰족한 날 쪽을 친구에게 줘요.', '손잡이 쪽을 친구에게 건네줘요.'], answer: 2, correctFeedback: '친구를 배려하는 따뜻한 마음을 가졌군요!', wrongFeedback: '날카로운 부분을 주면 친구가 다칠 수 있어요.' },
-              { area: '교통 안전', type: '음성', text: '초록불이 켜지면 횡단보도를 건너기 전 어떻게 행동해야 할까요?', options: [], answer: '손,멈춰,살펴,좌우', correctFeedback: '멈춤, 살핌, 건넘! 교통 규칙을 아주 잘 아는군요.', wrongFeedback: '신호가 바뀌어도 차가 안 멈출 수 있으니 꼭 양옆을 살펴야 해요.' },
-              { area: '재난 안전 (화재)', type: '객관식', text: '불이 나서 연기가 많을 때 탈출 방법은?', options: ['빨리 가기 위해 서서 달려요.', '입을 막고 자세를 낮춰 이동해요.'], answer: 2, correctFeedback: '뜨거운 연기를 피하는 지혜를 잘 발견했어요!', wrongFeedback: '연기는 위로 올라가는 성질이 있어서 서서 다니면 숨쉬기 어려워요.' },
-              { area: '재난 안전 (지진)', type: '객관식', text: '지진이 발생하면 가장 먼저 해야 할 일은 무엇인가요?', options: ['책상 밑으로 숨는다.', '건물 밖으로 바로 뛰어 나간다.'], answer: 1, correctFeedback: '떨어지는 물건으로부터 내 머리를 지키는 게 가장 중요해요!', wrongFeedback: '흔들릴 때 밖으로 뛰어나가면 간판 등이 떨어져서 더 위험할 수 있어요.' },
-              { area: '생활 안전', type: '객관식', text: '학교 복도에서 이동할 때 안전한 방법은?', options: ['신나게 뛰어가요.', '오른쪽 길로 천천히 걸어가요.'], answer: 2, correctFeedback: '학교 규칙을 잘 지키는 멋진 어린이가 되었네요!', wrongFeedback: '복도에서 뛰면 다른 친구와 부딪혀서 크게 다칠 수 있어요.' },
-              { area: '사이버 안전', type: '음성', text: '인터넷에서 모르는 사람이 집 주소를 물어보면 어떻게 대답해야 할까요?', options: [], answer: '안돼,안알려,몰라,싫어', correctFeedback: '나의 소중한 정보를 지키는 똑똑한 지킴이에요!', wrongFeedback: '모르는 사람에게 개인정보를 주면 나쁜 일에 쓰일 수 있어 위험해요.' },
-              { area: '응급 처치', type: '객관식', text: '사고가 났을 때 가장 먼저 해야 할 일은?', options: ['어른께 알리고 119에 전화해요.', '내가 직접 치료해요.'], answer: 1, correctFeedback: '침착하게 어른에게 도움을 요청하는 법을 잘 알고 있군요!', wrongFeedback: '다친 사람을 직접 만지면 더 위험해질 수 있어요. 먼저 어른이나 119에 알려요.' },
-              { area: '보건 안전', type: '객관식', text: '먼지가 심한 날 밖에서 놀고 싶다면?', options: ['그냥 밖에서 놀아요.', '마스크를 쓰고 실내에서 놀아요.'], answer: 2, correctFeedback: '나의 건강을 스스로 지키는 방법을 찾았네요!', wrongFeedback: '눈에 보이지 않는 나쁜 먼지가 우리 몸에 들어오면 아플 수 있어요.' },
-              { area: '학교 안전', type: '객관식', text: '청소 도구를 사용한 뒤에는 어떻게 할까요?', options: ['바닥에 두고 놀아요.', '정해진 자리에 가지런히 정리해요.'], answer: 2, correctFeedback: '정리 정돈은 안전 사고를 막는 첫걸음이랍니다!', wrongFeedback: '바닥에 둔 물건에 발이 걸려 넘어져서 다칠 수 있어요.' },
-              { area: '실종 예방', type: '음성', text: '길을 잃었을 때 제자리에서 어떤 행동을 해야 할까요?', options: [], answer: '기다려,멈춰,도와', correctFeedback: '멈추기! 생각하기! 도와주세요! 이 세 가지를 잘 기억해요.', wrongFeedback: '이리저리 뛰어다니면 부모님이 나를 찾기가 더 어려워져요. 제자리에 멈춰야 해요.' }
-            ];
-            setStudents(mockStudents);
-            setAllQuestions(mockQuestions);
-            groupQuestions(mockQuestions);
-            setIsLoading(false);
-          }, 1000);
-        }
-        
-        // Init Speech Recognition
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (SpeechRecognition) {
-          const rec = new SpeechRecognition();
-          rec.lang = 'ko-KR';
-          rec.continuous = true;
-          rec.interimResults = true;
-          rec.onresult = (e) => {
-            let final = '';
-            let interim = '';
-            for (let i = e.resultIndex; i < e.results.length; ++i) {
-              if (e.results[i].isFinal) final += e.results[i][0].transcript + ' ';
-              else interim += e.results[i][0].transcript;
-            }
-            if (final) {
-              if (step === 'prerecord') setPreRecordText(prev => prev + final);
-              if (step === 'postrecord') setPostRecordText(prev => prev + final);
-              if (step === 'play') setVoiceAnswerText(prev => prev + final);
-            }
-            setInterimText(interim);
-          };
-          recognitionRef.current = rec;
-        }
-      }, [step]);
-
-      // Speaker Toggle Reactivity
-      useEffect(() => {
-        if (isSpeakerOn) {
-          if (step === 'intro') speak("안녕! 통합교과 요정에 온 걸 환영해. 나를 지키는 안전 약속을 배우러 출발해볼까?");
-          else if (step === 'play' && currentQuestionsInArea.length > 0) speak(currentQuestionsInArea[currentQIndex].text);
-          else if (step === 'eval') speak("모든 탐험을 마쳤어요! 스스로 별점을 주어 평가해볼까요?");
-          else if (step === 'result') speak("안전탐험 완료! 참 잘했어요!");
-        } else {
-          if (typeof window !== 'undefined' && window.speechSynthesis) {
-            window.speechSynthesis.cancel();
-          }
-        }
-      }, [isSpeakerOn]);
-
-      const PATH_POINTS = [
-        { x: 12, y: 18 }, { x: 38, y: 15 }, { x: 65, y: 12 }, { x: 88, y: 25 },
-        { x: 82, y: 55 }, { x: 60, y: 78 }, { x: 32, y: 85 }, { x: 10, y: 75 },
-        { x: 15, y: 48 }, { x: 45, y: 45 }, { x: 75, y: 40 }
-      ];
-
-      const groupQuestions = (questions) => {
-        const groups = {};
-        questions.forEach(q => {
-          if(!groups[q.area]) groups[q.area] = [];
-          groups[q.area].push(q);
-        });
-        const mapped = Object.keys(groups).map((areaName, idx) => {
-          const info = getAreaInfo(areaName);
-          const pos = PATH_POINTS[idx % PATH_POINTS.length];
-          return { id: areaName, title: areaName, questions: groups[areaName], icon: info.icon, bg: info.bg, x: pos.x, y: pos.y };
-        });
-        setGroupedAreas(mapped);
-      };
-
-      const startApp = async () => {
-        if (!studentName) return alert('이름을 선택해주세요.');
-        if (isSpeakerOn) playSound('click');
-        
-        // 앱 시작 시 마이크 권한을 한 번 미리 요청하여 반복되는 권한 팝업 방지
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          stream.getTracks().forEach(track => track.stop());
-        } catch(err) {
-          console.warn('마이크 권한 요청 실패 또는 취소:', err);
-        }
-
-        setStep('intro');
-        if (isSpeakerOn) speak("안녕! 통합교과 요정에 온 걸 환영해. 나를 지키는 안전 약속을 배우러 출발해볼까?");
-      };
-
-      const toggleRecord = async (type) => {
-        if (isSpeakerOn) playSound('click');
-        if (isRecording) {
-          mediaRecorderRef.current?.stop();
-          recognitionRef.current?.stop();
-          setIsRecording(false);
-        } else {
-          try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const mediaRecorder = new MediaRecorder(stream);
-            audioChunksRef.current = [];
-            
-            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
-            mediaRecorder.onstop = () => {
-              const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-              const reader = new FileReader();
-              reader.readAsDataURL(audioBlob);
-              reader.onloadend = () => {
-                if (type === 'pre') setPreRecordAudioBase64(reader.result);
-                else setPostRecordAudioBase64(reader.result);
-              };
-              stream.getTracks().forEach(track => track.stop());
+        // --- TTS & Sound ---
+        const speak = (text, rate = 0.9, pitch = 1.1) => {
+            if (typeof window === 'undefined' || !window.speechSynthesis) return;
+            const synth = window.speechSynthesis;
+            if (synth.speaking) synth.cancel();
+            const utterThis = new SpeechSynthesisUtterance(text);
+            const setVoice = () => {
+                const voices = synth.getVoices();
+                let voice = voices.find(v => v.lang === 'ko-KR' && v.name.includes('Google'));
+                if (!voice) voice = voices.find(v => v.lang === 'ko-KR');
+                if (voice) utterThis.voice = voice;
             };
-            
-            mediaRecorder.start();
-            mediaRecorderRef.current = mediaRecorder;
-            recognitionRef.current?.start();
-            setIsRecording(true);
-          } catch (err) {
-            alert('마이크 접근 권한이 필요합니다.');
-          }
-        }
-      };
-
-      const toggleVoiceRecord = async () => {
-        if (isSpeakerOn) playSound('click');
-        if (isRecording) {
-          mediaRecorderRef.current?.stop();
-          recognitionRef.current?.stop();
-          setIsRecording(false);
-        } else {
-          try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const mediaRecorder = new MediaRecorder(stream);
-            audioChunksRef.current = [];
-            
-            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
-            
-            const currentArea = currentQuestionsInArea[currentQIndex].area;
-            mediaRecorder.onstop = () => {
-              const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-              const reader = new FileReader();
-              reader.readAsDataURL(audioBlob);
-              reader.onloadend = () => {
-                setVoiceAnswers(prev => ({
-                   ...prev,
-                   [currentArea]: { ...prev[currentArea], audioBase64: reader.result }
-                }));
-              };
-              stream.getTracks().forEach(track => track.stop());
-            };
-            
-            mediaRecorder.start();
-            mediaRecorderRef.current = mediaRecorder;
-            setVoiceAnswerText('');
-            setInterimText('');
-            setFeedback(null);
-            recognitionRef.current?.start();
-            setIsRecording(true);
-          } catch(err) {
-             alert('마이크 접근 권한이 필요합니다.');
-          }
-        }
-      };
-
-      const selectArea = (area) => {
-        setCurrentQuestionsInArea(area.questions);
-        setCurrentAreaIndex(groupedAreas.findIndex(a => a.id === area.id));
-        setCurrentQIndex(0);
-        setFeedback(null);
-        setStep('play');
-        if (isSpeakerOn) speak(area.questions[0].text);
-      };
-
-      const handleOptionClick = (option, idx, correctIdx) => {
-        const isCorrect = (idx + 1) === correctIdx;
-        const currentQ = currentQuestionsInArea[currentQIndex];
-        const correctMsg = currentQ.correctFeedback || '참 잘했어요! 안전 약속을 잘 아는군요.';
-        const wrongMsg = currentQ.wrongFeedback || '다시 한 번 안전하게 생각해볼까요?';
-
-        if (isCorrect) {
-          if (isSpeakerOn) playSound('correct');
-          setFeedback({ type: '정답', message: correctMsg });
-        } else {
-          if (isSpeakerOn) playSound('wrong');
-          setFeedback({ type: '오답', message: wrongMsg });
-        }
-        if (isSpeakerOn) speak(isCorrect ? correctMsg : wrongMsg);
-      };
-
-      const checkVoiceAnswer = () => {
-        const currentQ = currentQuestionsInArea[currentQIndex];
-        const explanation = currentQ.correctFeedback || '스스로 안전 약속을 생각해보는 멋진 대원이네요!';
-        const keywordsStr = String(currentQ.answer).split(',').map(k => `"${k.trim()}"`).join(', ');
-
-        if (isSpeakerOn) playSound('correct');
-        setFeedback({ 
-          type: '정답', 
-          message: `[정답 예시] ${keywordsStr} 등의 단어가 포함된 대답\n\n[해설] ${explanation}` 
-        });
-        
-        setVoiceAnswers(prev => ({
-           ...prev,
-           [currentQ.area]: { ...prev[currentQ.area], text: voiceAnswerText }
-        }));
-        
-        if (isSpeakerOn) speak(`정답 예시는 ${keywordsStr} 등의 단어가 포함된 대답입니다. 해설. ${explanation}`);
-      };
-
-      const nextQuestion = () => {
-        setFeedback(null);
-        setVoiceAnswerText('');
-        if (currentQIndex + 1 < currentQuestionsInArea.length) {
-          setCurrentQIndex(prev => prev + 1);
-          if (isSpeakerOn) speak(currentQuestionsInArea[currentQIndex + 1].text);
-        } else {
-          // Area complete
-          setCompletedAreas(prev => new Set(prev).add(groupedAreas[currentAreaIndex].id));
-          if (completedAreas.size + 1 >= groupedAreas.length) {
-            setStep('eval');
-            if (isSpeakerOn) speak("모든 탐험을 마쳤어요! 스스로 별점을 주어 평가해볼까요?");
-          } else {
-            setStep('map');
-          }
-        }
-      };
-
-      const submitData = () => {
-        setIsSubmitting(true);
-        const payload = {
-          studentName,
-          stars,
-          progress: completedAreas.size === groupedAreas.length ? '완료' : '진행중',
-          preRecordText, preRecordAudioBase64,
-          postRecordText, postRecordAudioBase64,
-          badges: Array.from(completedAreas),
-          voiceAnswers
+            if (synth.getVoices().length === 0) window.speechSynthesis.onvoiceschanged = setVoice;
+            else setVoice();
+            utterThis.rate = rate; utterThis.pitch = pitch;
+            synth.speak(utterThis);
         };
-        
-        if (typeof google !== 'undefined' && google.script && google.script.run) {
-          google.script.run.withSuccessHandler(() => {
-            setIsSubmitting(false);
-            setStep('result');
-          }).withFailureHandler((err) => {
-            alert('저장에 실패했습니다: ' + err);
-            setIsSubmitting(false);
-          }).saveData(payload);
-        } else {
-          setTimeout(() => { setIsSubmitting(false); setStep('result'); }, 1500);
-        }
-      };
 
-      if (isLoading) return <div className="h-screen flex items-center justify-center flex-col text-blue-500 font-bold text-2xl"><Loader2 className="animate-spin w-16 h-16 mb-4"/>데이터를 불러오는 중입니다...</div>;
+        const playSound = (type) => {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
 
-      return (
-        <div className="h-screen w-full bg-[#F0F9FF] font-sans text-slate-800 flex flex-col items-center justify-center overflow-hidden relative p-4">
-          
-          {/* Top Bar for Speaker Toggle */}
-          <div className="absolute top-4 right-4 z-50">
-            <button onClick={() => setIsSpeakerOn(!isSpeakerOn)} className="p-3 bg-white rounded-full shadow-md border-2 border-slate-200">
-              {isSpeakerOn ? <Volume2 size={24} className="text-blue-500"/> : <VolumeX size={24} className="text-slate-400"/>}
-            </button>
-          </div>
+            if (type === 'correct') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.2);
+                gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.3);
+                gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'click') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+            }
+        };
 
-          <AnimatePresence mode="wait">
-            {/* 1. LOGIN */}
-            {step === 'login' && (
-              <motion.div key="login" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="bg-white p-8 rounded-[3rem] shadow-2xl border-4 border-blue-100 max-w-md w-full text-center space-y-6">
-                <SubjectFairy className="scale-110" />
-                <h1 className="text-4xl font-black text-blue-600">안전 탐험대</h1>
-                <p className="text-lg font-bold text-slate-600">자신의 이름을 선택하고 탐험을 시작하세요!</p>
-                <select value={studentName} onChange={e=>setStudentName(e.target.value)} className="w-full text-2xl font-bold p-4 border-4 border-blue-200 rounded-2xl outline-none bg-blue-50 text-blue-800">
-                  <option value="">이름 선택하기</option>
-                  {students.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-                <button onClick={startApp} className="w-full py-5 bg-blue-600 text-white rounded-[2rem] text-2xl font-black shadow-xl active:scale-95 transition-all">
-                  출발하기 <ChevronRight size={28} className="inline" />
-                </button>
-              </motion.div>
-            )}
-
-            {/* 2. INTRO */}
-            {step === 'intro' && (
-              <motion.div key="intro" initial={{scale:0.9}} animate={{scale:1}} className="bg-white p-8 rounded-[3rem] shadow-2xl border-4 border-blue-100 max-w-lg w-full text-center space-y-6">
-                <SubjectFairy className="scale-125 my-4" />
-                <h1 className="text-3xl font-black text-blue-600">반가워, {studentName} 대원!</h1>
-                <div className="bg-orange-50 p-6 rounded-3xl border-2 border-orange-200">
-                  <p className="text-xl font-black text-orange-600 leading-tight mb-2">"나를 지키는 안전 약속을 배우자!"</p>
-                  <p className="text-md text-orange-800 font-bold">통합교과 요정과 함께 다양한 영역의 안전 수칙을 알아볼 거예요.</p>
-                </div>
-                <button onClick={() => setStep('prerecord')} className="w-full py-5 bg-blue-600 text-white rounded-[2rem] text-2xl font-black shadow-xl active:scale-95 transition-all">
-                  사전 학습 기록하기 <ChevronRight size={28} className="inline" />
-                </button>
-              </motion.div>
-            )}
-
-            {/* 3. PRE-RECORD */}
-            {step === 'prerecord' && (
-              <motion.div key="pre" initial={{opacity:0}} animate={{opacity:1}} className="bg-white p-8 rounded-[3rem] shadow-2xl border-4 border-green-100 max-w-lg w-full text-center space-y-6">
-                <h1 className="text-3xl font-black text-green-600">탐험 전 나의 생각</h1>
-                <p className="text-lg font-bold text-slate-600 bg-green-50 p-4 rounded-xl">평소 알고 있던 '안전 규칙'이나<br/>위험할 때 대처법에 대해 자유롭게 말해주세요!</p>
-                
-                <button onClick={() => toggleRecord('pre')} className={`w-32 h-32 rounded-full flex items-center justify-center mx-auto text-white shadow-xl transition-all ${isRecording ? 'bg-red-500 pulse-record' : 'bg-green-500 hover:bg-green-600'}`}>
-                  {isRecording ? <Square size={48}/> : <Mic size={48}/>}
-                </button>
-                <p className="text-sm font-bold text-slate-400">{isRecording ? '녹음 중입니다... (네모를 누르면 멈춰요)' : '마이크를 누르고 말해보세요'}</p>
-                
-                <div className="h-32 w-full bg-slate-50 rounded-2xl border-2 border-slate-200 p-4 text-left overflow-y-auto text-slate-700 font-bold">
-                  {preRecordText + (isRecording ? interimText : '') || '여기에 말한 내용이 글자로 표시됩니다.'}
-                </div>
-                
-                <button onClick={() => { if(isRecording) toggleRecord('pre'); setStep('map'); }} className="w-full py-4 bg-slate-800 text-white rounded-2xl text-xl font-black shadow-md active:scale-95">
-                  안전 지도 보기 <ChevronRight size={24} className="inline" />
-                </button>
-              </motion.div>
-            )}
-
-            {/* 4. MAP */}
-            {step === 'map' && (
-              <motion.div key="map" initial={{opacity:0}} animate={{opacity:1}} className="relative w-full h-full max-w-3xl bg-[#F8FAFC] rounded-[3.5rem] border-[10px] border-white shadow-2xl overflow-hidden mt-8">
-                <div className="absolute top-4 left-6 z-20 font-black text-blue-600 text-2xl drop-shadow-md">안전 탐험 지도 <span className="text-sm bg-white px-2 py-1 rounded-full text-blue-500 border-2 border-blue-200 ml-2">{completedAreas.size} / {groupedAreas.length} 완료</span></div>
-                
-                <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-20 z-0" viewBox="0 0 100 100" preserveAspectRatio="none">
-                  {groupedAreas.length > 1 && (
-                    <path d={`M ${groupedAreas.map(m => `${m.x} ${m.y}`).join(' L ')}`} fill="none" stroke="#0284C7" strokeWidth="1.5" strokeDasharray="3 3" />
-                  )}
+        // --- Character ---
+        const SubjectFairy = ({ className = "" }) => (
+            <motion.div animate={{ y: [0, -8, 0] }} transition={{ repeat: Infinity, duration: 2.5 }} className={`relative inline-block ${className}`}>
+                <svg width="80" height="100" viewBox="0 0 120 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    {/* Rabbit Ears */}
+                    <path d="M40 70 C 30 20, 50 10, 55 40" fill="#FFF" stroke="#FFB6C1" strokeWidth="4" />
+                    <path d="M80 70 C 90 20, 70 10, 65 40" fill="#FFF" stroke="#FFB6C1" strokeWidth="4" />
+                    <path d="M45 55 C 40 25, 48 20, 50 45" fill="#FFC0CB" />
+                    <path d="M75 55 C 80 25, 72 20, 70 45" fill="#FFC0CB" />
+                    {/* Rabbit Face */}
+                    <ellipse cx="60" cy="85" rx="35" ry="30" fill="#FFF" stroke="#FFB6C1" strokeWidth="4" />
+                    {/* Eyes */}
+                    <circle cx="48" cy="80" r="4" fill="#333" />
+                    <circle cx="72" cy="80" r="4" fill="#333" />
+                    {/* Cheeks */}
+                    <ellipse cx="40" cy="88" rx="5" ry="3" fill="#FFB6C1" opacity="0.6" />
+                    <ellipse cx="80" cy="88" rx="5" ry="3" fill="#FFB6C1" opacity="0.6" />
+                    {/* Nose & Mouth */}
+                    <circle cx="60" cy="86" r="3" fill="#FF69B4" />
+                    <path d="M55 92 Q 60 98 65 92" stroke="#333" strokeWidth="2" fill="none" strokeLinecap="round" />
                 </svg>
+            </motion.div>
+        );
 
-                {groupedAreas.map((m) => {
-                  const isDone = completedAreas.has(m.id);
-                  return (
-                    <div key={m.id} className="absolute -translate-x-1/2 -translate-y-1/2 z-10" style={{ left: `${m.x}%`, top: `${m.y}%` }}>
-                      <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => selectArea(m)}
-                        className={`p-4 rounded-[2rem] shadow-xl border-4 flex flex-col items-center justify-center gap-1 transition-colors ${
-                          isDone ? 'bg-slate-200 border-slate-300 opacity-60 grayscale' : `${m.bg} border-white text-white scale-110`
-                        }`}
-                      >
-                        <div className="scale-110">{m.icon}</div>
-                        <span className="text-sm font-black leading-none drop-shadow-sm whitespace-nowrap">{m.title}</span>
-                        {isDone && <CheckCircle2 className="absolute -top-2 -right-2 text-green-600 bg-white rounded-full p-0.5" size={24} />}
-                      </motion.button>
-                    </div>
-                  );
-                })}
-              </motion.div>
-            )}
+        // --- Default Icons & Colors mapping ---
+        const getAreaInfo = (areaName) => {
+            if (areaName.includes('재난') && areaName.includes('화재')) return { icon: <FlameKindling />, bg: 'bg-orange-500', pos: { x: 88, y: 25 } };
+            if (areaName.includes('재난') && areaName.includes('지진')) return { icon: <MapPin />, bg: 'bg-yellow-600', pos: { x: 65, y: 12 } };
+            if (areaName.includes('교통')) return { icon: <Car />, bg: 'bg-emerald-500', pos: { x: 38, y: 15 } };
+            if (areaName.includes('신변')) return { icon: <UserX />, bg: 'bg-purple-500', pos: { x: 12, y: 18 } };
+            if (areaName.includes('사이버')) return { icon: <Smartphone />, bg: 'bg-indigo-500', pos: { x: 60, y: 78 } };
+            if (areaName.includes('보건')) return { icon: <Wind />, bg: 'bg-slate-500', pos: { x: 10, y: 75 } };
+            if (areaName.includes('실종')) return { icon: <Search />, bg: 'bg-teal-500', pos: { x: 75, y: 40 } };
+            return { icon: <ShieldCheck />, bg: 'bg-blue-500', pos: { x: 50, y: 50 } };
+        };
 
-            {/* 5. PLAY */}
-            {step === 'play' && currentQuestionsInArea.length > 0 && (
-              <motion.div key="play" initial={{ y: 30, opacity:0 }} animate={{ y: 0, opacity:1 }} className="w-full max-w-2xl flex flex-col items-center justify-center gap-4 h-full pt-10">
-                <div className="text-lg font-black text-slate-500 mb-2">{groupedAreas[currentAreaIndex].title} 탐험 중... ({currentQIndex + 1}/{currentQuestionsInArea.length})</div>
-                <div className={`bg-white p-8 rounded-[3.5rem] shadow-2xl border-[6px] border-blue-50 w-full transition-all ${feedback ? 'scale-95 opacity-80' : 'scale-100'}`}>
-                  
-                  {/* 화재대피도 인라인 표시 (영역 이름에 화재 포함 시) */}
-                  {groupedAreas[currentAreaIndex].title.includes('화재') && (
-                     <div className="inline-flex items-center gap-2 bg-red-50 text-red-600 font-bold px-4 py-2 rounded-full mb-4 border border-red-200"><FlameKindling size={20}/>🚨 화재대피도 확인 구역</div>
-                  )}
+        // ✅ 여기에 GAS 배포 URL을 붙여넣으세요!
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbz6K-xMDGLMX7gOFdnCryJuMPZlS6hr4X96AjgG-wLQAqaj_Kcsy1I0HlFnH-vEqJ1j/exec';
 
-                  <h2 className="text-3xl font-black leading-tight flex items-start gap-3 text-slate-800 mb-6">
-                    <span className="bg-blue-500 text-white w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-xl">Q</span>
-                    {currentQuestionsInArea[currentQIndex].text}
-                  </h2>
-                  
-                  {currentQuestionsInArea[currentQIndex].type === '음성' ? (
-                    <div className="flex flex-col items-center gap-6 mt-4">
-                      <button disabled={feedback !== null} onClick={() => toggleVoiceRecord()} className={`w-32 h-32 rounded-full flex items-center justify-center text-white shadow-xl transition-all ${isRecording ? 'bg-red-500 pulse-record' : 'bg-blue-500 hover:bg-blue-600'} ${feedback ? 'opacity-50' : ''}`}>
-                        {isRecording ? <Square size={48}/> : <Mic size={48}/>}
-                      </button>
-                      <p className="text-lg font-bold text-slate-500">{isRecording ? '듣고 있어요... 다 말한 후 네모 버튼을 누르세요.' : '마이크를 누르고 정답을 말해보세요!'}</p>
-                      
-                      {(voiceAnswerText || interimText) && !feedback && (
-                        <div className="w-full flex flex-col items-center gap-4">
-                          <div className="bg-slate-50 p-4 rounded-xl border-2 border-slate-200 text-slate-700 font-bold w-full text-center text-xl">
-                            내가 한 말: "{voiceAnswerText + (isRecording ? interimText : '')}"
-                          </div>
-                          {!isRecording && voiceAnswerText && (
-                            <button onClick={() => checkVoiceAnswer()} className="px-8 py-4 bg-green-500 text-white rounded-[2rem] text-xl font-black shadow-lg active:scale-95">
-                              정답 확인하기
-                            </button>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="grid gap-4">
-                      {currentQuestionsInArea[currentQIndex].options.map((opt, idx) => (
-                        <button key={idx} disabled={feedback !== null} onClick={() => handleOptionClick(opt, idx, currentQuestionsInArea[currentQIndex].answer)}
-                          className={`w-full p-6 rounded-[2rem] border-4 text-left text-xl font-bold transition-all shadow-sm ${
-                            feedback ? (idx + 1 === currentQuestionsInArea[currentQIndex].answer ? 'border-green-500 bg-green-50 text-green-700' : 'opacity-30 border-slate-100')
-                            : 'border-slate-100 hover:border-blue-300 hover:bg-blue-50 text-slate-700'
-                          }`}
-                        >
-                          {idx + 1}. {opt}
+        function App() {
+            // Data State
+            const [students, setStudents] = useState([]);
+            const [allQuestions, setAllQuestions] = useState([]);
+            const [groupedAreas, setGroupedAreas] = useState([]);
+            const [isLoading, setIsLoading] = useState(true);
+            const [isSubmitting, setIsSubmitting] = useState(false);
+
+            // App State
+            const [step, setStep] = useState('login'); // login -> intro -> prerecord -> map -> play -> eval -> postrecord -> result
+            const [studentName, setStudentName] = useState('');
+            const [isSpeakerOn, setIsSpeakerOn] = useState(false);
+
+            // Progress State
+            const [completedAreas, setCompletedAreas] = useState(new Set());
+            const [currentAreaIndex, setCurrentAreaIndex] = useState(0);
+            const [currentQuestionsInArea, setCurrentQuestionsInArea] = useState([]);
+            const [currentQIndex, setCurrentQIndex] = useState(0);
+            const [feedback, setFeedback] = useState(null);
+            const [stars, setStars] = useState(0);
+
+            // Recording State
+            const [preRecordText, setPreRecordText] = useState('');
+            const [preRecordAudioBase64, setPreRecordAudioBase64] = useState('');
+            const [postRecordText, setPostRecordText] = useState('');
+            const [postRecordAudioBase64, setPostRecordAudioBase64] = useState('');
+            const [voiceAnswerText, setVoiceAnswerText] = useState('');
+            const [voiceAnswers, setVoiceAnswers] = useState({});
+            const [interimText, setInterimText] = useState('');
+
+            const [isRecording, setIsRecording] = useState(false);
+            const mediaRecorderRef = useRef(null);
+            const recognitionRef = useRef(null);
+            const audioChunksRef = useRef([]);
+
+            useEffect(() => {
+                // Load data from Google Apps Script via fetch (GitHub Pages 호환)
+                if (GAS_URL && GAS_URL !== 'https://script.google.com/macros/s/AKfycbz6K-xMDGLMX7gOFdnCryJuMPZlS6hr4X96AjgG-wLQAqaj_Kcsy1I0HlFnH-vEqJ1j/exec') {
+                    fetch(GAS_URL + '?action=getAppData')
+                        .then(res => res.json())
+                        .then(data => {
+                            setStudents(data.students || []);
+                            setAllQuestions(data.questions || []);
+                            groupQuestions(data.questions || []);
+                            setIsLoading(false);
+                        })
+                        .catch(err => {
+                            console.error('GAS 연동 실패, 기본 데이터 사용:', err);
+                            loadMockData();
+                        });
+                } else {
+                    loadMockData();
+                }
+
+                // Init Speech Recognition
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (SpeechRecognition) {
+                    const rec = new SpeechRecognition();
+                    rec.lang = 'ko-KR';
+                    rec.continuous = true;
+                    rec.interimResults = true;
+                    rec.onresult = (e) => {
+                        let final = '';
+                        let interim = '';
+                        for (let i = e.resultIndex; i < e.results.length; ++i) {
+                            if (e.results[i].isFinal) final += e.results[i][0].transcript + ' ';
+                            else interim += e.results[i][0].transcript;
+                        }
+                        if (final) {
+                            if (step === 'prerecord') setPreRecordText(prev => prev + final);
+                            if (step === 'postrecord') setPostRecordText(prev => prev + final);
+                            if (step === 'play') setVoiceAnswerText(prev => prev + final);
+                        }
+                        setInterimText(interim);
+                    };
+                    recognitionRef.current = rec;
+                }
+            }, [step]);
+
+            // Speaker Toggle Reactivity
+            useEffect(() => {
+                if (isSpeakerOn) {
+                    if (step === 'intro') speak("안녕! 통합교과 요정에 온 걸 환영해. 나를 지키는 안전 약속을 배우러 출발해볼까?");
+                    else if (step === 'play' && currentQuestionsInArea.length > 0) speak(currentQuestionsInArea[currentQIndex].text);
+                    else if (step === 'eval') speak("모든 탐험을 마쳤어요! 스스로 별점을 주어 평가해볼까요?");
+                    else if (step === 'result') speak("안전탐험 완료! 참 잘했어요!");
+                } else {
+                    if (typeof window !== 'undefined' && window.speechSynthesis) {
+                        window.speechSynthesis.cancel();
+                    }
+                }
+            }, [isSpeakerOn]);
+
+            const PATH_POINTS = [
+                { x: 12, y: 18 }, { x: 38, y: 15 }, { x: 65, y: 12 }, { x: 88, y: 25 },
+                { x: 82, y: 55 }, { x: 60, y: 78 }, { x: 32, y: 85 }, { x: 10, y: 75 },
+                { x: 15, y: 48 }, { x: 45, y: 45 }, { x: 75, y: 40 }
+            ];
+
+            const loadMockData = () => {
+                const mockStudents = ['홍길동', '김철수', '이영희'];
+                const mockQuestions = [
+                    { area: '신변 안전', type: '음성', text: '모르는 사람이 "부모님 친구야, 같이 가자"고 하면 뭐라고 말해야 할까요?', options: [], answer: '안돼,싫어,아니요', correctFeedback: '씩씩하게 잘 거절했어요!', wrongFeedback: '위험할 수 있어요.' },
+                    { area: '학용품 안전', type: '객관식', text: '친구에게 가위를 줄 때 올바른 방법은?', options: ['뾰족한 날 쪽을 친구에게 줘요.', '손잡이 쪽을 친구에게 건네줘요.'], answer: 2, correctFeedback: '친구를 배려하는 따뜻한 마음을 가졌군요!', wrongFeedback: '날카로운 부분을 주면 친구가 다칠 수 있어요.' },
+                    { area: '교통 안전', type: '음성', text: '초록불이 켜지면 횡단보도를 건너기 전 어떻게 행동해야 할까요?', options: [], answer: '손,멈춰,살펴,좌우', correctFeedback: '멈춤, 살핌, 건넘! 교통 규칙을 아주 잘 아는군요.', wrongFeedback: '꼭 양옆을 살펴야 해요.' },
+                    { area: '재난 안전 (화재)', type: '객관식', text: '불이 나서 연기가 많을 때 탈출 방법은?', options: ['빨리 가기 위해 서서 달려요.', '입을 막고 자세를 낮춰 이동해요.'], answer: 2, correctFeedback: '뜨거운 연기를 피하는 지혜를 잘 발견했어요!', wrongFeedback: '연기는 위로 올라가요.' },
+                    { area: '재난 안전 (지진)', type: '객관식', text: '지진이 발생하면 가장 먼저 해야 할 일은?', options: ['책상 밑으로 숨는다.', '건물 밖으로 바로 뛰어 나간다.'], answer: 1, correctFeedback: '내 머리를 지키는 게 가장 중요해요!', wrongFeedback: '밖으로 뛰어나가면 더 위험해요.' },
+                    { area: '생활 안전', type: '객관식', text: '학교 복도에서 이동할 때 안전한 방법은?', options: ['신나게 뛰어가요.', '오른쪽 길로 천천히 걸어가요.'], answer: 2, correctFeedback: '학교 규칙을 잘 지키는 멋진 어린이!', wrongFeedback: '복도에서 뛰면 다칠 수 있어요.' },
+                    { area: '사이버 안전', type: '음성', text: '인터넷에서 모르는 사람이 집 주소를 물어보면 어떻게 대답해야 할까요?', options: [], answer: '안돼,안알려,몰라,싫어', correctFeedback: '나의 소중한 정보를 지키는 똑똑한 지킴이에요!', wrongFeedback: '개인정보는 알려주면 안 돼요.' },
+                    { area: '응급 처치', type: '객관식', text: '사고가 났을 때 가장 먼저 해야 할 일은?', options: ['어른께 알리고 119에 전화해요.', '내가 직접 치료해요.'], answer: 1, correctFeedback: '어른에게 도움을 요청하는 법을 잘 알고 있군요!', wrongFeedback: '먼저 어른이나 119에 알려요.' },
+                    { area: '보건 안전', type: '객관식', text: '먼지가 심한 날 밖에서 놀고 싶다면?', options: ['그냥 밖에서 놀아요.', '마스크를 쓰고 실내에서 놀아요.'], answer: 2, correctFeedback: '나의 건강을 스스로 지키는 방법을 찾았네요!', wrongFeedback: '나쁜 먼지가 몸에 들어오면 아플 수 있어요.' },
+                    { area: '학교 안전', type: '객관식', text: '청소 도구를 사용한 뒤에는 어떻게 할까요?', options: ['바닥에 두고 놀아요.', '정해진 자리에 가지런히 정리해요.'], answer: 2, correctFeedback: '정리 정돈은 안전 사고를 막는 첫걸음이랍니다!', wrongFeedback: '바닥에 둔 물건에 발이 걸려 넘어져서 다칠 수 있어요.' },
+                    { area: '실종 예방', type: '음성', text: '길을 잃었을 때 제자리에서 어떤 행동을 해야 할까요?', options: [], answer: '기다려,멈춰,도와', correctFeedback: '멈추기! 생각하기! 도와주세요! 이 세 가지를 잘 기억해요.', wrongFeedback: '제자리에 멈춰야 해요.' }
+                ];
+                setStudents(mockStudents);
+                setAllQuestions(mockQuestions);
+                groupQuestions(mockQuestions);
+                setIsLoading(false);
+            };
+
+            const groupQuestions = (questions) => {
+                const groups = {};
+                questions.forEach(q => {
+                    if (!groups[q.area]) groups[q.area] = [];
+                    groups[q.area].push(q);
+                });
+                const mapped = Object.keys(groups).map((areaName, idx) => {
+                    const info = getAreaInfo(areaName);
+                    const pos = PATH_POINTS[idx % PATH_POINTS.length];
+                    return { id: areaName, title: areaName, questions: groups[areaName], icon: info.icon, bg: info.bg, x: pos.x, y: pos.y };
+                });
+                setGroupedAreas(mapped);
+            };
+
+            const startApp = async () => {
+                if (!studentName) return alert('이름을 선택해주세요.');
+                if (isSpeakerOn) playSound('click');
+
+                // 앱 시작 시 마이크 권한을 한 번 미리 요청하여 반복되는 권한 팝업 방지
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    stream.getTracks().forEach(track => track.stop());
+                } catch (err) {
+                    console.warn('마이크 권한 요청 실패 또는 취소:', err);
+                }
+
+                setStep('intro');
+                if (isSpeakerOn) speak("안녕! 통합교과 요정에 온 걸 환영해. 나를 지키는 안전 약속을 배우러 출발해볼까?");
+            };
+
+            const toggleRecord = async (type) => {
+                if (isSpeakerOn) playSound('click');
+                if (isRecording) {
+                    mediaRecorderRef.current?.stop();
+                    recognitionRef.current?.stop();
+                    setIsRecording(false);
+                } else {
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        const mediaRecorder = new MediaRecorder(stream);
+                        audioChunksRef.current = [];
+
+                        mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
+                        mediaRecorder.onstop = () => {
+                            const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                            const reader = new FileReader();
+                            reader.readAsDataURL(audioBlob);
+                            reader.onloadend = () => {
+                                if (type === 'pre') setPreRecordAudioBase64(reader.result);
+                                else setPostRecordAudioBase64(reader.result);
+                            };
+                            stream.getTracks().forEach(track => track.stop());
+                        };
+
+                        mediaRecorder.start();
+                        mediaRecorderRef.current = mediaRecorder;
+                        recognitionRef.current?.start();
+                        setIsRecording(true);
+                    } catch (err) {
+                        alert('마이크 접근 권한이 필요합니다.');
+                    }
+                }
+            };
+
+            const toggleVoiceRecord = async () => {
+                if (isSpeakerOn) playSound('click');
+                if (isRecording) {
+                    mediaRecorderRef.current?.stop();
+                    recognitionRef.current?.stop();
+                    setIsRecording(false);
+                } else {
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        const mediaRecorder = new MediaRecorder(stream);
+                        audioChunksRef.current = [];
+
+                        mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
+
+                        const currentArea = currentQuestionsInArea[currentQIndex].area;
+                        mediaRecorder.onstop = () => {
+                            const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                            const reader = new FileReader();
+                            reader.readAsDataURL(audioBlob);
+                            reader.onloadend = () => {
+                                setVoiceAnswers(prev => ({
+                                    ...prev,
+                                    [currentArea]: { ...prev[currentArea], audioBase64: reader.result }
+                                }));
+                            };
+                            stream.getTracks().forEach(track => track.stop());
+                        };
+
+                        mediaRecorder.start();
+                        mediaRecorderRef.current = mediaRecorder;
+                        setVoiceAnswerText('');
+                        setInterimText('');
+                        setFeedback(null);
+                        recognitionRef.current?.start();
+                        setIsRecording(true);
+                    } catch (err) {
+                        alert('마이크 접근 권한이 필요합니다.');
+                    }
+                }
+            };
+
+            const selectArea = (area) => {
+                setCurrentQuestionsInArea(area.questions);
+                setCurrentAreaIndex(groupedAreas.findIndex(a => a.id === area.id));
+                setCurrentQIndex(0);
+                setFeedback(null);
+                setStep('play');
+                if (isSpeakerOn) speak(area.questions[0].text);
+            };
+
+            const handleOptionClick = (option, idx, correctIdx) => {
+                const isCorrect = (idx + 1) === correctIdx;
+                const currentQ = currentQuestionsInArea[currentQIndex];
+                const correctMsg = currentQ.correctFeedback || '참 잘했어요! 안전 약속을 잘 아는군요.';
+                const wrongMsg = currentQ.wrongFeedback || '다시 한 번 안전하게 생각해볼까요?';
+
+                if (isCorrect) {
+                    if (isSpeakerOn) playSound('correct');
+                    setFeedback({ type: '정답', message: correctMsg });
+                } else {
+                    if (isSpeakerOn) playSound('wrong');
+                    setFeedback({ type: '오답', message: wrongMsg });
+                }
+                if (isSpeakerOn) speak(isCorrect ? correctMsg : wrongMsg);
+            };
+
+            const checkVoiceAnswer = () => {
+                const currentQ = currentQuestionsInArea[currentQIndex];
+                const explanation = currentQ.correctFeedback || '스스로 안전 약속을 생각해보는 멋진 대원이네요!';
+                const keywordsStr = String(currentQ.answer).split(',').map(k => `"${k.trim()}"`).join(', ');
+
+                if (isSpeakerOn) playSound('correct');
+                setFeedback({
+                    type: '정답',
+                    message: `[정답 예시] ${keywordsStr} 등의 단어가 포함된 대답\n\n[해설] ${explanation}`
+                });
+
+                setVoiceAnswers(prev => ({
+                    ...prev,
+                    [currentQ.area]: { ...prev[currentQ.area], text: voiceAnswerText }
+                }));
+
+                if (isSpeakerOn) speak(`정답 예시는 ${keywordsStr} 등의 단어가 포함된 대답입니다. 해설. ${explanation}`);
+            };
+
+            const nextQuestion = () => {
+                setFeedback(null);
+                setVoiceAnswerText('');
+                if (currentQIndex + 1 < currentQuestionsInArea.length) {
+                    setCurrentQIndex(prev => prev + 1);
+                    if (isSpeakerOn) speak(currentQuestionsInArea[currentQIndex + 1].text);
+                } else {
+                    // Area complete
+                    setCompletedAreas(prev => new Set(prev).add(groupedAreas[currentAreaIndex].id));
+                    if (completedAreas.size + 1 >= groupedAreas.length) {
+                        setStep('eval');
+                        if (isSpeakerOn) speak("모든 탐험을 마쳤어요! 스스로 별점을 주어 평가해볼까요?");
+                    } else {
+                        setStep('map');
+                    }
+                }
+            };
+
+            const submitData = () => {
+                setIsSubmitting(true);
+                const payload = {
+                    studentName,
+                    stars,
+                    progress: completedAreas.size === groupedAreas.length ? '완료' : '진행중',
+                    preRecordText, preRecordAudioBase64,
+                    postRecordText, postRecordAudioBase64,
+                    badges: Array.from(completedAreas),
+                    voiceAnswers
+                };
+
+                if (GAS_URL && GAS_URL !== 'https://script.google.com/macros/s/AKfycbz6K-xMDGLMX7gOFdnCryJuMPZlS6hr4X96AjgG-wLQAqaj_Kcsy1I0HlFnH-vEqJ1j/exec') {
+                    fetch(GAS_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'saveData', payload })
+                    })
+                        .then(res => res.json())
+                        .then(() => { setIsSubmitting(false); setStep('result'); })
+                        .catch(err => { alert('저장 실패: ' + err); setIsSubmitting(false); });
+                } else {
+                    setTimeout(() => { setIsSubmitting(false); setStep('result'); }, 1500);
+                }
+            };
+
+            if (isLoading) return <div className="h-screen flex items-center justify-center flex-col text-blue-500 font-bold text-2xl"><Loader2 className="animate-spin w-16 h-16 mb-4" />데이터를 불러오는 중입니다...</div>;
+
+            return (
+                <div className="h-screen w-full bg-[#F0F9FF] font-sans text-slate-800 flex flex-col items-center justify-center overflow-hidden relative p-4">
+
+                    {/* Top Bar for Speaker Toggle */}
+                    <div className="absolute top-4 right-4 z-50">
+                        <button onClick={() => setIsSpeakerOn(!isSpeakerOn)} className="p-3 bg-white rounded-full shadow-md border-2 border-slate-200">
+                            {isSpeakerOn ? <Volume2 size={24} className="text-blue-500" /> : <VolumeX size={24} className="text-slate-400" />}
                         </button>
-                      ))}
                     </div>
-                  )}
+
+                    <AnimatePresence mode="wait">
+                        {/* 1. LOGIN */}
+                        {step === 'login' && (
+                            <motion.div key="login" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="bg-white p-8 rounded-[3rem] shadow-2xl border-4 border-blue-100 max-w-md w-full text-center space-y-6">
+                                <SubjectFairy className="scale-110" />
+                                <h1 className="text-4xl font-black text-blue-600">안전 탐험대</h1>
+                                <p className="text-lg font-bold text-slate-600">자신의 이름을 선택하고 탐험을 시작하세요!</p>
+                                <select value={studentName} onChange={e => setStudentName(e.target.value)} className="w-full text-2xl font-bold p-4 border-4 border-blue-200 rounded-2xl outline-none bg-blue-50 text-blue-800">
+                                    <option value="">이름 선택하기</option>
+                                    {students.map(s => <option key={s} value={s}>{s}</option>)}
+                                </select>
+                                <button onClick={startApp} className="w-full py-5 bg-blue-600 text-white rounded-[2rem] text-2xl font-black shadow-xl active:scale-95 transition-all">
+                                    출발하기 <ChevronRight size={28} className="inline" />
+                                </button>
+                            </motion.div>
+                        )}
+
+                        {/* 2. INTRO */}
+                        {step === 'intro' && (
+                            <motion.div key="intro" initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="bg-white p-8 rounded-[3rem] shadow-2xl border-4 border-blue-100 max-w-lg w-full text-center space-y-6">
+                                <SubjectFairy className="scale-125 my-4" />
+                                <h1 className="text-3xl font-black text-blue-600">반가워, {studentName} 대원!</h1>
+                                <div className="bg-orange-50 p-6 rounded-3xl border-2 border-orange-200">
+                                    <p className="text-xl font-black text-orange-600 leading-tight mb-2">"나를 지키는 안전 약속을 배우자!"</p>
+                                    <p className="text-md text-orange-800 font-bold">통합교과 요정과 함께 다양한 영역의 안전 수칙을 알아볼 거예요.</p>
+                                </div>
+                                <button onClick={() => setStep('prerecord')} className="w-full py-5 bg-blue-600 text-white rounded-[2rem] text-2xl font-black shadow-xl active:scale-95 transition-all">
+                                    사전 학습 기록하기 <ChevronRight size={28} className="inline" />
+                                </button>
+                            </motion.div>
+                        )}
+
+                        {/* 3. PRE-RECORD */}
+                        {step === 'prerecord' && (
+                            <motion.div key="pre" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white p-8 rounded-[3rem] shadow-2xl border-4 border-green-100 max-w-lg w-full text-center space-y-6">
+                                <h1 className="text-3xl font-black text-green-600">탐험 전 나의 생각</h1>
+                                <p className="text-lg font-bold text-slate-600 bg-green-50 p-4 rounded-xl">평소 알고 있던 '안전 규칙'이나<br />위험할 때 대처법에 대해 자유롭게 말해주세요!</p>
+
+                                <button onClick={() => toggleRecord('pre')} className={`w-32 h-32 rounded-full flex items-center justify-center mx-auto text-white shadow-xl transition-all ${isRecording ? 'bg-red-500 pulse-record' : 'bg-green-500 hover:bg-green-600'}`}>
+                                    {isRecording ? <Square size={48} /> : <Mic size={48} />}
+                                </button>
+                                <p className="text-sm font-bold text-slate-400">{isRecording ? '녹음 중입니다... (네모를 누르면 멈춰요)' : '마이크를 누르고 말해보세요'}</p>
+
+                                <div className="h-32 w-full bg-slate-50 rounded-2xl border-2 border-slate-200 p-4 text-left overflow-y-auto text-slate-700 font-bold">
+                                    {preRecordText + (isRecording ? interimText : '') || '여기에 말한 내용이 글자로 표시됩니다.'}
+                                </div>
+
+                                <button onClick={() => { if (isRecording) toggleRecord('pre'); setStep('map'); }} className="w-full py-4 bg-slate-800 text-white rounded-2xl text-xl font-black shadow-md active:scale-95">
+                                    안전 지도 보기 <ChevronRight size={24} className="inline" />
+                                </button>
+                            </motion.div>
+                        )}
+
+                        {/* 4. MAP */}
+                        {step === 'map' && (
+                            <motion.div key="map" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative w-full h-full max-w-3xl bg-[#F8FAFC] rounded-[3.5rem] border-[10px] border-white shadow-2xl overflow-hidden mt-8">
+                                <div className="absolute top-4 left-6 z-20 font-black text-blue-600 text-2xl drop-shadow-md">안전 탐험 지도 <span className="text-sm bg-white px-2 py-1 rounded-full text-blue-500 border-2 border-blue-200 ml-2">{completedAreas.size} / {groupedAreas.length} 완료</span></div>
+
+                                <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-20 z-0" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                    {groupedAreas.length > 1 && (
+                                        <path d={`M ${groupedAreas.map(m => `${m.x} ${m.y}`).join(' L ')}`} fill="none" stroke="#0284C7" strokeWidth="1.5" strokeDasharray="3 3" />
+                                    )}
+                                </svg>
+
+                                {groupedAreas.map((m) => {
+                                    const isDone = completedAreas.has(m.id);
+                                    return (
+                                        <div key={m.id} className="absolute -translate-x-1/2 -translate-y-1/2 z-10" style={{ left: `${m.x}%`, top: `${m.y}%` }}>
+                                            <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => selectArea(m)}
+                                                className={`p-4 rounded-[2rem] shadow-xl border-4 flex flex-col items-center justify-center gap-1 transition-colors ${isDone ? 'bg-slate-200 border-slate-300 opacity-60 grayscale' : `${m.bg} border-white text-white scale-110`
+                                                    }`}
+                                            >
+                                                <div className="scale-110">{m.icon}</div>
+                                                <span className="text-sm font-black leading-none drop-shadow-sm whitespace-nowrap">{m.title}</span>
+                                                {isDone && <CheckCircle2 className="absolute -top-2 -right-2 text-green-600 bg-white rounded-full p-0.5" size={24} />}
+                                            </motion.button>
+                                        </div>
+                                    );
+                                })}
+                            </motion.div>
+                        )}
+
+                        {/* 5. PLAY */}
+                        {step === 'play' && currentQuestionsInArea.length > 0 && (
+                            <motion.div key="play" initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="w-full max-w-2xl flex flex-col items-center justify-center gap-4 h-full pt-10">
+                                <div className="text-lg font-black text-slate-500 mb-2">{groupedAreas[currentAreaIndex].title} 탐험 중... ({currentQIndex + 1}/{currentQuestionsInArea.length})</div>
+                                <div className={`bg-white p-8 rounded-[3.5rem] shadow-2xl border-[6px] border-blue-50 w-full transition-all ${feedback ? 'scale-95 opacity-80' : 'scale-100'}`}>
+
+                                    {/* 화재대피도 인라인 표시 (영역 이름에 화재 포함 시) */}
+                                    {groupedAreas[currentAreaIndex].title.includes('화재') && (
+                                        <div className="inline-flex items-center gap-2 bg-red-50 text-red-600 font-bold px-4 py-2 rounded-full mb-4 border border-red-200"><FlameKindling size={20} />🚨 화재대피도 확인 구역</div>
+                                    )}
+
+                                    <h2 className="text-3xl font-black leading-tight flex items-start gap-3 text-slate-800 mb-6">
+                                        <span className="bg-blue-500 text-white w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-xl">Q</span>
+                                        {currentQuestionsInArea[currentQIndex].text}
+                                    </h2>
+
+                                    {currentQuestionsInArea[currentQIndex].type === '음성' ? (
+                                        <div className="flex flex-col items-center gap-6 mt-4">
+                                            <button disabled={feedback !== null} onClick={() => toggleVoiceRecord()} className={`w-32 h-32 rounded-full flex items-center justify-center text-white shadow-xl transition-all ${isRecording ? 'bg-red-500 pulse-record' : 'bg-blue-500 hover:bg-blue-600'} ${feedback ? 'opacity-50' : ''}`}>
+                                                {isRecording ? <Square size={48} /> : <Mic size={48} />}
+                                            </button>
+                                            <p className="text-lg font-bold text-slate-500">{isRecording ? '듣고 있어요... 다 말한 후 네모 버튼을 누르세요.' : '마이크를 누르고 정답을 말해보세요!'}</p>
+
+                                            {(voiceAnswerText || interimText) && !feedback && (
+                                                <div className="w-full flex flex-col items-center gap-4">
+                                                    <div className="bg-slate-50 p-4 rounded-xl border-2 border-slate-200 text-slate-700 font-bold w-full text-center text-xl">
+                                                        내가 한 말: "{voiceAnswerText + (isRecording ? interimText : '')}"
+                                                    </div>
+                                                    {!isRecording && voiceAnswerText && (
+                                                        <button onClick={() => checkVoiceAnswer()} className="px-8 py-4 bg-green-500 text-white rounded-[2rem] text-xl font-black shadow-lg active:scale-95">
+                                                            정답 확인하기
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className="grid gap-4">
+                                            {currentQuestionsInArea[currentQIndex].options.map((opt, idx) => (
+                                                <button key={idx} disabled={feedback !== null} onClick={() => handleOptionClick(opt, idx, currentQuestionsInArea[currentQIndex].answer)}
+                                                    className={`w-full p-6 rounded-[2rem] border-4 text-left text-xl font-bold transition-all shadow-sm ${feedback ? (idx + 1 === currentQuestionsInArea[currentQIndex].answer ? 'border-green-500 bg-green-50 text-green-700' : 'opacity-30 border-slate-100')
+                                                        : 'border-slate-100 hover:border-blue-300 hover:bg-blue-50 text-slate-700'
+                                                        }`}
+                                                >
+                                                    {idx + 1}. {opt}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <AnimatePresence>
+                                    {feedback && (
+                                        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={`p-6 rounded-[2rem] border-4 shadow-xl flex items-center gap-4 w-full ${feedback.type === '정답' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                                            <div className="text-4xl">{feedback.type === '정답' ? '🌟' : '💡'}</div>
+                                            <div className="flex-1">
+                                                <p className={`text-xl font-black whitespace-pre-wrap ${feedback.type === '정답' ? 'text-green-800' : 'text-red-800'}`}>{feedback.message}</p>
+                                            </div>
+                                            <button onClick={feedback.type === '정답' ? nextQuestion : () => { setFeedback(null); setVoiceAnswerText(''); }} className={`px-6 py-3 rounded-xl font-black text-white shadow-md active:scale-95 whitespace-nowrap ${feedback.type === '정답' ? 'bg-green-600' : 'bg-red-500'}`}>
+                                                {feedback.type === '정답' ? <><ChevronRight className="inline" /> 다음으로</> : <><RotateCcw className="inline mr-1" size={20} /> 다시 풀기</>}
+                                            </button>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </motion.div>
+                        )}
+
+                        {/* 6. EVALUATION */}
+                        {step === 'eval' && (
+                            <motion.div key="eval" initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="bg-white p-8 rounded-[3rem] shadow-2xl border-4 border-yellow-200 max-w-lg w-full text-center space-y-8">
+                                <h1 className="text-3xl font-black text-yellow-600">나의 안전탐험 점수는?</h1>
+                                <p className="text-lg font-bold text-slate-600">스스로 얼마나 잘 배웠는지 별을 눌러 평가해보세요!</p>
+                                <div className="flex justify-center gap-3 my-8">
+                                    {[1, 2, 3, 4, 5].map(s => (
+                                        <button key={s} onClick={() => setStars(s)} className="focus:outline-none transition-transform hover:scale-125">
+                                            <Star size={60} className={s <= stars ? "fill-yellow-400 text-yellow-500" : "text-slate-200"} strokeWidth={1} />
+                                        </button>
+                                    ))}
+                                </div>
+                                {stars > 0 && (
+                                    <div className="space-y-3">
+                                        {stars <= 3 && (
+                                            <button onClick={() => { setStars(0); setCompletedAreas(new Set()); setStep('map'); }} className="w-full py-4 bg-orange-100 text-orange-600 border-2 border-orange-300 rounded-2xl text-xl font-black shadow-sm">
+                                                <RotateCcw className="inline mr-2" /> 조금 더 다시 해볼래요
+                                            </button>
+                                        )}
+                                        <button onClick={() => setStep('postrecord')} className="w-full py-5 bg-yellow-500 text-white rounded-[2rem] text-2xl font-black shadow-xl active:scale-95 transition-all">
+                                            다음 단계로 <ChevronRight size={28} className="inline" />
+                                        </button>
+                                    </div>
+                                )}
+                            </motion.div>
+                        )}
+
+                        {/* 7. POST-RECORD */}
+                        {step === 'postrecord' && (
+                            <motion.div key="post" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white p-8 rounded-[3rem] shadow-2xl border-4 border-purple-100 max-w-lg w-full text-center space-y-6">
+                                <h1 className="text-3xl font-black text-purple-600">탐험 후 나의 생각</h1>
+                                <p className="text-lg font-bold text-slate-600 bg-purple-50 p-4 rounded-xl">학습을 마친 후 새롭게 알게 된 점이나<br />앞으로의 다짐을 말해주세요!</p>
+
+                                <button onClick={() => toggleRecord('post')} className={`w-32 h-32 rounded-full flex items-center justify-center mx-auto text-white shadow-xl transition-all ${isRecording ? 'bg-red-500 pulse-record' : 'bg-purple-500 hover:bg-purple-600'}`}>
+                                    {isRecording ? <Square size={48} /> : <Mic size={48} />}
+                                </button>
+                                <p className="text-sm font-bold text-slate-400">{isRecording ? '녹음 중입니다...' : '마이크를 누르고 말해보세요'}</p>
+
+                                <div className="h-32 w-full bg-slate-50 rounded-2xl border-2 border-slate-200 p-4 text-left overflow-y-auto text-slate-700 font-bold">
+                                    {postRecordText + (isRecording ? interimText : '') || '여기에 말한 내용이 글자로 표시됩니다.'}
+                                </div>
+
+                                <button disabled={isSubmitting} onClick={() => { if (isRecording) toggleRecord('post'); submitData(); }} className="w-full flex items-center justify-center gap-2 py-5 bg-purple-600 text-white rounded-[2rem] text-xl font-black shadow-xl active:scale-95 disabled:opacity-50">
+                                    {isSubmitting ? <><Loader2 className="animate-spin" /> 기록 저장 중...</> : <><Save /> 최종 기록 완료 및 제출하기</>}
+                                </button>
+                            </motion.div>
+                        )}
+
+                        {/* 8. RESULT CERTIFICATE */}
+                        {step === 'result' && (
+                            <motion.div key="result" initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="bg-white p-8 rounded-[3rem] shadow-2xl border-[8px] border-orange-200 max-w-lg w-full text-center space-y-6 mx-4">
+                                <SubjectFairy className="scale-90" />
+                                <h1 className="text-4xl font-black text-orange-600 drop-shadow-sm">안전탐험 완료!</h1>
+                                <div className="bg-orange-50 p-6 rounded-[2rem] border-4 border-dashed border-orange-300 flex flex-col items-center gap-4 relative text-center">
+                                    <ShieldCheck className="w-16 h-16 text-orange-500 mx-auto" />
+                                    <div className="text-slate-800 w-full">
+                                        <p className="text-2xl font-black mb-2">안전 지킴이 수료증</p>
+                                        <p className="text-md font-bold text-slate-600 leading-tight">위 대원은 모든 안전 미션을 완벽하게<br />완수하였음을 증명합니다.</p>
+
+                                        <div className="mt-4 bg-white p-3 rounded-xl border-2 border-orange-100 text-left w-full space-y-2 max-h-40 overflow-y-auto">
+                                            <p className="text-sm font-black text-orange-600 border-b border-orange-100 pb-1 mb-2">✅ 학습 결과 요약</p>
+                                            <p className="text-sm font-bold text-slate-700 mt-1">성공한 미션: <span className="text-orange-500">{completedAreas.size} / {groupedAreas.length}개</span></p>
+                                            {preRecordText && <p className="text-sm font-bold text-slate-700"><span className="text-slate-400 block text-xs">탐험 전 생각:</span> "{preRecordText}"</p>}
+                                            {postRecordText && <p className="text-sm font-bold text-slate-700"><span className="text-slate-400 block text-xs">탐험 후 다짐:</span> "{postRecordText}"</p>}
+                                        </div>
+
+                                        <p className="text-sm font-black mt-4 text-orange-500 bg-white px-4 py-1 rounded-full inline-block shadow-sm">발급일: {new Date().toLocaleDateString('ko-KR')} | {studentName}</p>
+                                    </div>
+                                    {/* 벚꽃 이모지 대신 참 잘했어요 도장 느낌 */}
+                                    <div className="absolute -bottom-6 -right-4 w-24 h-24 bg-red-500 text-white rounded-full flex items-center justify-center border-[4px] border-double border-white shadow-lg transform rotate-12">
+                                        <span className="font-black text-xl leading-tight">참!<br />잘했어요</span>
+                                    </div>
+                                </div>
+                                <div className="flex gap-3 pt-4">
+                                    <button onClick={() => window.location.reload()} className="flex-1 py-4 bg-slate-100 rounded-2xl font-black text-slate-500 hover:bg-slate-200 transition-colors">다시 시작</button>
+                                </div>
+                            </motion.div>
+                        )}
+
+                    </AnimatePresence>
                 </div>
+            );
+        }
 
-                <AnimatePresence>
-                  {feedback && (
-                    <motion.div initial={{ y: 20, opacity:0 }} animate={{ y:0, opacity:1 }} className={`p-6 rounded-[2rem] border-4 shadow-xl flex items-center gap-4 w-full ${feedback.type === '정답' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-                       <div className="text-4xl">{feedback.type === '정답' ? '🌟' : '💡'}</div>
-                       <div className="flex-1">
-                          <p className={`text-xl font-black whitespace-pre-wrap ${feedback.type === '정답' ? 'text-green-800' : 'text-red-800'}`}>{feedback.message}</p>
-                       </div>
-                       <button onClick={feedback.type === '정답' ? nextQuestion : () => { setFeedback(null); setVoiceAnswerText(''); }} className={`px-6 py-3 rounded-xl font-black text-white shadow-md active:scale-95 whitespace-nowrap ${feedback.type === '정답' ? 'bg-green-600' : 'bg-red-500'}`}>
-                         {feedback.type === '정답' ? <><ChevronRight className="inline" /> 다음으로</> : <><RotateCcw className="inline mr-1" size={20} /> 다시 풀기</>}
-                       </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            )}
-
-            {/* 6. EVALUATION */}
-            {step === 'eval' && (
-              <motion.div key="eval" initial={{scale:0.9}} animate={{scale:1}} className="bg-white p-8 rounded-[3rem] shadow-2xl border-4 border-yellow-200 max-w-lg w-full text-center space-y-8">
-                <h1 className="text-3xl font-black text-yellow-600">나의 안전탐험 점수는?</h1>
-                <p className="text-lg font-bold text-slate-600">스스로 얼마나 잘 배웠는지 별을 눌러 평가해보세요!</p>
-                <div className="flex justify-center gap-3 my-8">
-                  {[1,2,3,4,5].map(s => (
-                    <button key={s} onClick={() => setStars(s)} className="focus:outline-none transition-transform hover:scale-125">
-                      <Star size={60} className={s <= stars ? "fill-yellow-400 text-yellow-500" : "text-slate-200"} strokeWidth={1} />
-                    </button>
-                  ))}
-                </div>
-                {stars > 0 && (
-                  <div className="space-y-3">
-                    {stars <= 3 && (
-                      <button onClick={() => { setStars(0); setCompletedAreas(new Set()); setStep('map'); }} className="w-full py-4 bg-orange-100 text-orange-600 border-2 border-orange-300 rounded-2xl text-xl font-black shadow-sm">
-                        <RotateCcw className="inline mr-2" /> 조금 더 다시 해볼래요
-                      </button>
-                    )}
-                    <button onClick={() => setStep('postrecord')} className="w-full py-5 bg-yellow-500 text-white rounded-[2rem] text-2xl font-black shadow-xl active:scale-95 transition-all">
-                      다음 단계로 <ChevronRight size={28} className="inline" />
-                    </button>
-                  </div>
-                )}
-              </motion.div>
-            )}
-
-            {/* 7. POST-RECORD */}
-            {step === 'postrecord' && (
-              <motion.div key="post" initial={{opacity:0}} animate={{opacity:1}} className="bg-white p-8 rounded-[3rem] shadow-2xl border-4 border-purple-100 max-w-lg w-full text-center space-y-6">
-                <h1 className="text-3xl font-black text-purple-600">탐험 후 나의 생각</h1>
-                <p className="text-lg font-bold text-slate-600 bg-purple-50 p-4 rounded-xl">학습을 마친 후 새롭게 알게 된 점이나<br/>앞으로의 다짐을 말해주세요!</p>
-                
-                <button onClick={() => toggleRecord('post')} className={`w-32 h-32 rounded-full flex items-center justify-center mx-auto text-white shadow-xl transition-all ${isRecording ? 'bg-red-500 pulse-record' : 'bg-purple-500 hover:bg-purple-600'}`}>
-                  {isRecording ? <Square size={48}/> : <Mic size={48}/>}
-                </button>
-                <p className="text-sm font-bold text-slate-400">{isRecording ? '녹음 중입니다...' : '마이크를 누르고 말해보세요'}</p>
-                
-                <div className="h-32 w-full bg-slate-50 rounded-2xl border-2 border-slate-200 p-4 text-left overflow-y-auto text-slate-700 font-bold">
-                  {postRecordText + (isRecording ? interimText : '') || '여기에 말한 내용이 글자로 표시됩니다.'}
-                </div>
-                
-                <button disabled={isSubmitting} onClick={() => { if(isRecording) toggleRecord('post'); submitData(); }} className="w-full flex items-center justify-center gap-2 py-5 bg-purple-600 text-white rounded-[2rem] text-xl font-black shadow-xl active:scale-95 disabled:opacity-50">
-                  {isSubmitting ? <><Loader2 className="animate-spin"/> 기록 저장 중...</> : <><Save /> 최종 기록 완료 및 제출하기</>}
-                </button>
-              </motion.div>
-            )}
-
-            {/* 8. RESULT CERTIFICATE */}
-            {step === 'result' && (
-              <motion.div key="result" initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="bg-white p-8 rounded-[3rem] shadow-2xl border-[8px] border-orange-200 max-w-lg w-full text-center space-y-6 mx-4">
-                <SubjectFairy className="scale-90" />
-                <h1 className="text-4xl font-black text-orange-600 drop-shadow-sm">안전탐험 완료!</h1>
-                <div className="bg-orange-50 p-6 rounded-[2rem] border-4 border-dashed border-orange-300 flex flex-col items-center gap-4 relative text-center">
-                   <ShieldCheck className="w-16 h-16 text-orange-500 mx-auto" />
-                   <div className="text-slate-800 w-full">
-                      <p className="text-2xl font-black mb-2">안전 지킴이 수료증</p>
-                      <p className="text-md font-bold text-slate-600 leading-tight">위 대원은 모든 안전 미션을 완벽하게<br/>완수하였음을 증명합니다.</p>
-                      
-                      <div className="mt-4 bg-white p-3 rounded-xl border-2 border-orange-100 text-left w-full space-y-2 max-h-40 overflow-y-auto">
-                        <p className="text-sm font-black text-orange-600 border-b border-orange-100 pb-1 mb-2">✅ 학습 결과 요약</p>
-                        <p className="text-sm font-bold text-slate-700 mt-1">성공한 미션: <span className="text-orange-500">{completedAreas.size} / {groupedAreas.length}개</span></p>
-                        {preRecordText && <p className="text-sm font-bold text-slate-700"><span className="text-slate-400 block text-xs">탐험 전 생각:</span> "{preRecordText}"</p>}
-                        {postRecordText && <p className="text-sm font-bold text-slate-700"><span className="text-slate-400 block text-xs">탐험 후 다짐:</span> "{postRecordText}"</p>}
-                      </div>
-
-                      <p className="text-sm font-black mt-4 text-orange-500 bg-white px-4 py-1 rounded-full inline-block shadow-sm">발급일: {new Date().toLocaleDateString('ko-KR')} | {studentName}</p>
-                   </div>
-                   {/* 벚꽃 이모지 대신 참 잘했어요 도장 느낌 */}
-                   <div className="absolute -bottom-6 -right-4 w-24 h-24 bg-red-500 text-white rounded-full flex items-center justify-center border-[4px] border-double border-white shadow-lg transform rotate-12">
-                     <span className="font-black text-xl leading-tight">참!<br/>잘했어요</span>
-                   </div>
-                </div>
-                <div className="flex gap-3 pt-4">
-                  <button onClick={() => window.location.reload()} className="flex-1 py-4 bg-slate-100 rounded-2xl font-black text-slate-500 hover:bg-slate-200 transition-colors">다시 시작</button>
-                </div>
-              </motion.div>
-            )}
-
-          </AnimatePresence>
-        </div>
-      );
-    }
-
-    const root = createRoot(document.getElementById('root'));
-    root.render(<App />);
-  </script>
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 </body>
+
 </html>
