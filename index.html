@@ -153,6 +153,7 @@
       const [postRecordText, setPostRecordText] = useState('');
       const [postRecordAudioBase64, setPostRecordAudioBase64] = useState('');
       const [voiceAnswerText, setVoiceAnswerText] = useState('');
+      const [voiceAnswers, setVoiceAnswers] = useState({});
       const [interimText, setInterimText] = useState('');
       
       const [isRecording, setIsRecording] = useState(false);
@@ -305,6 +306,47 @@
         }
       };
 
+      const toggleVoiceRecord = async () => {
+        if (isSpeakerOn) playSound('click');
+        if (isRecording) {
+          mediaRecorderRef.current?.stop();
+          recognitionRef.current?.stop();
+          setIsRecording(false);
+        } else {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const mediaRecorder = new MediaRecorder(stream);
+            audioChunksRef.current = [];
+            
+            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
+            
+            const currentArea = currentQuestionsInArea[currentQIndex].area;
+            mediaRecorder.onstop = () => {
+              const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+              const reader = new FileReader();
+              reader.readAsDataURL(audioBlob);
+              reader.onloadend = () => {
+                setVoiceAnswers(prev => ({
+                   ...prev,
+                   [currentArea]: { ...prev[currentArea], audioBase64: reader.result }
+                }));
+              };
+              stream.getTracks().forEach(track => track.stop());
+            };
+            
+            mediaRecorder.start();
+            mediaRecorderRef.current = mediaRecorder;
+            setVoiceAnswerText('');
+            setInterimText('');
+            setFeedback(null);
+            recognitionRef.current?.start();
+            setIsRecording(true);
+          } catch(err) {
+             alert('마이크 접근 권한이 필요합니다.');
+          }
+        }
+      };
+
       const selectArea = (area) => {
         setCurrentQuestionsInArea(area.questions);
         setCurrentAreaIndex(groupedAreas.findIndex(a => a.id === area.id));
@@ -341,6 +383,11 @@
           message: `[정답 예시] ${keywordsStr} 등의 단어가 포함된 대답\n\n[해설] ${explanation}` 
         });
         
+        setVoiceAnswers(prev => ({
+           ...prev,
+           [currentQ.area]: { ...prev[currentQ.area], text: voiceAnswerText }
+        }));
+        
         if (isSpeakerOn) speak(`정답 예시는 ${keywordsStr} 등의 단어가 포함된 대답입니다. 해설. ${explanation}`);
       };
 
@@ -370,7 +417,8 @@
           progress: completedAreas.size === groupedAreas.length ? '완료' : '진행중',
           preRecordText, preRecordAudioBase64,
           postRecordText, postRecordAudioBase64,
-          badges: Array.from(completedAreas)
+          badges: Array.from(completedAreas),
+          voiceAnswers
         };
         
         if (typeof google !== 'undefined' && google.script && google.script.run) {
@@ -499,18 +547,7 @@
                   
                   {currentQuestionsInArea[currentQIndex].type === '음성' ? (
                     <div className="flex flex-col items-center gap-6 mt-4">
-                      <button disabled={feedback !== null} onClick={() => {
-                        if (isRecording) {
-                          recognitionRef.current?.stop();
-                          setIsRecording(false);
-                        } else {
-                          if (isSpeakerOn) playSound('click');
-                          setVoiceAnswerText('');
-                          setFeedback(null);
-                          recognitionRef.current?.start();
-                          setIsRecording(true);
-                        }
-                      }} className={`w-32 h-32 rounded-full flex items-center justify-center text-white shadow-xl transition-all ${isRecording ? 'bg-red-500 pulse-record' : 'bg-blue-500 hover:bg-blue-600'} ${feedback ? 'opacity-50' : ''}`}>
+                      <button disabled={feedback !== null} onClick={() => toggleVoiceRecord()} className={`w-32 h-32 rounded-full flex items-center justify-center text-white shadow-xl transition-all ${isRecording ? 'bg-red-500 pulse-record' : 'bg-blue-500 hover:bg-blue-600'} ${feedback ? 'opacity-50' : ''}`}>
                         {isRecording ? <Square size={48}/> : <Mic size={48}/>}
                       </button>
                       <p className="text-lg font-bold text-slate-500">{isRecording ? '듣고 있어요... 다 말한 후 네모 버튼을 누르세요.' : '마이크를 누르고 정답을 말해보세요!'}</p>
@@ -613,11 +650,19 @@
               <motion.div key="result" initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="bg-white p-8 rounded-[3rem] shadow-2xl border-[8px] border-orange-200 max-w-lg w-full text-center space-y-6 mx-4">
                 <SubjectFairy className="scale-90" />
                 <h1 className="text-4xl font-black text-orange-600 drop-shadow-sm">안전탐험 완료!</h1>
-                <div className="bg-orange-50 p-6 rounded-[2rem] border-4 border-dashed border-orange-300 flex flex-col items-center gap-4 relative">
-                   <ShieldCheck className="w-16 h-16 text-orange-500" />
-                   <div className="text-slate-800">
+                <div className="bg-orange-50 p-6 rounded-[2rem] border-4 border-dashed border-orange-300 flex flex-col items-center gap-4 relative text-center">
+                   <ShieldCheck className="w-16 h-16 text-orange-500 mx-auto" />
+                   <div className="text-slate-800 w-full">
                       <p className="text-2xl font-black mb-2">안전 지킴이 수료증</p>
                       <p className="text-md font-bold text-slate-600 leading-tight">위 대원은 모든 안전 미션을 완벽하게<br/>완수하였음을 증명합니다.</p>
+                      
+                      <div className="mt-4 bg-white p-3 rounded-xl border-2 border-orange-100 text-left w-full space-y-2 max-h-40 overflow-y-auto">
+                        <p className="text-sm font-black text-orange-600 border-b border-orange-100 pb-1 mb-2">✅ 학습 결과 요약</p>
+                        <p className="text-sm font-bold text-slate-700 mt-1">성공한 미션: <span className="text-orange-500">{completedAreas.size} / {groupedAreas.length}개</span></p>
+                        {preRecordText && <p className="text-sm font-bold text-slate-700"><span className="text-slate-400 block text-xs">탐험 전 생각:</span> "{preRecordText}"</p>}
+                        {postRecordText && <p className="text-sm font-bold text-slate-700"><span className="text-slate-400 block text-xs">탐험 후 다짐:</span> "{postRecordText}"</p>}
+                      </div>
+
                       <p className="text-sm font-black mt-4 text-orange-500 bg-white px-4 py-1 rounded-full inline-block shadow-sm">발급일: {new Date().toLocaleDateString('ko-KR')} | {studentName}</p>
                    </div>
                    {/* 벚꽃 이모지 대신 참 잘했어요 도장 느낌 */}
