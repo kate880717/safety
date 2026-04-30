@@ -183,7 +183,7 @@
 
             useEffect(() => {
                 // Load data from Google Apps Script via fetch (GitHub Pages 호환)
-                if (GAS_URL && GAS_URL !== 'https://script.google.com/macros/s/AKfycbz6K-xMDGLMX7gOFdnCryJuMPZlS6hr4X96AjgG-wLQAqaj_Kcsy1I0HlFnH-vEqJ1j/exec') {
+                if (GAS_URL) {
                     fetch(GAS_URL + '?action=getAppData')
                         .then(res => res.json())
                         .then(data => {
@@ -445,7 +445,7 @@
                     voiceAnswers
                 };
 
-                if (GAS_URL && GAS_URL !== 'https://script.google.com/macros/s/AKfycbz6K-xMDGLMX7gOFdnCryJuMPZlS6hr4X96AjgG-wLQAqaj_Kcsy1I0HlFnH-vEqJ1j/exec') {
+                if (GAS_URL) {
                     fetch(GAS_URL, {
                         method: 'POST',
                         body: JSON.stringify({ action: 'saveData', payload })
