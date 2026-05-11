@@ -1,1864 +1,1544 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<base target="_top">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>안전탐험</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Do+Hyeon&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.3.1",
+    "react/": "https://esm.sh/react@18.3.1/",
+    "react-dom": "https://esm.sh/react-dom@18.3.1",
+    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+    "framer-motion": "https://esm.sh/framer-motion@11.11.1?deps=react@18.3.1,react-dom@18.3.1",
+    "lucide-react": "https://esm.sh/lucide-react@0.454.0?deps=react@18.3.1,react-dom@18.3.1"
+  }
+}
+</script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --c-traffic: #FF6B6B; --c-fire: #FF9F43; --c-disaster: #54A0FF;
-  --c-life: #5ED9A6; --c-int: #C56CF0;
-  --c-bg1: #FFE5F1; --c-bg2: #E5F4FF; --c-bg3: #FFF9E5;
-  --c-yellow: #FFD93D; --c-pink: #FF6B9D; --c-mint: #6BCB77;
-  --c-text: #2D3436; --c-soft: #74849A;
-  --r: 24px; --r-sm: 16px;
-  --shadow: 0 8px 30px rgba(0,0,0,0.08); --shadow-lg: 0 14px 40px rgba(0,0,0,0.15);
-}
-html, body {
-  width: 100%; height: 100%; overflow: hidden;
-  font-family: 'Jua', 'Do Hyeon', 'Gaegu', sans-serif;
-  background: linear-gradient(135deg, #FFE5F1 0%, #E5F4FF 50%, #FFF9E5 100%);
-  color: var(--c-text); -webkit-font-smoothing: antialiased;
-}
-body { display: flex; align-items: center; justify-content: center; }
-
-/* Scale wrapper - keep base 1024x720 fitted */
-#scaleWrap {
-  position: relative;
-  width: 1024px; height: 720px;
-  transform-origin: center center;
-  display: flex; align-items: center; justify-content: center;
-}
-#app {
-  width: 100%; height: 100%;
-  background: rgba(255,255,255,0.7); backdrop-filter: blur(20px);
-  border-radius: var(--r); box-shadow: var(--shadow-lg);
-  overflow: hidden; position: relative;
-}
-
-/* Top bar */
-.topbar {
-  position: absolute; top: 0; left: 0; right: 0; height: 64px;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 24px; z-index: 100;
-  background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0) 100%);
-}
-.logo { display: flex; align-items: center; gap: 10px; font-size: 28px; font-weight: 700; }
-.logo .em { font-size: 36px; animation: bob 2s ease-in-out infinite; }
-@keyframes bob { 0%,100%{transform:translateY(0) rotate(-3deg)} 50%{transform:translateY(-6px) rotate(3deg)} }
-.tb-right { display: flex; gap: 10px; align-items: center; }
-.chip {
-  display: flex; align-items: center; gap: 6px;
-  background: white; border-radius: 999px; padding: 8px 14px;
-  box-shadow: var(--shadow); font-size: 18px; font-weight: 700;
-}
-.chip .v { color: var(--c-pink); }
-
-/* Speaker toggle - always visible */
-.spk-btn {
-  width: 50px; height: 50px; border-radius: 50%;
-  border: none; cursor: pointer; font-size: 24px;
-  background: white; box-shadow: var(--shadow);
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.25s ease;
-}
-.spk-btn.on { background: linear-gradient(135deg, #FFD93D, #FF9F43); color: white; transform: scale(1.05); }
-.spk-btn:hover { transform: scale(1.1); }
-
-/* Screens */
-.screen { display: none; position: absolute; inset: 0; padding: 80px 36px 28px; }
-.screen.active { display: flex; flex-direction: column; animation: fadeUp 0.5s ease; }
-@keyframes fadeUp { from{opacity:0; transform:translateY(20px)} to{opacity:1; transform:translateY(0)} }
-
-/* Tutorial bubble */
-.tut {
-  position: absolute; background: linear-gradient(135deg, #FFD93D, #FF9F43);
-  color: white; padding: 12px 18px; border-radius: 16px;
-  font-size: 18px; font-weight: 700; z-index: 50;
-  box-shadow: var(--shadow); animation: pulseTut 2s ease-in-out infinite;
-  max-width: 280px;
-}
-.tut::after {
-  content: ''; position: absolute; left: 50%; top: 100%;
-  transform: translateX(-50%);
-  border: 10px solid transparent; border-top-color: #FF9F43;
-}
-.tut.below::after { top: auto; bottom: 100%; border-top-color: transparent; border-bottom-color: #FFD93D; }
-@keyframes pulseTut { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04)} }
-
-/* ===== Welcome ===== */
-#sWelcome { justify-content: center; align-items: center; text-align: center; }
-.title-big { font-size: 88px; font-weight: 700; background: linear-gradient(135deg, #FF6B9D, #FF9F43, #6BCB77, #54A0FF); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 8px; letter-spacing: -2px; }
-.title-sub { font-size: 28px; color: var(--c-soft); margin-bottom: 36px; }
-.float-emojis { font-size: 48px; margin-bottom: 16px; }
-.float-emojis span { display: inline-block; margin: 0 8px; animation: float 3s ease-in-out infinite; }
-.float-emojis span:nth-child(2){animation-delay:0.3s} 
-.float-emojis span:nth-child(3){animation-delay:0.6s}
-.float-emojis span:nth-child(4){animation-delay:0.9s}
-.float-emojis span:nth-child(5){animation-delay:1.2s}
-@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-15px)} }
-
-.name-sel {
-  display: flex; flex-direction: column; gap: 14px; width: 420px;
-  background: white; padding: 28px; border-radius: var(--r); box-shadow: var(--shadow);
-}
-.name-sel label { font-size: 22px; font-weight: 700; }
-.name-sel select {
-  font: inherit; font-size: 24px; padding: 14px 18px;
-  border: 3px solid #FFE5F1; border-radius: var(--r-sm);
-  background: white; cursor: pointer; outline: none;
-}
-.name-sel select:focus { border-color: var(--c-pink); }
-
-/* Buttons */
-.btn {
-  font: inherit; font-size: 24px; padding: 16px 36px;
-  border: none; border-radius: 999px; cursor: pointer;
-  background: linear-gradient(135deg, #FF6B9D, #FF9F43);
-  color: white; box-shadow: var(--shadow); font-weight: 700;
-  transition: all 0.2s; display: inline-flex; align-items: center; gap: 10px;
-}
-.btn:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
-.btn:active { transform: translateY(0); }
-.btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-.btn.sec { background: white; color: var(--c-text); border: 3px solid #E5F4FF; }
-.btn.mint { background: linear-gradient(135deg, #6BCB77, #54A0FF); }
-.btn.warn { background: linear-gradient(135deg, #FF9F43, #FF6B6B); }
-.btn.small { font-size: 18px; padding: 10px 22px; }
-
-/* ===== Mic ===== */
-#sMic { justify-content: center; align-items: center; text-align: center; }
-.mic-icon { font-size: 140px; animation: pulse 2s ease-in-out infinite; }
-@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
-
-/* ===== Area selection ===== */
-.screen-title { font-size: 38px; font-weight: 700; text-align: center; margin-bottom: 6px; }
-.screen-sub { font-size: 22px; color: var(--c-soft); text-align: center; margin-bottom: 28px; }
-.area-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
-  flex: 1; align-content: center;
-}
-.area-card {
-  background: white; border-radius: 28px; padding: 20px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  cursor: pointer; transition: all 0.25s; box-shadow: var(--shadow);
-  border: 4px solid transparent; position: relative; overflow: hidden;
-  min-height: 170px;
-}
-.area-card:hover { transform: translateY(-6px) rotate(-1deg); box-shadow: var(--shadow-lg); }
-.area-card .a-icon {
-  width: 80px; height: 80px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 44px; margin-bottom: 10px; color: white;
-  /* fire icon: single line - emoji must fit on one row */
-  white-space: nowrap; overflow: hidden;
-}
-.area-card .a-name { font-size: 26px; font-weight: 700; }
-.area-card .a-desc { font-size: 15px; color: var(--c-soft); margin-top: 2px; text-align: center; }
-.area-card .a-badge {
-  position: absolute; top: 10px; right: 10px;
-  font-size: 22px; opacity: 0.4;
-}
-.area-card.done .a-badge { opacity: 1; animation: pop 0.5s ease; }
-@keyframes pop { 0%{transform:scale(0)} 60%{transform:scale(1.3)} 100%{transform:scale(1)} }
-
-.area-card[data-area="traffic"] .a-icon { background: linear-gradient(135deg, #FF6B6B, #FF9F43); }
-.area-card[data-area="fire"] .a-icon { background: linear-gradient(135deg, #FF9F43, #FFD93D); }
-.area-card[data-area="disaster"] .a-icon { background: linear-gradient(135deg, #54A0FF, #6BCB77); }
-.area-card[data-area="life"] .a-icon { background: linear-gradient(135deg, #5ED9A6, #54A0FF); }
-.area-card[data-area="int"] .a-icon { background: linear-gradient(135deg, #C56CF0, #FF6B9D); }
-
-/* ===== Count selection ===== */
-.count-row { display: flex; gap: 22px; justify-content: center; align-items: center; flex: 1; }
-.count-card {
-  background: white; border-radius: 28px; padding: 36px 28px;
-  cursor: pointer; box-shadow: var(--shadow); transition: all 0.25s;
-  text-align: center; border: 4px solid transparent; min-width: 200px;
-}
-.count-card:hover { transform: translateY(-8px); border-color: var(--c-pink); }
-.count-card .n { font-size: 84px; font-weight: 700; background: linear-gradient(135deg, #FF6B9D, #FF9F43); -webkit-background-clip:text; background-clip:text; color:transparent; line-height: 1; }
-.count-card .l { font-size: 22px; margin-top: 6px; }
-.count-card .h { font-size: 15px; color: var(--c-soft); margin-top: 6px; }
-
-/* ===== Quiz ===== */
-#sQuiz .progress-bar {
-  height: 12px; background: white; border-radius: 999px;
-  margin-bottom: 14px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); overflow: hidden;
-}
-.progress-bar .fill {
-  height: 100%; background: linear-gradient(90deg, #FF6B9D, #FF9F43, #FFD93D);
-  border-radius: 999px; width: 0%; transition: width 0.5s ease;
-}
-.q-card {
-  flex: 1; background: white; border-radius: 28px; padding: 24px 32px;
-  display: flex; flex-direction: column; box-shadow: var(--shadow); position: relative;
-}
-.q-head { display: flex; align-items: center; gap: 16px; margin-bottom: 10px; }
-.q-kw {
-  font-size: 80px; flex-shrink: 0;
-  animation: bob 2s ease-in-out infinite;
-}
-.q-area-pill {
-  display: inline-block; padding: 6px 16px; border-radius: 999px;
-  color: white; font-weight: 700; font-size: 16px; margin-bottom: 8px;
-}
-.q-text { font-size: 32px; font-weight: 700; line-height: 1.3; }
-.q-text .tts-hl { background: linear-gradient(180deg, transparent 60%, #FFD93D 60%); }
-.q-options {
-  display: flex; flex-direction: column; gap: 10px; margin-top: 14px;
-}
-.q-opt {
-  background: linear-gradient(135deg, #FFE5F1, #FFF9E5);
-  border: 3px solid transparent; border-radius: 18px;
-  padding: 14px 20px; font-size: 24px; cursor: pointer;
-  font-family: inherit; text-align: left; display: flex; align-items: center; gap: 12px;
-  transition: all 0.2s;
-}
-.q-opt:hover { transform: translateX(6px); border-color: var(--c-pink); }
-.q-opt.correct { background: linear-gradient(135deg, #6BCB77, #5ED9A6); color: white; border-color: #6BCB77; animation: shake 0.3s ease; }
-.q-opt.wrong { background: linear-gradient(135deg, #FF6B6B, #FF9F43); color: white; border-color: #FF6B6B; }
-@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
-.q-opt .opt-n {
-  width: 36px; height: 36px; border-radius: 50%;
-  background: white; color: var(--c-text);
-  display: flex; align-items: center; justify-content: center; font-weight: 700;
-  flex-shrink: 0;
-}
-.q-opt.correct .opt-n, .q-opt.wrong .opt-n { background: rgba(255,255,255,0.4); color: white; }
-
-.q-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; gap: 10px; flex-wrap: wrap; }
-.help-btn {
-  background: linear-gradient(135deg, #C56CF0, #54A0FF);
-  color: white; border: none; padding: 12px 22px; border-radius: 999px;
-  font: inherit; font-size: 20px; cursor: pointer; font-weight: 700;
-  display: inline-flex; gap: 8px; align-items: center;
-  box-shadow: var(--shadow);
-}
-.help-btn:hover { transform: scale(1.05); }
-.help-note { font-size: 16px; color: var(--c-soft); }
-
-/* Feedback overlay */
-.fb-overlay {
-  position: absolute; inset: 0; background: rgba(255,255,255,0.92);
-  display: none; align-items: center; justify-content: center;
-  border-radius: 28px; flex-direction: column; gap: 12px; padding: 24px;
-  z-index: 5;
-}
-.fb-overlay.show { display: flex; animation: fadeUp 0.4s ease; }
-.fb-overlay .fb-emoji { font-size: 100px; animation: pop 0.5s ease; }
-.fb-overlay .fb-text { font-size: 28px; text-align: center; font-weight: 700; line-height: 1.3; }
-.fb-overlay .fb-sub { font-size: 20px; color: var(--c-soft); text-align: center; }
-
-/* ===== Concept (drag-drop) ===== */
-.concept {
-  flex: 1; background: white; border-radius: 28px; padding: 24px;
-  display: flex; flex-direction: column; gap: 16px; box-shadow: var(--shadow);
-}
-.dd-row {
-  display: flex; gap: 20px; align-items: stretch;
-}
-.dd-targets, .dd-items {
-  flex: 1; display: flex; flex-direction: column; gap: 12px;
-}
-.dd-target {
-  background: linear-gradient(135deg, #E5F4FF, #FFE5F1);
-  border: 3px dashed var(--c-pink); border-radius: 18px;
-  padding: 16px; min-height: 80px;
-  display: flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 700;
-  transition: all 0.2s;
-}
-.dd-target.over { background: linear-gradient(135deg, #FFD93D, #FF9F43); color: white; transform: scale(1.02); }
-.dd-target .label { flex-shrink: 0; min-width: 130px; }
-.dd-target .drop {
-  flex: 1; min-height: 50px;
-  border-radius: 12px; display: flex; align-items: center; justify-content: center;
-}
-.dd-item {
-  background: linear-gradient(135deg, #FFD93D, #FF9F43);
-  border-radius: 18px; padding: 16px 20px; font-size: 22px; font-weight: 700;
-  cursor: grab; box-shadow: var(--shadow); color: white; text-align: center;
-  user-select: none;
-}
-.dd-item:active { cursor: grabbing; }
-.dd-item.dragging { opacity: 0.5; }
-.dd-item.placed { background: linear-gradient(135deg, #6BCB77, #5ED9A6); }
-.dd-item.placed.wrong { background: linear-gradient(135deg, #FF6B6B, #FF9F43); animation: shake 0.4s; cursor: pointer; }
-
-/* ===== Recording ===== */
-.rec-card {
-  flex: 1; background: white; border-radius: 28px; padding: 24px 28px;
-  display: flex; flex-direction: column; gap: 12px; box-shadow: var(--shadow); position: relative;
-}
-.rec-prompt {
-  background: linear-gradient(135deg, #FFE5F1, #E5F4FF);
-  border-radius: 18px; padding: 18px 22px; font-size: 24px; font-weight: 700;
-  display: flex; gap: 14px; align-items: center;
-}
-.rec-prompt .em { font-size: 50px; }
-.rec-area {
-  flex: 1; background: linear-gradient(135deg, #FFF9E5, #FFE5F1);
-  border-radius: 18px; padding: 20px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
-  min-height: 180px;
-}
-.rec-status { font-size: 20px; color: var(--c-soft); }
-.rec-mic {
-  width: 100px; height: 100px; border-radius: 50%;
-  background: linear-gradient(135deg, #FF6B6B, #FF9F43);
-  color: white; font-size: 48px; border: none; cursor: pointer;
-  box-shadow: var(--shadow-lg); transition: all 0.2s;
-}
-.rec-mic:hover { transform: scale(1.08); }
-.rec-mic.recording { animation: micPulse 1.3s ease-in-out infinite; background: linear-gradient(135deg, #FF6B9D, #FF6B6B); }
-@keyframes micPulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(255,107,107,0.5); }
-  50% { box-shadow: 0 0 0 20px rgba(255,107,107,0); }
-}
-.rec-transcript {
-  background: white; border: 3px solid #E5F4FF; border-radius: 14px;
-  padding: 14px 18px; font-size: 22px; min-height: 60px; width: 100%;
-  font-family: inherit; line-height: 1.4;
-}
-.rec-transcript.live { border-color: var(--c-pink); background: linear-gradient(135deg, #FFFEF0, #FFF); }
-.kb-toggle { font-size: 16px; color: var(--c-soft); cursor: pointer; text-decoration: underline; }
-
-.star-rate { display: flex; gap: 8px; justify-content: center; }
-.star {
-  font-size: 50px; cursor: pointer; transition: all 0.15s;
-  filter: grayscale(1) opacity(0.4);
-}
-.star.lit { filter: none; animation: pop 0.3s ease; }
-.star:hover { transform: scale(1.2); }
-
-.rec-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-
-/* Stickers */
-.sticker-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-.sticker {
-  font-size: 44px; cursor: pointer; transition: all 0.2s;
-  filter: grayscale(1) opacity(0.5);
-  background: white; border-radius: 50%; width: 64px; height: 64px;
-  display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow);
-}
-.sticker.picked { filter: none; animation: pop 0.4s ease; background: linear-gradient(135deg, #FFD93D, #FF9F43); }
-.sticker:hover { transform: scale(1.15); }
-
-/* ===== Reflection ===== */
-.reflect-card {
-  flex: 1; background: white; border-radius: 28px; padding: 28px;
-  display: flex; flex-direction: column; gap: 16px; box-shadow: var(--shadow);
-}
-.reflect-q { font-size: 26px; font-weight: 700; }
-.reflect-input {
-  font-family: inherit; font-size: 22px; padding: 14px 18px;
-  border: 3px solid #E5F4FF; border-radius: 16px; min-height: 100px;
-  resize: none; outline: none;
-}
-.reflect-input:focus { border-color: var(--c-pink); }
-
-/* ===== Card summary ===== */
-.cards-pool {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
-  margin-bottom: 16px;
-}
-.sum-card {
-  background: white; border-radius: 20px; padding: 18px; cursor: pointer;
-  border: 4px solid transparent; box-shadow: var(--shadow);
-  font-size: 19px; line-height: 1.4; transition: all 0.2s; min-height: 110px;
-  display: flex; flex-direction: column; gap: 6px; font-weight: 700;
-}
-.sum-card .em { font-size: 28px; }
-.sum-card.picked { border-color: var(--c-pink); transform: translateY(-4px); background: linear-gradient(135deg, #FFFEF0, #FFF); }
-.sum-card.picked::after {
-  content: '✓'; position: absolute; top: 6px; right: 10px;
-  font-size: 22px; color: var(--c-pink); font-weight: 700;
-}
-.sum-card { position: relative; }
-
-/* ===== Summary / Certificate ===== */
-#sFinal { justify-content: center; align-items: center; }
-.cert {
-  background: white; border-radius: var(--r); padding: 32px 40px;
-  box-shadow: var(--shadow-lg); text-align: center; width: 700px;
-  border: 6px double var(--c-pink); position: relative;
-}
-.cert-title { font-size: 44px; font-weight: 700; margin-bottom: 6px; color: var(--c-pink); }
-.cert-sub { font-size: 22px; color: var(--c-soft); margin-bottom: 14px; }
-.cert-name { font-size: 36px; font-weight: 700; margin: 10px 0; }
-.cert-stats {
-  display: flex; justify-content: space-around; margin: 18px 0;
-  background: linear-gradient(135deg, #FFE5F1, #E5F4FF); padding: 16px; border-radius: 18px;
-}
-.cert-stat { text-align: center; }
-.cert-stat .v { font-size: 36px; font-weight: 700; background: linear-gradient(135deg, #FF6B9D, #FF9F43); -webkit-background-clip:text; background-clip:text; color: transparent; }
-.cert-stat .l { font-size: 16px; color: var(--c-soft); }
-.badge-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 10px 0 16px; }
-.cert-badge {
-  width: 56px; height: 56px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 28px; color: white;
-  box-shadow: var(--shadow);
-}
-
-/* Confetti */
-.confetti {
-  position: absolute; top: -20px; width: 12px; height: 12px;
-  pointer-events: none; z-index: 1000;
-}
-@keyframes fall {
-  to { transform: translateY(800px) rotate(720deg); opacity: 0; }
-}
-
-/* Reward burst (stars, hearts, flowers) */
-.burst-layer {
-  position: absolute; inset: 0; pointer-events: none; z-index: 200;
-  overflow: hidden;
-}
-.burst-item {
-  position: absolute; font-size: 40px;
-  animation: burst 1.4s ease-out forwards;
-}
-@keyframes burst {
-  0% { transform: translate(0,0) scale(0); opacity: 1; }
-  60% { opacity: 1; }
-  100% { transform: translate(var(--x), var(--y)) scale(1.2) rotate(360deg); opacity: 0; }
-}
-
-/* Modal */
-.modal-bg {
-  position: absolute; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px);
-  display: none; align-items: center; justify-content: center; z-index: 300;
-}
-.modal-bg.show { display: flex; animation: fadeUp 0.3s; }
-.modal {
-  background: white; border-radius: var(--r); padding: 28px;
-  max-width: 600px; width: 90%; box-shadow: var(--shadow-lg);
-}
-.modal h2 { font-size: 28px; margin-bottom: 12px; }
-.modal-step { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 10px; }
-.modal-step .num {
-  width: 36px; height: 36px; border-radius: 50%;
-  background: linear-gradient(135deg, #FF6B9D, #FF9F43); color: white;
-  display: flex; align-items: center; justify-content: center; font-weight: 700;
-  flex-shrink: 0;
-}
-.modal-step .t { font-size: 19px; line-height: 1.4; }
-
-/* Tutorial modal - 저학년용 단계별 */
-.tut-modal { max-width: 460px; text-align: center; padding: 24px 20px 20px; }
-.tut-pages { position: relative; min-height: 290px; display: flex; align-items: center; justify-content: center; }
-.tut-page {
-  display: none; flex-direction: column; align-items: center; gap: 14px;
-  padding: 10px;
-}
-.tut-page.active { display: flex; animation: fadeUp 0.4s ease; }
-.tut-em { font-size: 110px; animation: bob 2s ease-in-out infinite; line-height: 1; }
-.tut-title {
-  font-size: 40px; font-weight: 700;
-  background: linear-gradient(135deg, #FF6B9D, #FF9F43);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-}
-.tut-desc { font-size: 28px; line-height: 1.4; font-weight: 700; color: var(--c-text); }
-.tut-dots {
-  display: flex; gap: 10px; justify-content: center; margin: 14px 0 14px;
-}
-.tut-dot {
-  width: 14px; height: 14px; border-radius: 50%;
-  background: #E5E5E5; transition: all 0.25s;
-}
-.tut-dot.on {
-  background: linear-gradient(135deg, #FF6B9D, #FF9F43);
-  transform: scale(1.4);
-  box-shadow: 0 2px 8px rgba(255,107,157,0.4);
-}
-.tut-nav { display: flex; gap: 10px; justify-content: center; align-items: center; }
-
-/* Mid results bar */
-.mid-row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
-.area-tag {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 8px 14px; border-radius: 999px;
-  background: white; box-shadow: var(--shadow); font-size: 17px; font-weight: 700;
-}
-.area-tag .dot { width: 12px; height: 12px; border-radius: 50%; }
-
-.foot-actions { display: flex; gap: 12px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
-
-/* Sparkle accent */
-.sparkle { position: absolute; pointer-events: none; font-size: 24px; animation: sparkle 2s ease infinite; }
-@keyframes sparkle { 0%,100%{opacity:0; transform:scale(0)} 50%{opacity:1; transform:scale(1) rotate(180deg)} }
-
-/* Korean low-grade friendly: bigger touch targets, large text everywhere */
-@media (max-width: 900px) {
-  .area-grid { grid-template-columns: repeat(2, 1fr); }
-}
+@import url('https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Do+Hyeon&display=swap');
+body { font-family:'Jua','Gaegu','맑은 고딕',sans-serif; margin:0; padding:0; overflow:hidden; -webkit-tap-highlight-color:transparent; }
+.pulse-record { animation: pulseRec 1.3s infinite alternate; }
+@keyframes pulseRec { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.6); } 100% { box-shadow: 0 0 0 18px rgba(239,68,68,0); } }
+.confetti { position:fixed; top:-20px; width:12px; height:12px; pointer-events:none; z-index:9999; }
+@keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity:0; } }
+.burst-emoji { position:fixed; pointer-events:none; z-index:9998; font-size:40px; animation: burst 1.4s ease-out forwards; }
+@keyframes burst { 0% { transform: translate(0,0) scale(0); opacity:1; } 60% { opacity:1; } 100% { transform: translate(var(--x), var(--y)) scale(1.2) rotate(360deg); opacity:0; } }
+.dd-item { user-select:none; -webkit-user-select:none; }
+.dd-item.selected { transform: scale(1.08); box-shadow: 0 0 0 4px #FF6B9D; }
+.dd-target.active { transform: scale(1.05); border-color:#FFD93D !important; }
 </style>
 </head>
 <body>
+<div id="root"></div>
+<script type="text/babel" data-type="module">
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { createRoot } from 'react-dom/client';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Volume2, VolumeX, Star, ChevronRight, RotateCcw, ShieldCheck,
+  CheckCircle2, Mic, Square, Loader2, School, Car, FlameKindling,
+  Waves, HelpCircle, Trophy, Lightbulb, X, ArrowLeft
+} from 'lucide-react';
 
-<div id="scaleWrap">
-  <div id="app">
-    <!-- Top bar (always visible) -->
-    <div class="topbar">
-      <div class="logo"><span class="em">🛡️</span><span>안전탐험</span></div>
-      <div class="tb-right">
-        <div class="chip" id="chipName" style="display:none">🙋 <span id="nameTag"></span></div>
-        <div class="chip" id="chipStars" style="display:none">⭐ <span class="v" id="starsTotal">0</span></div>
-        <div class="chip" id="chipScore" style="display:none">🎯 <span class="v" id="scoreTotal">0</span>점</div>
-        <button class="spk-btn" id="spkBtn" title="스피커 켜기/끄기" aria-label="speaker">🔇</button>
-      </div>
-    </div>
+// ===== GAS API URL =====
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzuI75nXwyIpIlMPdvWlCcm3OHuOnSnv86DUDcfmUEaS87ln_Pl3Jw0KksFOHSqP5pJ/exec';
 
-    <!-- Welcome -->
-    <section class="screen active" id="sWelcome">
-      <div class="float-emojis"><span>🚦</span><span>🔥</span><span>🌊</span><span>✂️</span><span>🧚</span></div>
-      <div class="title-big">안전탐험</div>
-      <div class="title-sub">🌟 안전을 배우러 떠나는 신나는 모험! 🌟</div>
-      <div class="name-sel">
-        <label>👋 이름을 골라 주세요</label>
-        <select id="nameSel">
-          <option value="">-- 이름 선택 --</option>
-        </select>
-        <button class="btn" id="btnStart" disabled>시작하기 🚀</button>
-      </div>
-    </section>
-
-    <!-- Mic permission -->
-    <section class="screen" id="sMic">
-      <div class="mic-icon">🎤</div>
-      <h2 style="font-size:36px; margin:18px 0 8px;">마이크를 사용할게요</h2>
-      <p style="font-size:22px; color:var(--c-soft); text-align:center; max-width:600px; line-height:1.4;">
-        말로 답하고 녹음하려면 마이크가 필요해요.<br>
-        "허용"을 눌러 주세요. 한 번만 물어볼게요! 😊
-      </p>
-      <button class="btn" id="btnMic" style="margin-top:24px;">마이크 허용 🎙️</button>
-      <button class="btn sec small" id="btnMicSkip" style="margin-top:10px;">키보드로만 할게요</button>
-    </section>
-
-    <!-- Area selection -->
-    <section class="screen" id="sArea">
-      <div class="screen-title">🌈 어디로 탐험을 떠날까요?</div>
-      <div class="screen-sub">하고 싶은 영역을 골라 보세요!</div>
-      <div class="area-grid" id="areaGrid"></div>
-      <div class="foot-actions">
-        <button class="btn sec" id="btnHelpModal">📖 사용설명서</button>
-        <button class="btn mint" id="btnMidResult">📊 중간 결과 보기</button>
-      </div>
-    </section>
-
-    <!-- Count selection -->
-    <section class="screen" id="sCount">
-      <div class="screen-title">🎯 몇 문제 풀어 볼까요?</div>
-      <div class="screen-sub">자기에게 맞는 개수를 골라 봅시다</div>
-      <div class="count-row">
-        <div class="count-card" data-c="3"><div class="n">3</div><div class="l">문제</div><div class="h">짧게 도전!</div></div>
-        <div class="count-card" data-c="5"><div class="n">5</div><div class="l">문제</div><div class="h">알맞게 알맞게</div></div>
-        <div class="count-card" data-c="10"><div class="n">10</div><div class="l">문제</div><div class="h">탐험가 도전!</div></div>
-      </div>
-      <div class="foot-actions"><button class="btn sec" data-back="sArea">← 돌아가기</button></div>
-    </section>
-
-    <!-- Quiz -->
-    <section class="screen" id="sQuiz">
-      <div class="progress-bar"><div class="fill" id="qFill"></div></div>
-      <div class="q-card">
-        <div class="q-area-pill" id="qAreaPill"></div>
-        <div class="q-head">
-          <div class="q-kw" id="qKw">🚸</div>
-          <div style="flex:1">
-            <div class="q-text" id="qText"></div>
-          </div>
-        </div>
-        <div class="q-options" id="qOptions"></div>
-        <div class="q-actions">
-          <button class="help-btn" id="btnHelp">💜 도움받기</button>
-          <span class="help-note" id="helpNote"></span>
-          <span style="margin-left:auto; font-size:18px; color:var(--c-soft);" id="qIdx"></span>
-        </div>
-        <div class="fb-overlay" id="qFb">
-          <div class="fb-emoji"></div>
-          <div class="fb-text"></div>
-          <div class="fb-sub"></div>
-          <button class="btn" id="btnNext">다음으로 ➡️</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Concept (drag-drop) -->
-    <section class="screen" id="sConcept">
-      <div class="screen-title">🧩 개념 익히기</div>
-      <div class="screen-sub" id="conSub">맞는 것끼리 옮겨 봐요!</div>
-      <div class="concept">
-        <div class="dd-row" style="flex:1; align-items:flex-start;">
-          <div class="dd-targets" id="ddTargets"></div>
-          <div class="dd-items" id="ddItems"></div>
-        </div>
-        <div class="foot-actions">
-          <span class="help-note" id="ddHint">💡 틀린 카드는 다시 누르면 돌아와요</span>
-          <button class="btn" id="btnDdNext" disabled>다음으로 ➡️</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Recording -->
-    <section class="screen" id="sRecord">
-      <div class="screen-title">🎙️ 또박또박 말해 봐요</div>
-      <div class="rec-card">
-        <div class="rec-prompt"><div class="em" id="recEm">📣</div><div id="recPrompt"></div></div>
-        <div class="rec-area" id="recArea">
-          <div class="rec-status" id="recStatus">버튼을 누르고 말해 보세요</div>
-          <button class="rec-mic" id="recMic">🎤</button>
-          <textarea class="rec-transcript" id="recTranscript" placeholder="여기에 실시간으로 말한 내용이 나와요... (직접 입력도 가능!)" rows="2"></textarea>
-          <div class="kb-toggle" id="kbToggle">⌨️ 키보드로 입력하기</div>
-          <button class="btn mint" id="btnKbDone" style="display:none;">📝 다 썼어요!</button>
-        </div>
-        <div id="recReview" style="display:none;">
-          <div style="font-size:22px; text-align:center; font-weight:700;" id="reviewHeader">🎧 들어 보고 별점을 주세요</div>
-          <div style="display:flex; gap:10px; align-items:center; justify-content:center; margin:8px 0;">
-            <button class="btn small mint" id="btnPlayback"><span id="btnPlaybackText">▶️ 내 녹음 듣기</span></button>
-            <button class="btn small sec" id="btnPlaySent">📖 완성 문장 듣기</button>
-          </div>
-          <div class="star-rate" id="starRate">
-            <span class="star" data-v="1">⭐</span>
-            <span class="star" data-v="2">⭐</span>
-            <span class="star" data-v="3">⭐</span>
-            <span class="star" data-v="4">⭐</span>
-            <span class="star" data-v="5">⭐</span>
-          </div>
-          <div id="stickerBox" style="display:none;">
-            <div style="font-size:18px; text-align:center; margin:6px 0;">🎁 칭찬 스티커를 골라 봐요</div>
-            <div class="sticker-row">
-              <div class="sticker" data-s="🌟">🌟</div>
-              <div class="sticker" data-s="💖">💖</div>
-              <div class="sticker" data-s="🌸">🌸</div>
-              <div class="sticker" data-s="🦋">🦋</div>
-              <div class="sticker" data-s="🌈">🌈</div>
-              <div class="sticker" data-s="🎉">🎉</div>
-            </div>
-          </div>
-          <div class="rec-actions">
-            <button class="btn warn" id="btnReRec"><span id="btnReRecText">🔁 다시 녹음하기</span></button>
-            <button class="btn" id="btnDoneRec" disabled>다음으로 ➡️</button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Reflection -->
-    <section class="screen" id="sReflect">
-      <div class="screen-title">💭 잠깐, 생각해 봐요</div>
-      <div class="reflect-card">
-        <div class="reflect-q">🌟 오늘 배운 것 중에서 가장 기억에 남는 건 무엇이에요?</div>
-        <textarea class="reflect-input" id="reflectA1" placeholder="자유롭게 적거나 말해 봐요..."></textarea>
-        <div class="reflect-q">🌈 어떤 약속을 지키고 싶나요?</div>
-        <textarea class="reflect-input" id="reflectA2" placeholder="다짐을 적어 봐요..."></textarea>
-        <div class="foot-actions">
-          <span style="font-size:18px; color:var(--c-soft);">⭐ 다짐을 별점으로 평가해 볼까요?</span>
-          <div class="star-rate" id="reflectStars">
-            <span class="star" data-v="1">⭐</span><span class="star" data-v="2">⭐</span>
-            <span class="star" data-v="3">⭐</span><span class="star" data-v="4">⭐</span>
-            <span class="star" data-v="5">⭐</span>
-          </div>
-        </div>
-        <div class="foot-actions">
-          <button class="btn warn" id="btnReflectRedo" style="display:none;">🔁 다시 다짐하기</button>
-          <button class="btn" id="btnReflectNext">다음으로 ➡️</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Card summary (pick 2 to explain) -->
-    <section class="screen" id="sSummary">
-      <div class="screen-title">📚 배운 것을 정리해요</div>
-      <div class="screen-sub">설명하고 싶은 카드 2장을 골라 봐요!</div>
-      <div class="cards-pool" id="cardsPool"></div>
-      <div class="foot-actions">
-        <button class="btn" id="btnSumNext" disabled>두 카드로 설명하기 🎙️</button>
-      </div>
-    </section>
-
-    <!-- Final / certificate -->
-    <section class="screen" id="sFinal">
-      <div class="cert">
-        <div class="cert-title">🏆 안전탐험 수료</div>
-        <div class="cert-sub">아래 어린이가 안전탐험을 멋지게 마쳤어요!</div>
-        <div class="cert-name" id="certName">○○○</div>
-        <div class="cert-stats">
-          <div class="cert-stat"><div class="v" id="cAcc">0%</div><div class="l">정답률</div></div>
-          <div class="cert-stat"><div class="v" id="cStars">0</div><div class="l">받은 별</div></div>
-          <div class="cert-stat"><div class="v" id="cRec">0</div><div class="l">녹음</div></div>
-          <div class="cert-stat"><div class="v" id="cArea">0</div><div class="l">탐험 영역</div></div>
-        </div>
-        <div style="font-size:20px;">🏅 획득한 뱃지</div>
-        <div class="badge-row" id="badgeRow"></div>
-        <div class="foot-actions">
-          <button class="btn sec" id="btnAgain">🔄 처음으로</button>
-          <button class="btn" id="btnFinish">🎉 마치기</button>
-        </div>
-      </div>
-    </section>
-
-    <div class="burst-layer" id="burstLayer"></div>
-  </div>
-</div>
-
-<!-- Tutorial modal (페이지를 한 장씩) -->
-<div class="modal-bg" id="manualModal">
-  <div class="modal tut-modal">
-    <div class="tut-pages">
-      <div class="tut-page active" data-step="1">
-        <div class="tut-em">👋</div>
-        <div class="tut-title">이름 고르기</div>
-        <div class="tut-desc">내 이름을 찾아서<br>꾹 눌러요!</div>
-      </div>
-      <div class="tut-page" data-step="2">
-        <div class="tut-em">🌈</div>
-        <div class="tut-title">영역 고르기</div>
-        <div class="tut-desc">하고 싶은 영역을<br>골라요!</div>
-      </div>
-      <div class="tut-page" data-step="3">
-        <div class="tut-em">💜</div>
-        <div class="tut-title">도움받기</div>
-        <div class="tut-desc">모르겠으면<br>💜 버튼!</div>
-      </div>
-      <div class="tut-page" data-step="4">
-        <div class="tut-em">🎤</div>
-        <div class="tut-title">또박또박 말해요</div>
-        <div class="tut-desc">버튼을 누르고<br>크게 말해요!</div>
-      </div>
-      <div class="tut-page" data-step="5">
-        <div class="tut-em">⭐</div>
-        <div class="tut-title">별점 주기</div>
-        <div class="tut-desc">내 목소리 듣고<br>별을 줘요!</div>
-      </div>
-      <div class="tut-page" data-step="6">
-        <div class="tut-em">🔊</div>
-        <div class="tut-title">스피커</div>
-        <div class="tut-desc">위쪽 버튼을 켜면<br>읽어 줘요!</div>
-      </div>
-      <div class="tut-page" data-step="7">
-        <div class="tut-em">🏆</div>
-        <div class="tut-title">수료증</div>
-        <div class="tut-desc">끝나면<br>상을 받아요!</div>
-      </div>
-    </div>
-    <div class="tut-dots" id="tutDots"></div>
-    <div class="tut-nav">
-      <button class="btn sec" id="tutPrev">← 이전</button>
-      <button class="btn" id="tutNext">다음 →</button>
-      <button class="btn mint" id="tutDone" style="display:none;">시작! 🚀</button>
-    </div>
-  </div>
-</div>
-
-<!-- Mid result modal -->
-<div class="modal-bg" id="midModal">
-  <div class="modal">
-    <h2>📊 지금까지의 모험</h2>
-    <div id="midContent" style="font-size:20px; line-height:1.6;"></div>
-    <div class="foot-actions"><button class="btn" id="btnCloseMid">닫기</button></div>
-  </div>
-</div>
-
-<script>
-/* =========================================================
-   안전탐험 - main JS
-   - 1-2학년 친화 UI, 스피커 기본 OFF
-   - Korean voice priority (Google / Wavenet / Neural)
-   - 마이크 1회 권한 + MediaRecorder + WebSpeech STT
-   - Drag-drop 개념학습, 카드정리, 자기평가, 뱃지, 컨페티
-   - GAS(Apps Script) 연동: window.google.script.run
-========================================================= */
-
-const inGAS = !!(window.google && window.google.script && window.google.script.run);
-const G = inGAS ? google.script.run : null;
-
-// ====== 데이터 (시트에 없으면 사용되는 기본값) ======
-const AREAS = [
-  { id: 'traffic',  name: '교통안전',  icon: '🚦', desc: '횡단보도·신호등',     color: '#FF6B6B' },
-  { id: 'fire',     name: '화재대피',  icon: '🧯', desc: '불이 났을 때',         color: '#FF9F43' },
-  { id: 'disaster', name: '재난안전',  icon: '🌊', desc: '지진·태풍·홍수',       color: '#54A0FF' },
-  { id: 'life',     name: '생활안전',  icon: '✂️', desc: '집·교실에서',          color: '#5ED9A6' },
-  { id: 'int',      name: '통합 🧚',   icon: '🧚', desc: '모두 합쳐 정리하기',   color: '#C56CF0' }
-];
-
-const DEFAULT_Q = {
-  traffic: [
-    { kw:'🚸', text:'횡단보도를 건널 때 가장 먼저 할 일은?', opts:['그냥 뛰기','좌우 살피기','휴대폰 보기'], ans:1, fb:'좌우를 살피고 차가 없을 때 손을 들고 건너요! 🙋' },
-    { kw:'🚦', text:'빨간 신호등이 켜졌을 때는?', opts:['빨리 건너기','잠깐 멈춰 기다리기','뒤로 뛰기'], ans:1, fb:'빨간불이면 멈추고 초록불을 기다려요!' },
-    { kw:'🚗', text:'차에 탔을 때 꼭 해야 하는 것은?', opts:['창문 열기','안전벨트 매기','노래 부르기'], ans:1, fb:'안전벨트는 우리 몸을 지켜주는 약속이에요!' }
-  ],
-  fire: [
-    { kw:'🔥', text:'불이 났을 때 가장 먼저 해야 할 일은?', opts:['숨기','"불이야!" 외치고 알리기','짐 챙기기'], ans:1, fb:'큰 소리로 알리고 안전한 곳으로 가요!' },
-    { kw:'🚨', text:'연기가 가득할 때는 어떻게?', opts:['똑바로 서서 뛰기','자세를 낮추고 천천히','눈 감고 뛰기'], ans:1, fb:'연기는 위로 가요. 자세를 낮춰야 안전해요!' },
-    { kw:'📞', text:'불이 났을 때 전화해야 하는 번호는?', opts:['112','119','114'], ans:1, fb:'불·구조는 119, 도와줘요!' }
-  ],
-  disaster: [
-    { kw:'🏚️', text:'지진이 났을 때 교실에서는?', opts:['창문 열기','책상 아래로 숨기','복도로 뛰기'], ans:1, fb:'책상 아래로! 머리를 보호해요!' },
-    { kw:'🌧️', text:'태풍이 올 때는?', opts:['밖에서 놀기','집 안에 머물기','우산 들고 나가기'], ans:1, fb:'집 안에서 안전하게 기다려요!' },
-    { kw:'🌊', text:'홍수가 났을 때 안전한 곳은?', opts:['낮은 곳','높은 곳','다리 아래'], ans:1, fb:'높은 곳으로 빨리 대피해요!' }
-  ],
-  life: [
-    { kw:'✂️', text:'가위를 건넬 때는?', opts:['뾰족한 쪽 주기','손잡이 쪽 주기','던지기'], ans:1, fb:'손잡이를 주면 손이 안 다쳐요!' },
-    { kw:'🔌', text:'젖은 손으로 콘센트를 만지면?', opts:['괜찮아요','감전될 수 있어요','시원해져요'], ans:1, fb:'젖은 손은 절대 안 돼요! 위험해요!' },
-    { kw:'🍲', text:'뜨거운 냄비 가까이에서는?', opts:['건드리기','조심하기','쳐다보기'], ans:1, fb:'아주아주 조심해요! 데일 수 있어요.' }
-  ]
+// ===== 영역 정보 =====
+const AREA_INFO = {
+  traffic:  { name:'교통안전',   Icon:Car,           bg:'bg-red-500',     pos:{x:18, y:20} },
+  fire:     { name:'화재대피',   Icon:FlameKindling, bg:'bg-orange-500',  pos:{x:50, y:13} },
+  disaster: { name:'재난안전',   Icon:Waves,         bg:'bg-blue-500',    pos:{x:82, y:22} },
+  life:     { name:'학교생활',   Icon:School,        bg:'bg-emerald-500', pos:{x:78, y:62} },
+  guard:    { name:'안전지킴이', Icon:ShieldCheck,   bg:'bg-yellow-500',  pos:{x:30, y:72} }
 };
 
-// 개념 학습 (드래그앤드롭)
-const CONCEPT = {
-  traffic: { sub:'신호등 색깔에 맞는 행동을 옮겨 보세요', targets:[
-    { id:'tr1', label:'🔴 빨간불', accepts:'tr-stop' },
-    { id:'tr2', label:'🟢 초록불', accepts:'tr-go' },
-    { id:'tr3', label:'🟡 노란불', accepts:'tr-care' }
-  ], items:[
-    { id:'tr-go', label:'건너요' },
-    { id:'tr-stop', label:'멈춰요' },
-    { id:'tr-care', label:'조심해요' }
-  ]},
-  fire: { sub:'화재 단계에 맞는 행동을 옮겨 보세요', targets:[
-    { id:'fi1', label:'1️⃣ 불을 봤을 때', accepts:'fi-call' },
-    { id:'fi2', label:'2️⃣ 연기 속에서', accepts:'fi-low' },
-    { id:'fi3', label:'3️⃣ 대피한 다음', accepts:'fi-119' }
-  ], items:[
-    { id:'fi-low', label:'자세 낮추기' },
-    { id:'fi-call', label:'"불이야!" 외치기' },
-    { id:'fi-119', label:'119에 신고하기' }
-  ]},
-  disaster: { sub:'재난 종류에 맞는 행동을 옮겨 보세요', targets:[
-    { id:'ds1', label:'🌍 지진', accepts:'ds-desk' },
-    { id:'ds2', label:'🌧️ 태풍', accepts:'ds-in' },
-    { id:'ds3', label:'🌊 홍수', accepts:'ds-up' }
-  ], items:[
-    { id:'ds-in', label:'집 안에서 기다려요' },
-    { id:'ds-desk', label:'책상 아래로 숨어요' },
-    { id:'ds-up', label:'높은 곳으로 가요' }
-  ]},
-  life: { sub:'올바른 사용법을 옮겨 보세요', targets:[
-    { id:'li1', label:'✂️ 가위', accepts:'li-grip' },
-    { id:'li2', label:'🔌 콘센트', accepts:'li-dry' },
-    { id:'li3', label:'🍲 뜨거운 것', accepts:'li-far' }
-  ], items:[
-    { id:'li-dry', label:'마른 손으로 만져요' },
-    { id:'li-grip', label:'손잡이를 건네요' },
-    { id:'li-far', label:'조금 떨어져 봐요' }
-  ]}
-};
-
+// ===== 콘텐츠 =====
 const RECORD_PROMPTS = [
   { em:'🛡️', text:'"나는 안전을 잘 지킬 거예요!" 라고 또박또박 말해 봐요' },
   { em:'🚸', text:'"횡단보도에서는 좌우를 살펴요" 라고 말해 봐요' },
   { em:'🚨', text:'"불이 나면 자세를 낮추고 119에 신고해요" 라고 말해 봐요' },
-  { em:'🌟', text:'"우리 모두 안전하게 지내요!" 라고 약속해 봐요' }
+  { em:'👤', text:'"낯선 사람을 따라가지 않아요" 라고 말해 봐요' },
+  { em:'🧼', text:'"급식 먹기 전에 손을 씻어요" 라고 말해 봐요' },
+  { em:'🛒', text:'"가족을 잃으면 안내 데스크에 가요" 라고 말해 봐요' },
+  { em:'🏚️', text:'"지진이 나면 책상 아래로 숨어요" 라고 말해 봐요' },
+  { em:'🏃', text:'"복도에서는 천천히 걸어요" 라고 약속해 봐요' },
+  { em:'🛴', text:'"자전거 탈 때 헬멧을 꼭 써요" 라고 말해 봐요' },
+  { em:'🌟', text:'"우리 모두 안전하게 지내요!" 라고 외쳐 봐요' }
 ];
 
-const SUMMARY_CARDS = [
-  { id:'s1', em:'🚸', text:'횡단보도에서는 좌우를 살펴요' },
-  { id:'s2', em:'🚦', text:'빨간불에서는 잠깐 멈춰요' },
-  { id:'s3', em:'🚗', text:'차에서는 안전벨트를 매요' },
-  { id:'s4', em:'🔥', text:'불이 나면 "불이야!" 외쳐요' },
-  { id:'s5', em:'🚨', text:'연기 속에서는 자세를 낮춰요' },
-  { id:'s6', em:'📞', text:'불이 나면 119에 신고해요' },
-  { id:'s7', em:'🌍', text:'지진이 나면 책상 아래로 숨어요' },
-  { id:'s8', em:'🌧️', text:'태풍이 오면 집 안에 있어요' },
-  { id:'s9', em:'✂️', text:'가위는 손잡이를 건네요' },
-  { id:'s10', em:'🔌', text:'젖은 손으로 콘센트 안 만져요' }
-];
-
-// ====== 앱 상태 ======
-const S = {
-  student: '',
-  area: null,
-  count: 5,
-  questions: [],          // 현재 세션 문제들 (area별로 묶어둠)
-  qIdx: 0,
-  answers: [],            // {area, q, picked, correct, helpUsed}
-  recordings: [],         // {prompt, transcript, audioUrl, stars, sticker, redoCount}
-  reflectStars: 0,
-  selectedSummary: [],
-  donAreas: new Set(),
-  stars: 0,
-  score: 0,
-  badges: [],
-  speakerOn: false,
-  micGranted: false,
-  voice: null,
-  mediaStream: null,
-  mediaRecorder: null,
-  audioChunks: [],
-  currentAudioBlob: null,
-  currentAudioUrl: null,
-  recognition: null,
-  questionsBySheet: null,  // 시트에서 불러온 문제
-  studentsBySheet: null
+const CONCEPT_DATA = {
+  traffic: { sub:'신호등 색깔에 맞는 행동을 옮겨 봐요',
+    targets:[{id:'t1',label:'🔴 빨간불',accepts:'stop'},{id:'t2',label:'🟢 초록불',accepts:'go'},{id:'t3',label:'🟡 노란불',accepts:'care'}],
+    items:[{id:'go',label:'건너요'},{id:'stop',label:'멈춰요'},{id:'care',label:'조심해요'}] },
+  fire: { sub:'화재 상황에 맞는 행동을 옮겨 봐요',
+    targets:[{id:'f1',label:'1️⃣ 불을 봤을 때',accepts:'shout'},{id:'f2',label:'2️⃣ 연기 속에서',accepts:'low'},{id:'f3',label:'3️⃣ 대피한 후',accepts:'call'}],
+    items:[{id:'low',label:'자세 낮추기'},{id:'shout',label:'"불이야!" 외치기'},{id:'call',label:'119에 신고하기'}] },
+  disaster: { sub:'재난 종류에 맞는 행동을 옮겨 봐요',
+    targets:[{id:'d1',label:'🏚️ 지진',accepts:'desk'},{id:'d2',label:'🌬️ 태풍',accepts:'inside'},{id:'d3',label:'🌊 홍수',accepts:'high'}],
+    items:[{id:'inside',label:'안전한 실내에서 기다려요'},{id:'desk',label:'책상 아래로 숨어요'},{id:'high',label:'높은 곳으로 가요'}] },
+  life: { sub:'학교생활에서 올바른 행동을 옮겨 봐요',
+    targets:[{id:'l1',label:'✂️ 가위 건네기',accepts:'grip'},{id:'l2',label:'🏃 복도에서',accepts:'walk'},{id:'l3',label:'🍽️ 급식 전에',accepts:'wash'}],
+    items:[{id:'walk',label:'천천히 걸어요'},{id:'grip',label:'손잡이 쪽으로 건네요'},{id:'wash',label:'손을 씻어요'}] },
+  guard: { sub:'위험한 상황에 맞는 행동을 옮겨 봐요',
+    targets:[{id:'g1',label:'👤 낯선 사람이 따라오라 할 때',accepts:'no'},{id:'g2',label:'🍭 모르는 어른이 뭘 줄 때',accepts:'refuse'},{id:'g3',label:'🛒 가족을 잃었을 때',accepts:'desk'}],
+    items:[{id:'refuse',label:'"안 받아요" 하고 떠나요'},{id:'no',label:'"싫어요!" 외치고 도망'},{id:'desk',label:'안내 데스크로 가요'}] }
 };
 
-// ====== 음성: 한국어 자연스러운 음성 우선 ======
-function selectKoreanVoice() {
-  if (!window.speechSynthesis) return null;
-  const voices = speechSynthesis.getVoices();
-  const ko = voices.filter(v => v.lang === 'ko-KR' || (v.lang||'').startsWith('ko'));
-  if (ko.length === 0) return voices[0] || null;
-  // 1순위: Google 한국어 (클라우드)
-  let v = ko.find(x => x.name.toLowerCase().includes('google') && !x.localService);
-  if (v) return v;
-  v = ko.find(x => x.name.toLowerCase().includes('google'));
-  if (v) return v;
-  // 2순위: Wavenet/Neural2
-  v = ko.find(x => /wavenet|neural2|neural-a|ko-kr-wavenet|ko-kr-neural/i.test(x.name));
-  if (v) return v;
-  // 3순위: 자연스러움 키워드
-  v = ko.find(x => /wavenet|neural|premium|enhanced|natural/i.test(x.name));
-  if (v) return v;
-  return ko[0];
-}
-function loadVoiceWhenReady() {
-  const tryNow = () => {
-    const v = selectKoreanVoice();
-    if (v) S.voice = v;
-  };
-  tryNow();
-  if (!S.voice && 'onvoiceschanged' in speechSynthesis) {
-    speechSynthesis.onvoiceschanged = tryNow;
-  }
-}
+const SUMMARY_CARDS = [
+  { id:'s1',em:'🚸',text:'횡단보도에서 좌우를 살펴요' },
+  { id:'s2',em:'🚦',text:'빨간불에선 멈춰서 기다려요' },
+  { id:'s3',em:'🛴',text:'자전거 탈 때 헬멧을 써요' },
+  { id:'s4',em:'🚨',text:'연기 속에선 자세를 낮춰요' },
+  { id:'s5',em:'📞',text:'불이 나면 119에 신고해요' },
+  { id:'s6',em:'🏚️',text:'지진이 나면 책상 아래로 숨어요' },
+  { id:'s7',em:'✂️',text:'가위는 손잡이 쪽으로 건네요' },
+  { id:'s8',em:'🧼',text:'급식 전에 손을 씻어요' },
+  { id:'s9',em:'🏃',text:'복도에서는 걸어요' },
+  { id:'s10',em:'👤',text:'낯선 사람을 따라가지 않아요' },
+  { id:'s11',em:'🍭',text:'모르는 사람이 주는 건 안 받아요' },
+  { id:'s12',em:'🛒',text:'가족을 잃으면 안내 데스크에 가요' }
+];
 
-function speak(text, opts={}) {
-  if (!S.speakerOn) return;
+const ENCOURAGEMENTS = ['정말 잘했어요!','대단해요!','완벽해요!','안전 박사예요!','와! 멋져요!','훌륭해요!','최고예요!','척척박사!'];
+
+const FUN_FACTS = {
+  traffic:['💡 차는 멈추는 데 시간이 걸려요!','💡 손을 들면 운전자에게 잘 보여요!','💡 신호등은 모두를 지켜주는 약속이에요.'],
+  fire:['💡 연기는 위로 올라가요. 자세를 낮춰요!','💡 엘리베이터는 멈출 수 있어 위험해요.','💡 "불이야!" 외치면 다른 사람도 알아요.'],
+  disaster:['💡 지진은 1분 정도 강하게 흔들려요.','💡 태풍 후 길은 미끄러워요. 조심!','💡 흐르는 물은 어른도 못 이겨요.'],
+  life:['💡 비누로 30초 이상 씻어야 깨끗!','💡 잠 잘 자고 손 씻으면 건강해요.','💡 깨끗한 책상에서 공부가 잘 돼요!'],
+  guard:['💡 어른은 어린이에게 길을 묻지 않아요.','💡 친절해 보여도 따라가지 않아요.','💡 내 정보는 비밀이에요!']
+};
+
+const TUTORIAL_PAGES = [
+  { em:'👋', title:'이름 고르기', desc:'내 이름을 골라요!' },
+  { em:'🗺️', title:'지도 탐험', desc:'영역을 골라\n안전을 배워요!' },
+  { em:'💜', title:'도움받기', desc:'모르겠으면\n💜 버튼!' },
+  { em:'🎤', title:'또박또박 말해요', desc:'버튼 누르고\n크게 말해요!' },
+  { em:'⭐', title:'별점 주기', desc:'내 목소리 듣고\n별을 줘요!' },
+  { em:'🔊', title:'스피커', desc:'켜면 읽어 줘요!\n위쪽에 있어요.' },
+  { em:'🏆', title:'수료증', desc:'끝나면 상을\n받아요!' }
+];
+
+// ===== 한국어 음성 우선순위 =====
+let cachedVoice = null;
+const selectKoreanVoice = () => {
+  if (!window.speechSynthesis) return null;
+  if (cachedVoice) return cachedVoice;
+  const voices = speechSynthesis.getVoices();
+  if (!voices.length) return null;
+  const ko = voices.filter(v => (v.lang||'').toLowerCase().startsWith('ko'));
+  if (!ko.length) return voices[0];
+  let v = ko.find(x => x.name.toLowerCase().includes('google') && !x.localService);
+  if (!v) v = ko.find(x => x.name.toLowerCase().includes('google'));
+  if (!v) v = ko.find(x => /wavenet|neural2|neural-a/i.test(x.name));
+  if (!v) v = ko.find(x => /wavenet|neural|premium|enhanced|natural/i.test(x.name));
+  cachedVoice = v || ko[0];
+  return cachedVoice;
+};
+
+const speak = (text, opts={}) => {
   if (!window.speechSynthesis) return;
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'ko-KR';
-  u.voice = S.voice || selectKoreanVoice();
-  u.pitch = 1.0;             // 갈라짐 방지
-  u.rate = opts.rate || 0.95; // 자연스럽게
-  u.volume = 1.0;
+  u.lang='ko-KR';
+  const v = selectKoreanVoice();
+  if (v) u.voice = v;
+  u.pitch = 1.0;
+  u.rate = opts.rate || 0.95;
   if (opts.onend) u.onend = opts.onend;
   speechSynthesis.speak(u);
-  return u;
-}
+};
+const stopSpeak = () => { if (window.speechSynthesis) speechSynthesis.cancel(); };
 
-function speakWithHighlight(el, text) {
-  if (!S.speakerOn) return;
-  // 글자 단위 하이라이트
-  const chars = text.split('');
-  el.innerHTML = chars.map(c => `<span class="ch">${c}</span>`).join('');
-  const spans = el.querySelectorAll('.ch');
-  if (!window.speechSynthesis) return;
-  speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'ko-KR'; u.voice = S.voice || selectKoreanVoice();
-  u.pitch = 1.0; u.rate = 0.92;
-  // boundary 이벤트로 글자 강조
-  if ('onboundary' in u) {
-    u.onboundary = (e) => {
-      const ci = e.charIndex || 0;
-      spans.forEach((s,i) => s.classList.toggle('tts-hl', i <= ci+1 && i >= ci-1));
-    };
-  }
-  u.onend = () => spans.forEach(s => s.classList.remove('tts-hl'));
-  speechSynthesis.speak(u);
-}
-
-// ====== 효과음 (Web Audio) ======
-let actx = null;
-function ac() { actx = actx || new (window.AudioContext||window.webkitAudioContext)(); return actx; }
-function sfx(kind) {
-  if (!S.speakerOn) return; // 스피커 꺼져있으면 효과음도 안 남
+// ===== 효과음 =====
+let audioCtx = null;
+const ac = () => { if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; };
+const playSfx = (kind) => {
   try {
     const ctx = ac();
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    o.connect(g); g.connect(ctx.destination);
-    if (kind === 'correct') {
-      // 도-미-솔 짧은 멜로디
-      const notes = [523.25, 659.25, 783.99];
-      notes.forEach((f,i) => {
-        const oo = ctx.createOscillator(); const gg = ctx.createGain();
-        oo.type = 'sine'; oo.frequency.value = f;
-        gg.gain.setValueAtTime(0.15, ctx.currentTime + i*0.12);
-        gg.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i*0.12 + 0.15);
-        oo.connect(gg); gg.connect(ctx.destination);
-        oo.start(ctx.currentTime + i*0.12);
-        oo.stop(ctx.currentTime + i*0.12 + 0.16);
+    if (kind==='correct') {
+      [523.25,659.25,783.99].forEach((f,i)=>{
+        const o=ctx.createOscillator(),g=ctx.createGain();
+        o.type='sine'; o.frequency.value=f;
+        g.gain.setValueAtTime(0.15,ctx.currentTime+i*0.1);
+        g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.1+0.15);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(ctx.currentTime+i*0.1); o.stop(ctx.currentTime+i*0.1+0.16);
       });
-    } else if (kind === 'wrong') {
-      o.type = 'sawtooth'; o.frequency.value = 220;
-      o.frequency.linearRampToValueAtTime(150, ctx.currentTime + 0.25);
-      g.gain.setValueAtTime(0.12, ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.28);
-      o.start(); o.stop(ctx.currentTime + 0.3);
-    } else if (kind === 'pop') {
-      o.type = 'sine'; o.frequency.value = 880;
-      o.frequency.exponentialRampToValueAtTime(1500, ctx.currentTime + 0.08);
-      g.gain.setValueAtTime(0.15, ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
-      o.start(); o.stop(ctx.currentTime + 0.13);
-    } else if (kind === 'fanfare') {
-      const notes = [392, 523.25, 659.25, 783.99, 1046.5];
-      notes.forEach((f,i) => {
-        const oo = ctx.createOscillator(); const gg = ctx.createGain();
-        oo.type = 'triangle'; oo.frequency.value = f;
-        gg.gain.setValueAtTime(0.13, ctx.currentTime + i*0.1);
-        gg.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i*0.1 + 0.4);
-        oo.connect(gg); gg.connect(ctx.destination);
-        oo.start(ctx.currentTime + i*0.1);
-        oo.stop(ctx.currentTime + i*0.1 + 0.42);
+    } else if (kind==='wrong') {
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type='sawtooth'; o.frequency.value=220;
+      o.frequency.linearRampToValueAtTime(150,ctx.currentTime+0.25);
+      g.gain.setValueAtTime(0.12,ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.28);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(); o.stop(ctx.currentTime+0.3);
+    } else if (kind==='pop') {
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type='sine'; o.frequency.value=880;
+      o.frequency.exponentialRampToValueAtTime(1500,ctx.currentTime+0.08);
+      g.gain.setValueAtTime(0.15,ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.12);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(); o.stop(ctx.currentTime+0.13);
+    } else if (kind==='fanfare') {
+      [392,523.25,659.25,783.99,1046.5].forEach((f,i)=>{
+        const o=ctx.createOscillator(),g=ctx.createGain();
+        o.type='triangle'; o.frequency.value=f;
+        g.gain.setValueAtTime(0.13,ctx.currentTime+i*0.1);
+        g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.1+0.4);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(ctx.currentTime+i*0.1); o.stop(ctx.currentTime+i*0.1+0.42);
       });
+    } else if (kind==='click') {
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type='sine'; o.frequency.value=600;
+      g.gain.setValueAtTime(0.08,ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.08);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(); o.stop(ctx.currentTime+0.1);
     }
-  } catch(e){}
-}
+  } catch(e) {}
+};
 
-// ====== 화면 전환 ======
-function show(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  const el = document.getElementById(id);
-  if (el) el.classList.add('active');
-}
-
-// ====== 폭죽/스티커 burst ======
-function burst(kinds=['🌟','💖','🌸','🦋','🌈','🎉','✨','⭐']) {
-  const layer = document.getElementById('burstLayer');
-  const cx = layer.clientWidth/2, cy = layer.clientHeight/2;
-  for (let i=0;i<22;i++) {
-    const el = document.createElement('div');
-    el.className = 'burst-item';
-    el.textContent = kinds[Math.floor(Math.random()*kinds.length)];
-    el.style.left = cx + 'px'; el.style.top = cy + 'px';
-    const ang = Math.random()*Math.PI*2;
-    const r = 180 + Math.random()*160;
-    el.style.setProperty('--x', Math.cos(ang)*r + 'px');
-    el.style.setProperty('--y', Math.sin(ang)*r + 'px');
-    layer.appendChild(el);
-    setTimeout(()=>el.remove(), 1500);
+// ===== 폭죽 & 컨페티 =====
+const triggerBurst = (kinds=['🌟','💖','🌸','🦋','🌈','🎉','✨','⭐'], count=22) => {
+  const cx=window.innerWidth/2, cy=window.innerHeight/2;
+  for (let i=0;i<count;i++) {
+    const el=document.createElement('div');
+    el.className='burst-emoji';
+    el.textContent=kinds[Math.floor(Math.random()*kinds.length)];
+    el.style.left=cx+'px'; el.style.top=cy+'px';
+    const a=Math.random()*Math.PI*2, r=140+Math.random()*180;
+    el.style.setProperty('--x', Math.cos(a)*r+'px');
+    el.style.setProperty('--y', Math.sin(a)*r+'px');
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),1500);
   }
-}
-
-function confetti() {
-  const colors = ['#FF6B9D','#FF9F43','#FFD93D','#6BCB77','#54A0FF','#C56CF0'];
+};
+const triggerConfetti = () => {
+  const colors=['#FF6B9D','#FF9F43','#FFD93D','#6BCB77','#54A0FF','#C56CF0'];
   for (let i=0;i<60;i++) {
-    const c = document.createElement('div');
-    c.className = 'confetti';
-    c.style.left = (Math.random()*100) + '%';
-    c.style.background = colors[Math.floor(Math.random()*colors.length)];
-    c.style.borderRadius = Math.random()>0.5 ? '50%' : '2px';
-    c.style.animation = `fall ${2+Math.random()*2}s linear forwards`;
-    c.style.animationDelay = (Math.random()*0.5)+'s';
-    document.getElementById('app').appendChild(c);
-    setTimeout(()=>c.remove(), 4000);
+    const c=document.createElement('div');
+    c.className='confetti';
+    c.style.left=(Math.random()*100)+'%';
+    c.style.background=colors[Math.floor(Math.random()*colors.length)];
+    c.style.borderRadius=Math.random()>0.5?'50%':'2px';
+    c.style.animation=`fall ${2+Math.random()*2}s linear forwards`;
+    c.style.animationDelay=(Math.random()*0.5)+'s';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),4000);
   }
-}
+};
 
-// ====== 스피커 토글 ======
-const spkBtn = document.getElementById('spkBtn');
-spkBtn.addEventListener('click', () => {
-  S.speakerOn = !S.speakerOn;
-  spkBtn.textContent = S.speakerOn ? '🔊' : '🔇';
-  spkBtn.classList.toggle('on', S.speakerOn);
-  if (!S.speakerOn) speechSynthesis.cancel();
-  else {
-    // 켰을 때 현재 화면 문제 읽기
-    if (document.getElementById('sQuiz').classList.contains('active')) {
-      const q = currentQ();
-      if (q) speak(q.text);
-    }
-  }
-});
+// ===== 토끼 요정 =====
+const SubjectFairy = ({ size=80 }) => (
+  <motion.div animate={{y:[0,-8,0]}} transition={{repeat:Infinity,duration:2.5}} className="inline-block">
+    <svg width={size} height={size*1.25} viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg">
+      <path d="M40 70 C 30 20, 50 10, 55 40" fill="#FFF" stroke="#FFB6C1" strokeWidth="4"/>
+      <path d="M80 70 C 90 20, 70 10, 65 40" fill="#FFF" stroke="#FFB6C1" strokeWidth="4"/>
+      <path d="M45 55 C 40 25, 48 20, 50 45" fill="#FFC0CB"/>
+      <path d="M75 55 C 80 25, 72 20, 70 45" fill="#FFC0CB"/>
+      <ellipse cx="60" cy="85" rx="35" ry="30" fill="#FFF" stroke="#FFB6C1" strokeWidth="4"/>
+      <circle cx="48" cy="80" r="4" fill="#333"/>
+      <circle cx="72" cy="80" r="4" fill="#333"/>
+      <ellipse cx="40" cy="88" rx="5" ry="3" fill="#FFB6C1" opacity="0.6"/>
+      <ellipse cx="80" cy="88" rx="5" ry="3" fill="#FFB6C1" opacity="0.6"/>
+      <circle cx="60" cy="86" r="3" fill="#FF69B4"/>
+      <path d="M55 92 Q 60 98 65 92" stroke="#333" strokeWidth="2" fill="none" strokeLinecap="round"/>
+    </svg>
+  </motion.div>
+);
 
-// ====== 이름 드롭다운 ======
-const nameSel = document.getElementById('nameSel');
-const btnStart = document.getElementById('btnStart');
-nameSel.addEventListener('change', e => {
-  btnStart.disabled = !e.target.value;
-});
-btnStart.addEventListener('click', () => {
-  S.student = nameSel.value;
-  document.getElementById('nameTag').textContent = S.student;
-  document.getElementById('chipName').style.display = 'flex';
-  document.getElementById('chipStars').style.display = 'flex';
-  document.getElementById('chipScore').style.display = 'flex';
-  // 마이크 권한 확인 (앱 시작 시 1회)
-  const granted = localStorage.getItem('mic_granted_' + S.student);
-  if (granted === 'yes') {
-    S.micGranted = true;
-    show('sArea');
-    renderAreas();
-  } else {
-    show('sMic');
-  }
-});
-
-// 학생 명단 로드
-function loadStudents() {
-  const fallback = ['김민준','이서연','박지호','최예린','정도윤','장하은','윤시우','강유나'];
-  if (G) {
-    G.withSuccessHandler(list => {
-      const names = (list && list.length) ? list : fallback;
-      fillNames(names);
-    }).withFailureHandler(()=>fillNames(fallback)).getStudentList();
-  } else {
-    fillNames(fallback);
-  }
-}
-function fillNames(names) {
-  S.studentsBySheet = names;
-  names.forEach(n => {
-    const o = document.createElement('option');
-    o.value = n; o.textContent = n;
-    nameSel.appendChild(o);
-  });
-}
-
-// 문제 로드
-function loadQuestions() {
-  if (G) {
-    G.withSuccessHandler(data => {
-      if (data && Object.keys(data).length) S.questionsBySheet = data;
-    }).withFailureHandler(()=>{}).getQuestionsFromSheet();
-  }
-}
-
-function questionsForArea(area) {
-  if (S.questionsBySheet && S.questionsBySheet[area] && S.questionsBySheet[area].length) {
-    return S.questionsBySheet[area];
-  }
-  return DEFAULT_Q[area] || [];
-}
-
-// ====== 마이크 ======
-document.getElementById('btnMic').addEventListener('click', async () => {
+// ===== GAS 호출 (CORS 회피용 text/plain) =====
+const callGAS = async (action, payload) => {
+  if (!GAS_URL) return { ok:false, error:'GAS URL 없음' };
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    S.mediaStream = stream;
-    S.micGranted = true;
-    localStorage.setItem('mic_granted_' + S.student, 'yes');
-    show('sArea');
-    renderAreas();
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action, payload })
+    });
+    return await res.json();
   } catch(e) {
-    alert('마이크 권한이 필요해요. 키보드로 활동을 진행할게요.');
-    S.micGranted = false;
-    show('sArea'); renderAreas();
+    console.error('GAS error:', e);
+    return { ok:false, error: String(e) };
   }
-});
-document.getElementById('btnMicSkip').addEventListener('click', () => {
-  S.micGranted = false;
-  show('sArea'); renderAreas();
-});
+};
 
-// ====== 영역 선택 ======
-function renderAreas() {
-  const grid = document.getElementById('areaGrid');
-  grid.innerHTML = '';
-  AREAS.forEach(a => {
-    const c = document.createElement('div');
-    c.className = 'area-card' + (S.donAreas.has(a.id) ? ' done' : '');
-    c.dataset.area = a.id;
-    c.innerHTML = `
-      <div class="a-icon">${a.icon}</div>
-      <div class="a-name">${a.name}</div>
-      <div class="a-desc">${a.desc}</div>
-      <div class="a-badge">${S.donAreas.has(a.id) ? '🏅' : ''}</div>
-    `;
-    c.addEventListener('click', () => {
-      S.area = a.id;
-      if (a.id === 'int') {
-        // 통합은 카드 정리로 바로 가요
-        showSummaryCards();
-      } else {
-        show('sCount');
-      }
-    });
-    grid.appendChild(c);
-  });
-}
+// ============================================================
+// 메인 App
+// ============================================================
+function App() {
+  // 데이터
+  const [students, setStudents] = useState([]);
+  const [allQuestions, setAllQuestions] = useState([]);
+  const [groupedAreas, setGroupedAreas] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-// 튜토리얼: 한 페이지씩 보여주기 (저학년 친화)
-const TUT_TOTAL = 7;
-let tutStep = 1;
+  // 앱 상태
+  const [step, setStep] = useState('login');
+  const [studentName, setStudentName] = useState('');
+  const [isSpeakerOn, setIsSpeakerOn] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [tutorialStep, setTutorialStep] = useState(0);
 
-function renderTutDots() {
-  const wrap = document.getElementById('tutDots');
-  wrap.innerHTML = '';
-  for (let i=1; i<=TUT_TOTAL; i++) {
-    const d = document.createElement('div');
-    d.className = 'tut-dot' + (i === tutStep ? ' on' : '');
-    wrap.appendChild(d);
-  }
-}
+  // 진행 상태
+  const [completedAreas, setCompletedAreas] = useState(new Set());
+  const [currentArea, setCurrentArea] = useState(null);
+  const [areaQuestions, setAreaQuestions] = useState([]);
+  const [questionCount, setQuestionCount] = useState(5);
+  const [currentQIdx, setCurrentQIdx] = useState(0);
+  const [feedback, setFeedback] = useState(null);
+  const [totalStars, setTotalStars] = useState(0);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [totalAnswered, setTotalAnswered] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [bestStreak, setBestStreak] = useState(0);
+  const [helpUsedThisQ, setHelpUsedThisQ] = useState(false);
 
-function showTutStep(n) {
-  tutStep = Math.max(1, Math.min(TUT_TOTAL, n));
-  document.querySelectorAll('.tut-page').forEach(p => {
-    p.classList.toggle('active', parseInt(p.dataset.step) === tutStep);
-  });
-  document.getElementById('tutPrev').style.visibility = tutStep === 1 ? 'hidden' : 'visible';
-  document.getElementById('tutNext').style.display = tutStep === TUT_TOTAL ? 'none' : 'inline-flex';
-  document.getElementById('tutDone').style.display = tutStep === TUT_TOTAL ? 'inline-flex' : 'none';
-  renderTutDots();
-  // 스피커가 켜져 있으면 페이지 내용 읽어주기
-  if (S.speakerOn) {
-    const page = document.querySelector(`.tut-page[data-step="${tutStep}"]`);
-    if (page) {
-      const title = page.querySelector('.tut-title').textContent;
-      const desc = page.querySelector('.tut-desc').textContent.replace(/\s+/g, ' ').trim();
-      speak(title + '. ' + desc);
-    }
-  }
-}
+  // 녹음 관련
+  const [preRecordText, setPreRecordText] = useState('');
+  const [preRecordAudio, setPreRecordAudio] = useState('');
+  const [postRecordText, setPostRecordText] = useState('');
+  const [postRecordAudio, setPostRecordAudio] = useState('');
+  const [voiceAnswerText, setVoiceAnswerText] = useState('');
+  const [interimText, setInterimText] = useState('');
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordTarget, setRecordTarget] = useState(null);
+  const [keyboardMode, setKeyboardMode] = useState(false);
 
-function openTutorial() {
-  showTutStep(1);
-  document.getElementById('manualModal').classList.add('show');
-}
-function closeTutorial() {
-  document.getElementById('manualModal').classList.remove('show');
-  if (window.speechSynthesis) speechSynthesis.cancel();
-}
+  // 중간 녹음 (영역마다)
+  const [midRecording, setMidRecording] = useState(null); // {prompt, text, audio, stars, sticker}
+  const [midRecCount, setMidRecCount] = useState(0);
+  const [midRecPhase, setMidRecPhase] = useState('record'); // record | review
 
-document.getElementById('btnHelpModal').addEventListener('click', openTutorial);
-document.getElementById('tutPrev').addEventListener('click', () => showTutStep(tutStep - 1));
-document.getElementById('tutNext').addEventListener('click', () => showTutStep(tutStep + 1));
-document.getElementById('tutDone').addEventListener('click', closeTutorial);
-document.getElementById('btnMidResult').addEventListener('click', () => showMidResult());
-document.getElementById('btnCloseMid').addEventListener('click', () => {
-  document.getElementById('midModal').classList.remove('show');
-});
+  // 성찰
+  const [reflectA1, setReflectA1] = useState('');
+  const [reflectA2, setReflectA2] = useState('');
+  const [reflectStars, setReflectStars] = useState(0);
 
-function showMidResult() {
-  const total = S.answers.length;
-  const correct = S.answers.filter(a=>a.correct).length;
-  const acc = total ? Math.round(correct/total*100) : 0;
-  let html = `
-    <p>📚 푼 문제: <b>${total}</b></p>
-    <p>✅ 맞힌 문제: <b>${correct}</b> (정답률 ${acc}%)</p>
-    <p>⭐ 모은 별: <b>${S.stars}</b></p>
-    <p>🎙️ 녹음 횟수: <b>${S.recordings.length}</b></p>
-    <p>🏅 마친 영역: <b>${S.donAreas.size}</b> / 5</p>
-    <div class="mid-row" style="margin-top:10px;">
-  `;
-  AREAS.forEach(a => {
-    const count = S.answers.filter(x=>x.area===a.id).length;
-    const cc = S.answers.filter(x=>x.area===a.id && x.correct).length;
-    html += `<span class="area-tag"><span class="dot" style="background:${a.color}"></span>${a.icon} ${a.name}: ${cc}/${count}</span>`;
-  });
-  html += '</div>';
-  document.getElementById('midContent').innerHTML = html;
-  document.getElementById('midModal').classList.add('show');
-}
+  // 카드 정리
+  const [selectedCards, setSelectedCards] = useState([]);
+  const [summaryRec, setSummaryRec] = useState({ text:'', audio:'', stars:0, sticker:null });
+  const [summaryPhase, setSummaryPhase] = useState('record');
 
-// ====== 개수 선택 ======
-document.querySelectorAll('.count-card').forEach(c => {
-  c.addEventListener('click', () => {
-    S.count = parseInt(c.dataset.c);
-    startConcept(); // 영역 시작 시 개념학습 먼저
-  });
-});
-document.querySelectorAll('[data-back]').forEach(b => {
-  b.addEventListener('click', () => {
-    const t = b.dataset.back;
-    show(t);
-    if (t === 'sArea') renderAreas();
-  });
-});
+  // 자기평가
+  const [selfStars, setSelfStars] = useState(0);
 
-// ====== 개념학습 (드래그앤드롭) ======
-function startConcept() {
-  show('sConcept');
-  const con = CONCEPT[S.area];
-  if (!con) { startQuiz(); return; }
-  document.getElementById('conSub').textContent = con.sub;
-  const tEl = document.getElementById('ddTargets');
-  const iEl = document.getElementById('ddItems');
-  tEl.innerHTML = ''; iEl.innerHTML = '';
-  con.targets.forEach(t => {
-    const d = document.createElement('div');
-    d.className = 'dd-target'; d.dataset.id = t.id; d.dataset.accepts = t.accepts;
-    d.innerHTML = `<div class="label">${t.label}</div><div class="drop" data-drop="${t.id}"></div>`;
-    tEl.appendChild(d);
-  });
-  con.items.forEach(it => {
-    const d = document.createElement('div');
-    d.className = 'dd-item'; d.draggable = true; d.dataset.id = it.id;
-    d.textContent = it.label;
-    iEl.appendChild(d);
-  });
-  setupDD();
-  document.getElementById('btnDdNext').disabled = true;
-  if (S.speakerOn) speak(con.sub);
-}
+  // refs
+  const mediaRecorderRef = useRef(null);
+  const recognitionRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const streamRef = useRef(null);
 
-function setupDD() {
-  const items = document.querySelectorAll('.dd-item');
-  const drops = document.querySelectorAll('.dd-target');
-  items.forEach(it => {
-    it.addEventListener('dragstart', e => {
-      e.dataTransfer.setData('text/plain', it.dataset.id);
-      it.classList.add('dragging');
-    });
-    it.addEventListener('dragend', () => it.classList.remove('dragging'));
-    // 틀린 카드 다시 클릭하면 리셋
-    it.addEventListener('click', () => {
-      if (it.classList.contains('placed') && it.classList.contains('wrong')) {
-        const pool = document.getElementById('ddItems');
-        it.classList.remove('placed','wrong');
-        it.draggable = true;
-        pool.appendChild(it);
-      }
-    });
-  });
-  drops.forEach(d => {
-    d.addEventListener('dragover', e => { e.preventDefault(); d.classList.add('over'); });
-    d.addEventListener('dragleave', () => d.classList.remove('over'));
-    d.addEventListener('drop', e => {
-      e.preventDefault(); d.classList.remove('over');
-      const id = e.dataTransfer.getData('text/plain');
-      const item = document.querySelector(`.dd-item[data-id="${id}"]`);
-      if (!item) return;
-      const accepts = d.dataset.accepts;
-      const slot = d.querySelector('.drop');
-      // 이미 채워져 있으면 무시
-      if (slot.children.length > 0) return;
-      item.classList.add('placed');
-      if (accepts === id) {
-        item.classList.remove('wrong');
-        item.draggable = false;
-        sfx('pop');
-      } else {
-        item.classList.add('wrong');
-      }
-      slot.appendChild(item);
-      checkDDComplete();
-    });
-  });
-}
-
-function checkDDComplete() {
-  const targets = document.querySelectorAll('.dd-target');
-  let allPlaced = true, allRight = true;
-  targets.forEach(t => {
-    const slot = t.querySelector('.drop');
-    if (slot.children.length === 0) { allPlaced = false; return; }
-    const child = slot.children[0];
-    if (child.classList.contains('wrong')) allRight = false;
-  });
-  document.getElementById('btnDdNext').disabled = !(allPlaced && allRight);
-  if (allPlaced && allRight) {
-    burst(['✨','🌟','💫']);
-    sfx('correct');
-  }
-}
-document.getElementById('btnDdNext').addEventListener('click', () => startQuiz());
-
-// ====== 퀴즈 ======
-function startQuiz() {
-  // 영역 문제 가져와서 count만큼 선택 (없으면 반복)
-  const pool = questionsForArea(S.area);
-  S.questions = [];
-  for (let i=0;i<S.count;i++) {
-    S.questions.push(pool[i % pool.length]);
-  }
-  S.qIdx = 0;
-  show('sQuiz');
-  renderQuestion();
-}
-
-function currentQ() { return S.questions[S.qIdx]; }
-
-function renderQuestion() {
-  const q = currentQ();
-  if (!q) return;
-  const area = AREAS.find(a=>a.id===S.area);
-  document.getElementById('qFill').style.width = ((S.qIdx)/S.count*100) + '%';
-  document.getElementById('qIdx').textContent = `${S.qIdx+1} / ${S.count}`;
-  const pill = document.getElementById('qAreaPill');
-  pill.textContent = `${area.icon} ${area.name}`;
-  pill.style.background = area.color;
-  document.getElementById('qKw').textContent = q.kw;
-  const qText = document.getElementById('qText');
-  qText.textContent = q.text;
-  const opts = document.getElementById('qOptions');
-  opts.innerHTML = '';
-  q.opts.forEach((o, i) => {
-    const b = document.createElement('button');
-    b.className = 'q-opt';
-    b.innerHTML = `<span class="opt-n">${i+1}</span><span>${o}</span>`;
-    b.addEventListener('click', () => pickAnswer(i, b));
-    opts.appendChild(b);
-  });
-  document.getElementById('helpNote').textContent = '';
-  document.getElementById('qFb').classList.remove('show');
-  if (S.speakerOn) speakWithHighlight(qText, q.text);
-}
-
-function pickAnswer(idx, btn) {
-  const q = currentQ();
-  const correct = idx === q.ans;
-  const helpUsed = !!btn._helpUsed;
-  // 모든 버튼 잠금
-  document.querySelectorAll('.q-opt').forEach((b,i) => {
-    b.disabled = true;
-    if (i === q.ans) b.classList.add('correct');
-    else if (i === idx) b.classList.add('wrong');
-  });
-  S.answers.push({ area:S.area, q:q.text, picked:q.opts[idx], correct, helpUsed: !!document.getElementById('helpNote').dataset.used });
-  if (correct) { S.score++; S.stars++; updateChips(); sfx('correct'); burst(['🌟','✨','💫']); }
-  else sfx('wrong');
-  // 피드백 표시
-  const fb = document.getElementById('qFb');
-  fb.querySelector('.fb-emoji').textContent = correct ? '🎉' : '💪';
-  fb.querySelector('.fb-text').textContent = correct ? '정답이에요! 정말 잘했어요!' : '괜찮아요, 다시 기억해 봐요';
-  fb.querySelector('.fb-sub').textContent = q.fb;
-  fb.classList.add('show');
-  if (S.speakerOn) speak(correct ? '정답이에요! ' + q.fb : '괜찮아요. ' + q.fb);
-  // GAS에 저장
-  if (G) {
-    G.withSuccessHandler(()=>{}).withFailureHandler(()=>{}).saveAnswer({
-      student: S.student, area: S.area, q: q.text, picked: q.opts[idx],
-      correctAns: q.opts[q.ans], correct, helpUsed: !!document.getElementById('helpNote').dataset.used,
-      time: new Date().toISOString()
-    });
-  }
-}
-
-document.getElementById('btnNext').addEventListener('click', () => {
-  S.qIdx++;
-  document.getElementById('helpNote').dataset.used = '';
-  // 5문제 단위 녹음 활동
-  if (S.qIdx > 0 && S.qIdx % 5 === 0 && S.qIdx < S.count) {
-    startRecording('mid');
-  } else if (S.qIdx >= S.count) {
-    finishArea();
-  } else {
-    renderQuestion();
-  }
-});
-
-// 도움받기
-document.getElementById('btnHelp').addEventListener('click', () => {
-  const q = currentQ();
-  document.getElementById('helpNote').textContent = '💜 도움받았어요';
-  document.getElementById('helpNote').dataset.used = 'yes';
-  // 스피커 꺼져있어도 도움은 들려줘야 함! (도움은 항상 작동)
-  const wasOn = S.speakerOn;
-  S.speakerOn = true;
-  const more = q.opts.map((o,i)=>`${i+1}번, ${o}`).join('. ');
-  speak(`문제예요. ${q.text} 보기는 다음과 같아요. ${more}`, { onend: () => { S.speakerOn = wasOn; }});
-});
-
-function updateChips() {
-  document.getElementById('starsTotal').textContent = S.stars;
-  document.getElementById('scoreTotal').textContent = S.score;
-}
-
-// ====== 녹음 활동 ======
-let recordKind = 'mid'; // 'mid' | 'final' | 'summary'
-let recordPromptText = '';
-let currentStars = 0;
-let currentSticker = null;
-let recRedoCount = 0;
-let isKeyboardMode = false;
-
-function enterKeyboardMode() {
-  isKeyboardMode = true;
-  document.getElementById('recStatus').textContent = '⌨️ 글로 적어 봐요! 다 쓰면 "📝 다 썼어요" 눌러요';
-  document.getElementById('recMic').style.display = 'none';
-  document.getElementById('kbToggle').style.display = 'none';
-  document.getElementById('btnKbDone').style.display = 'inline-flex';
-  document.getElementById('recTranscript').placeholder = '여기에 또박또박 적어 봐요! ✏️';
-  document.getElementById('reviewHeader').textContent = '📝 잘 썼어요! 별점을 줘 봐요';
-  document.getElementById('btnPlaybackText').textContent = '🔊 내가 쓴 글 듣기';
-  document.getElementById('btnReRecText').textContent = '✏️ 다시 쓰기';
-  setTimeout(() => document.getElementById('recTranscript').focus(), 100);
-}
-
-function exitKeyboardMode() {
-  isKeyboardMode = false;
-  document.getElementById('recStatus').textContent = '🎤 버튼을 누르고 또박또박 말해 봐요!';
-  document.getElementById('recMic').style.display = '';
-  document.getElementById('kbToggle').style.display = '';
-  document.getElementById('btnKbDone').style.display = 'none';
-  document.getElementById('recTranscript').placeholder = '여기에 실시간으로 말한 내용이 나와요... (직접 입력도 가능!)';
-  document.getElementById('reviewHeader').textContent = '🎧 들어 보고 별점을 주세요';
-  document.getElementById('btnPlaybackText').textContent = '▶️ 내 녹음 듣기';
-  document.getElementById('btnReRecText').textContent = '🔁 다시 녹음하기';
-}
-
-function startRecording(kind, customPrompt) {
-  recordKind = kind;
-  recRedoCount = 0;
-  let p;
-  if (customPrompt) {
-    p = { em:'🎙️', text: customPrompt };
-  } else {
-    p = RECORD_PROMPTS[Math.floor(Math.random()*RECORD_PROMPTS.length)];
-  }
-  recordPromptText = p.text;
-  document.getElementById('recEm').textContent = p.em;
-  document.getElementById('recPrompt').textContent = p.text;
-  document.getElementById('recTranscript').value = '';
-  document.getElementById('recReview').style.display = 'none';
-  document.getElementById('stickerBox').style.display = 'none';
-  document.getElementById('btnDoneRec').disabled = true;
-  document.querySelectorAll('#starRate .star').forEach(s => s.classList.remove('lit'));
-  document.querySelectorAll('.sticker').forEach(s => s.classList.remove('picked'));
-  currentStars = 0; currentSticker = null;
-  S.currentAudioBlob = null; S.currentAudioUrl = null;
-  // 마이크 권한에 따라 입력 모드 자동 결정
-  if (S.micGranted) exitKeyboardMode();
-  else enterKeyboardMode();
-  show('sRecord');
-  if (S.speakerOn) speak(p.text);
-}
-
-document.getElementById('recMic').addEventListener('click', () => {
-  if (!S.mediaRecorder || S.mediaRecorder.state === 'inactive') startRec();
-  else stopRec();
-});
-
-async function startRec() {
-  if (!S.micGranted) {
-    enterKeyboardMode();
-    return;
-  }
-  try {
-    if (!S.mediaStream) {
-      S.mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    }
-    S.audioChunks = [];
-    S.mediaRecorder = new MediaRecorder(S.mediaStream);
-    S.mediaRecorder.ondataavailable = e => { if (e.data.size > 0) S.audioChunks.push(e.data); };
-    S.mediaRecorder.onstop = () => {
-      const blob = new Blob(S.audioChunks, { type:'audio/webm' });
-      S.currentAudioBlob = blob;
-      S.currentAudioUrl = URL.createObjectURL(blob);
-      document.getElementById('recReview').style.display = 'block';
-      document.getElementById('recStatus').textContent = '🎧 들어 보고 별점을 주세요';
-    };
-    S.mediaRecorder.start();
-    document.getElementById('recMic').classList.add('recording');
-    document.getElementById('recStatus').textContent = '🎙️ 듣고 있어요... 또박또박 말해 봐요!';
-    startSTT();
-  } catch(e) {
-    // 마이크 사용 불가 → 키보드 모드로 전환
-    S.micGranted = false;
-    enterKeyboardMode();
-  }
-}
-
-function stopRec() {
-  if (S.mediaRecorder && S.mediaRecorder.state !== 'inactive') S.mediaRecorder.stop();
-  document.getElementById('recMic').classList.remove('recording');
-  if (S.recognition) { try { S.recognition.stop(); } catch(e){} }
-  document.getElementById('recTranscript').classList.remove('live');
-}
-
-function startSTT() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) return;
-  const r = new SR();
-  r.lang = 'ko-KR'; r.continuous = true; r.interimResults = true;
-  const ta = document.getElementById('recTranscript');
-  ta.classList.add('live');
-  let final = '';
-  r.onresult = (e) => {
-    let interim = '';
-    for (let i=e.resultIndex;i<e.results.length;i++) {
-      const t = e.results[i][0].transcript;
-      if (e.results[i].isFinal) final += t + ' ';
-      else interim += t;
-    }
-    ta.value = (final + interim).trim();
-  };
-  r.onerror = () => {};
-  r.onend = () => { ta.classList.remove('live'); };
-  try { r.start(); } catch(e){}
-  S.recognition = r;
-}
-
-document.getElementById('kbToggle').addEventListener('click', enterKeyboardMode);
-
-document.getElementById('btnKbDone').addEventListener('click', () => {
-  const txt = document.getElementById('recTranscript').value.trim();
-  if (!txt) {
-    document.getElementById('recStatus').textContent = '⚠️ 아직 안 적었어요! 글을 적어 봐요 ✏️';
-    document.getElementById('recTranscript').focus();
-    if (S.speakerOn) speak('아직 안 적었어요. 글을 적어 봐요.');
-    return;
-  }
-  document.getElementById('recReview').style.display = 'block';
-  document.getElementById('recStatus').textContent = '잘 썼어요! 이제 별점을 줘 봐요 ⭐';
-  if (S.speakerOn) speak('잘 썼어요! 이제 별점을 줘 봐요.');
-  // 별점 영역으로 스크롤
-  document.getElementById('recReview').scrollIntoView({ behavior:'smooth', block:'nearest' });
-});
-
-document.getElementById('btnPlayback').addEventListener('click', () => {
-  if (S.currentAudioUrl) {
-    const a = new Audio(S.currentAudioUrl);
-    a.play();
-  } else {
-    // 키보드 입력시: TTS로 본인 입력 읽기
-    const wasOn = S.speakerOn; S.speakerOn = true;
-    speak(document.getElementById('recTranscript').value || '입력한 내용이 없어요');
-    S.speakerOn = wasOn;
-  }
-});
-
-document.getElementById('btnPlaySent').addEventListener('click', () => {
-  const wasOn = S.speakerOn; S.speakerOn = true;
-  speak(recordPromptText);
-  S.speakerOn = wasOn;
-});
-
-// 별점 평가
-document.querySelectorAll('#starRate .star').forEach(s => {
-  s.addEventListener('click', () => {
-    const v = parseInt(s.dataset.v);
-    currentStars = v;
-    document.querySelectorAll('#starRate .star').forEach(x => {
-      x.classList.toggle('lit', parseInt(x.dataset.v) <= v);
-    });
-    if (v >= 4) {
-      // 칭찬 스티커 선택 가능
-      document.getElementById('stickerBox').style.display = 'block';
-      document.getElementById('btnDoneRec').disabled = false;
-      burst(['🌟','💖']);
-    } else {
-      // 3개 이하면 다시 녹음
-      document.getElementById('stickerBox').style.display = 'none';
-      document.getElementById('btnDoneRec').disabled = true;
-      const wasOn = S.speakerOn; S.speakerOn = true;
-      speak('괜찮아요! 다시 한 번 해 봐요!');
-      S.speakerOn = wasOn;
-    }
-  });
-});
-
-document.querySelectorAll('.sticker').forEach(s => {
-  s.addEventListener('click', () => {
-    document.querySelectorAll('.sticker').forEach(x => x.classList.remove('picked'));
-    s.classList.add('picked');
-    currentSticker = s.dataset.s;
-    sfx('pop');
-  });
-});
-
-document.getElementById('btnReRec').addEventListener('click', () => {
-  recRedoCount++;
-  document.getElementById('recTranscript').value = '';
-  document.getElementById('recReview').style.display = 'none';
-  document.getElementById('recStatus').textContent = '다시 녹음해 봐요! 천천히 또박또박 🎙️';
-  currentStars = 0; currentSticker = null;
-  document.querySelectorAll('#starRate .star').forEach(x => x.classList.remove('lit'));
-});
-
-document.getElementById('btnDoneRec').addEventListener('click', () => {
-  const transcript = document.getElementById('recTranscript').value.trim();
-  const rec = {
-    prompt: recordPromptText, transcript,
-    stars: currentStars, sticker: currentSticker,
-    redoCount: recRedoCount, area: S.area, kind: recordKind
-  };
-  S.recordings.push(rec);
-  S.stars += currentStars;
-  updateChips();
-
-  // GAS로 오디오 + 텍스트 저장
-  if (S.currentAudioBlob && G) {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64 = reader.result.split(',')[1];
-      G.withSuccessHandler(()=>{}).withFailureHandler(()=>{}).saveRecording({
-        student: S.student, area: S.area, prompt: recordPromptText,
-        transcript, stars: currentStars, sticker: currentSticker,
-        redoCount: recRedoCount, kind: recordKind,
-        audioBase64: base64, mimeType: 'audio/webm',
-        time: new Date().toISOString()
+  // ===== 데이터 로드 =====
+  useEffect(() => {
+    fetch(GAS_URL + '?action=getAppData')
+      .then(r => r.json())
+      .then(data => {
+        const stu = data.students || [];
+        const qs = data.questions || [];
+        setStudents(stu);
+        setAllQuestions(qs);
+        groupQuestions(qs);
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        alert('데이터 로드 실패. 임시 데이터로 진행합니다.');
+        loadMock();
       });
-    };
-    reader.readAsDataURL(S.currentAudioBlob);
-  } else if (G) {
-    G.withSuccessHandler(()=>{}).withFailureHandler(()=>{}).saveRecording({
-      student: S.student, area: S.area, prompt: recordPromptText,
-      transcript, stars: currentStars, sticker: currentSticker,
-      redoCount: recRedoCount, kind: recordKind, time: new Date().toISOString()
-    });
-  }
+  }, []);
 
-  // 다음 단계
-  if (recordKind === 'mid') {
-    // 성찰 - 중간 정리
-    show('sReflect');
-    if (S.speakerOn) speak('잠깐, 오늘 배운 것을 정리해 봐요');
-  } else if (recordKind === 'final') {
-    finishAreaAfterRec();
-  } else if (recordKind === 'summary') {
-    finalize();
-  }
-});
-
-// ====== 성찰 ======
-document.querySelectorAll('#reflectStars .star').forEach(s => {
-  s.addEventListener('click', () => {
-    const v = parseInt(s.dataset.v);
-    S.reflectStars = v;
-    document.querySelectorAll('#reflectStars .star').forEach(x => {
-      x.classList.toggle('lit', parseInt(x.dataset.v) <= v);
-    });
-    document.getElementById('btnReflectRedo').style.display = v <= 3 ? 'inline-flex' : 'none';
-  });
-});
-document.getElementById('btnReflectRedo').addEventListener('click', () => {
-  document.getElementById('reflectA2').value = '';
-  document.querySelectorAll('#reflectStars .star').forEach(x => x.classList.remove('lit'));
-  S.reflectStars = 0;
-  document.getElementById('btnReflectRedo').style.display = 'none';
-});
-document.getElementById('btnReflectNext').addEventListener('click', () => {
-  if (G) {
-    G.withSuccessHandler(()=>{}).withFailureHandler(()=>{}).saveReflection({
-      student: S.student, area: S.area,
-      a1: document.getElementById('reflectA1').value,
-      a2: document.getElementById('reflectA2').value,
-      stars: S.reflectStars, time: new Date().toISOString()
-    });
-  }
-  // 다음 문제로
-  renderQuestion();
-  show('sQuiz');
-});
-
-// ====== 영역 끝나면 최종 녹음 후 마무리 ======
-function finishArea() {
-  // 마지막 녹음
-  startRecording('final');
-}
-function finishAreaAfterRec() {
-  S.donAreas.add(S.area);
-  S.badges.push({ area: S.area, time: new Date().toISOString() });
-  confetti();
-  sfx('fanfare');
-  // 다음에 또 다른 영역 할지, 카드 요약 갈지
-  const remaining = AREAS.filter(a => a.id !== 'int' && !S.donAreas.has(a.id));
-  if (remaining.length === 0) {
-    showSummaryCards();
-  } else {
-    show('sArea');
-    renderAreas();
-  }
-}
-
-// ====== 카드 정리 (2장 선택 → 설명 녹음) ======
-function showSummaryCards() {
-  show('sSummary');
-  S.selectedSummary = [];
-  const pool = document.getElementById('cardsPool');
-  pool.innerHTML = '';
-  SUMMARY_CARDS.forEach(c => {
-    const el = document.createElement('div');
-    el.className = 'sum-card';
-    el.dataset.id = c.id;
-    el.innerHTML = `<div class="em">${c.em}</div><div>${c.text}</div>`;
-    el.addEventListener('click', () => {
-      if (el.classList.contains('picked')) {
-        el.classList.remove('picked');
-        S.selectedSummary = S.selectedSummary.filter(x=>x!==c.id);
-      } else {
-        if (S.selectedSummary.length >= 2) {
-          // 가장 처음 선택한 것 해제
-          const firstId = S.selectedSummary.shift();
-          document.querySelector(`.sum-card[data-id="${firstId}"]`).classList.remove('picked');
-        }
-        el.classList.add('picked');
-        S.selectedSummary.push(c.id);
+  // ===== 음성 인식 초기화 =====
+  useEffect(() => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return;
+    const rec = new SR();
+    rec.lang = 'ko-KR'; rec.continuous = true; rec.interimResults = true;
+    rec.onresult = (e) => {
+      let fin = '', interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) fin += e.results[i][0].transcript + ' ';
+        else interim += e.results[i][0].transcript;
       }
-      document.getElementById('btnSumNext').disabled = S.selectedSummary.length !== 2;
-    });
-    pool.appendChild(el);
-  });
-}
-document.getElementById('btnSumNext').addEventListener('click', () => {
-  const picked = S.selectedSummary.map(id => SUMMARY_CARDS.find(c=>c.id===id));
-  const prompt = `다음 두 가지를 설명해 봐요: "${picked[0].text}"와(과) "${picked[1].text}"`;
-  startRecording('summary', prompt);
-});
+      if (fin) {
+        if (recordTarget === 'pre') setPreRecordText(p => p + fin);
+        else if (recordTarget === 'post') setPostRecordText(p => p + fin);
+        else if (recordTarget === 'voice') setVoiceAnswerText(p => p + fin);
+        else if (recordTarget === 'mid') setMidRecording(m => m ? {...m, text: (m.text||'') + fin} : m);
+        else if (recordTarget === 'summary') setSummaryRec(s => ({...s, text: s.text + fin}));
+      }
+      setInterimText(interim);
+    };
+    rec.onerror = () => {};
+    rec.onend = () => {};
+    recognitionRef.current = rec;
+  }, [recordTarget]);
 
-// ====== 마무리 ======
-function finalize() {
-  show('sFinal');
-  document.getElementById('certName').textContent = S.student;
-  const total = S.answers.length;
-  const correct = S.answers.filter(a=>a.correct).length;
-  document.getElementById('cAcc').textContent = total ? Math.round(correct/total*100) + '%' : '0%';
-  document.getElementById('cStars').textContent = S.stars;
-  document.getElementById('cRec').textContent = S.recordings.length;
-  document.getElementById('cArea').textContent = S.donAreas.size;
-  const br = document.getElementById('badgeRow');
-  br.innerHTML = '';
-  S.donAreas.forEach(aid => {
-    const a = AREAS.find(x=>x.id===aid);
-    if (!a) return;
-    const b = document.createElement('div');
-    b.className = 'cert-badge'; b.style.background = a.color;
-    b.textContent = a.icon;
-    b.title = a.name;
-    br.appendChild(b);
-  });
-  confetti();
-  setTimeout(()=>confetti(), 600);
-  sfx('fanfare');
-  burst(['🏆','🎉','🌟','✨','💖','🌸']);
-  if (G) {
-    G.withSuccessHandler(()=>{}).withFailureHandler(()=>{}).saveFinal({
-      student: S.student,
-      accuracy: total ? Math.round(correct/total*100) : 0,
-      stars: S.stars, recordings: S.recordings.length,
-      areasDone: Array.from(S.donAreas), time: new Date().toISOString()
+  // ===== TTS 음성 미리 로드 =====
+  useEffect(() => {
+    if (window.speechSynthesis) {
+      speechSynthesis.onvoiceschanged = () => selectKoreanVoice();
+      selectKoreanVoice();
+    }
+  }, []);
+
+  const loadMock = () => {
+    setStudents(['김민준','이서연','박지호','최예린','정도윤','장하은','윤시우','강유나']);
+    setAllQuestions([]);
+    setGroupedAreas([]);
+    setIsLoading(false);
+  };
+
+  const groupQuestions = (qs) => {
+    const groups = {};
+    qs.forEach(q => {
+      const a = q.area;
+      if (!groups[a]) groups[a] = [];
+      groups[a].push(q);
     });
+    const mapped = Object.keys(groups).filter(id => AREA_INFO[id]).map(id => ({
+      id,
+      ...AREA_INFO[id],
+      questions: groups[id]
+    }));
+    setGroupedAreas(mapped);
+  };
+
+  // ===== 시작 (마이크 권한 1회) =====
+  const startApp = async () => {
+    if (!studentName) { alert('이름을 골라 주세요!'); return; }
+    playSfx(isSpeakerOn ? 'click' : null);
+    try {
+      const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+      s.getTracks().forEach(t => t.stop());
+    } catch(e) {
+      console.warn('마이크 권한 거부됨');
+    }
+    setStep('intro');
+    if (isSpeakerOn) speak(`안녕, ${studentName} 대원! 안전탐험을 시작해 볼까요?`);
+  };
+
+  // ===== 녹음 토글 =====
+  const startRecording = async (target) => {
+    if (isSpeakerOn) playSfx('click');
+    if (isRecording) { stopRecording(); return; }
+    if (keyboardMode) { return; }  // 키보드 모드에서는 녹음 X
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      const mr = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+      mr.ondataavailable = e => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
+      mr.onstop = () => {
+        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const data = reader.result;
+          if (target === 'pre') setPreRecordAudio(data);
+          else if (target === 'post') setPostRecordAudio(data);
+          else if (target === 'mid') setMidRecording(m => m ? {...m, audio: data} : m);
+          else if (target === 'summary') setSummaryRec(s => ({...s, audio: data}));
+        };
+        reader.readAsDataURL(blob);
+        stream.getTracks().forEach(t => t.stop());
+      };
+      mr.start();
+      mediaRecorderRef.current = mr;
+      setRecordTarget(target);
+      setInterimText('');
+      // STT 시작
+      try { recognitionRef.current?.start(); } catch(e) {}
+      setIsRecording(true);
+    } catch(e) {
+      alert('마이크 권한이 필요해요. 키보드로 입력해 보세요!');
+      setKeyboardMode(true);
+    }
+  };
+
+  const stopRecording = () => {
+    try { mediaRecorderRef.current?.stop(); } catch(e) {}
+    try { recognitionRef.current?.stop(); } catch(e) {}
+    setIsRecording(false);
+  };
+
+  // ===== 영역 선택 → 개념학습 → 문제수 선택 =====
+  const selectArea = (area) => {
+    if (isSpeakerOn) playSfx('click');
+    setCurrentArea(area);
+    setStep('concept');
+    if (isSpeakerOn) speak(CONCEPT_DATA[area.id].sub);
+  };
+
+  const startQuiz = (count) => {
+    if (isSpeakerOn) playSfx('click');
+    setQuestionCount(count);
+    // 풀에서 섞어 count만큼 (반복 허용)
+    const pool = [...currentArea.questions];
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i+1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    const selected = [];
+    for (let i = 0; i < count; i++) selected.push(pool[i % pool.length]);
+    setAreaQuestions(selected);
+    setCurrentQIdx(0);
+    setFeedback(null);
+    setVoiceAnswerText('');
+    setHelpUsedThisQ(false);
+    setMidRecCount(0);
+    setStep('play');
+    if (isSpeakerOn) speak(selected[0].text);
+  };
+
+  // ===== 정답 처리 =====
+  const handleChoice = (idx) => {
+    if (feedback) return;
+    const q = areaQuestions[currentQIdx];
+    const isCorrect = (idx + 1) === Number(q.answer);
+    processAnswer(q, q.options[idx], isCorrect);
+  };
+
+  const handleVoiceCheck = () => {
+    const q = areaQuestions[currentQIdx];
+    const userText = voiceAnswerText.trim().toLowerCase();
+    if (!userText) {
+      alert('녹음하거나 글로 적어 주세요!');
+      return;
+    }
+    const keywords = String(q.answer).split(',').map(k => k.trim().toLowerCase()).filter(Boolean);
+    const matched = keywords.some(k => userText.includes(k));
+    processAnswer(q, voiceAnswerText, matched);
+  };
+
+  const processAnswer = (q, picked, isCorrect) => {
+    setTotalAnswered(t => t+1);
+    let newStreak = streak;
+    if (isCorrect) {
+      setCorrectCount(c => c+1);
+      setTotalStars(s => s+1);
+      newStreak = streak + 1;
+      setStreak(newStreak);
+      if (newStreak > bestStreak) setBestStreak(newStreak);
+      if (isSpeakerOn) playSfx('correct');
+      triggerBurst(['🌟','✨','💫']);
+      if (newStreak === 3) triggerBurst(['🔥','🔥','🔥','✨','💥']);
+      if (newStreak === 5) { triggerBurst(['⚡','⚡','⚡','🎆','💫']); triggerConfetti(); }
+      if (newStreak >= 7) { triggerBurst(['🏆','✨','🎉','💎']); triggerConfetti(); }
+    } else {
+      setStreak(0);
+      if (isSpeakerOn) playSfx('wrong');
+    }
+
+    const praise = ENCOURAGEMENTS[Math.floor(Math.random()*ENCOURAGEMENTS.length)];
+    let mainText;
+    if (isCorrect) {
+      mainText = newStreak >= 3 ? `🔥 ${newStreak}연속 정답! ${praise}` : `정답이에요! ${praise}`;
+    } else {
+      mainText = '괜찮아요, 다시 기억해 봐요';
+    }
+    let subText = isCorrect ? q.correctFeedback : q.wrongFeedback;
+    if (isCorrect && Math.random() < 0.5 && FUN_FACTS[currentArea.id]) {
+      const facts = FUN_FACTS[currentArea.id];
+      subText += '\n' + facts[Math.floor(Math.random()*facts.length)];
+    }
+    setFeedback({ correct: isCorrect, main: mainText, sub: subText });
+    if (isSpeakerOn) speak(isCorrect ? `${praise} ${q.correctFeedback}` : `괜찮아요. ${q.wrongFeedback}`);
+
+    // GAS 저장
+    callGAS('saveAnswer', {
+      student: studentName, area: currentArea.id, q: q.text,
+      picked: String(picked), correctAns: String(q.answer),
+      correct: isCorrect, helpUsed: helpUsedThisQ
+    });
+  };
+
+  // ===== 다음 문제 / 영역 마무리 =====
+  const nextQuestion = () => {
+    setFeedback(null);
+    setVoiceAnswerText('');
+    setInterimText('');
+    setHelpUsedThisQ(false);
+    const nextIdx = currentQIdx + 1;
+    // 5문제마다 중간 녹음 (단, 마지막 문제 다음엔 영역 마무리)
+    if (nextIdx > 0 && nextIdx % 5 === 0 && nextIdx < areaQuestions.length) {
+      goToMidRecording();
+    } else if (nextIdx >= areaQuestions.length) {
+      goToMidRecording(true);
+    } else {
+      setCurrentQIdx(nextIdx);
+      if (isSpeakerOn) speak(areaQuestions[nextIdx].text);
+    }
+  };
+
+  const retryQuestion = () => {
+    setFeedback(null);
+    setVoiceAnswerText('');
+    setInterimText('');
+  };
+
+  // ===== 도움받기 =====
+  const useHelp = () => {
+    const q = areaQuestions[currentQIdx];
+    setHelpUsedThisQ(true);
+    // 스피커 꺼져있어도 도움은 들려주기
+    const wasOn = isSpeakerOn;
+    if (!wasOn) {
+      const u = new SpeechSynthesisUtterance(q.text);
+      u.lang='ko-KR'; const v = selectKoreanVoice(); if (v) u.voice = v;
+      u.pitch=1.0; u.rate=0.9;
+      speechSynthesis.cancel(); speechSynthesis.speak(u);
+    } else {
+      speak(q.text);
+    }
+  };
+
+  // ===== 중간/최종 녹음 =====
+  const goToMidRecording = (isFinal=false) => {
+    const prompt = RECORD_PROMPTS[Math.floor(Math.random()*RECORD_PROMPTS.length)];
+    setMidRecording({ prompt: prompt.text, em: prompt.em, text:'', audio:'', stars:0, sticker:null, isFinal });
+    setMidRecPhase('record');
+    setKeyboardMode(false);
+    setStep('midrec');
+    if (isSpeakerOn) speak(prompt.text);
+  };
+
+  const finishMidReview = () => {
+    if (!midRecording) return;
+    if (midRecording.stars <= 3) {
+      // 다시 녹음 강제
+      alert('별점이 3개 이하면 다시 녹음해 봐요!');
+      retryMid();
+      return;
+    }
+    saveMidRec();
+  };
+
+  const retryMid = () => {
+    setMidRecording(m => ({...m, text:'', audio:'', stars:0, sticker:null}));
+    setMidRecPhase('record');
+    setInterimText('');
+  };
+
+  const saveMidRec = () => {
+    if (!midRecording) return;
+    const isFinal = midRecording.isFinal;
+    // GAS 저장
+    callGAS('saveRecording', {
+      student: studentName, area: currentArea.id,
+      kind: isFinal ? 'final' : 'mid',
+      prompt: midRecording.prompt,
+      transcript: midRecording.text,
+      stars: midRecording.stars,
+      sticker: midRecording.sticker,
+      audioBase64: midRecording.audio
+    });
+    setTotalStars(s => s + midRecording.stars);
+    setMidRecCount(c => c + 1);
+
+    if (isFinal) {
+      // 영역 종료 → 성찰
+      setStep('reflect');
+      if (isSpeakerOn) speak('잠깐, 오늘 배운 것을 정리해 봐요.');
+    } else {
+      // 다음 문제로
+      const nextIdx = currentQIdx + 1;
+      setCurrentQIdx(nextIdx);
+      setStep('play');
+      setFeedback(null);
+      setVoiceAnswerText('');
+      if (isSpeakerOn && areaQuestions[nextIdx]) speak(areaQuestions[nextIdx].text);
+    }
+  };
+
+  // ===== 성찰 마무리 → 지도로 =====
+  const finishReflect = () => {
+    if (reflectStars > 0 && reflectStars <= 3) {
+      // 별 3개 이하 → 다시 다짐
+      alert('다짐이 약해요. 다시 적어 봐요!');
+      setReflectA2(''); setReflectStars(0);
+      return;
+    }
+    callGAS('saveReflection', {
+      student: studentName, area: currentArea.id,
+      a1: reflectA1, a2: reflectA2, stars: reflectStars
+    });
+    setReflectA1(''); setReflectA2(''); setReflectStars(0);
+    const newDone = new Set(completedAreas).add(currentArea.id);
+    setCompletedAreas(newDone);
+    triggerConfetti();
+    if (isSpeakerOn) playSfx('fanfare');
+    if (newDone.size >= groupedAreas.length) {
+      setStep('summary');
+      if (isSpeakerOn) speak('이제 배운 것을 정리해 봐요. 두 가지 카드를 골라요.');
+    } else {
+      setStep('map');
+    }
+  };
+
+  // ===== 카드 정리 → 최종 녹음 =====
+  const toggleSummaryCard = (cid) => {
+    if (isSpeakerOn) playSfx('click');
+    setSelectedCards(prev => {
+      if (prev.includes(cid)) return prev.filter(x => x !== cid);
+      if (prev.length >= 2) return [prev[1], cid];
+      return [...prev, cid];
+    });
+  };
+
+  const startSummaryRec = () => {
+    if (selectedCards.length !== 2) return;
+    const picked = selectedCards.map(id => SUMMARY_CARDS.find(c => c.id === id));
+    const prompt = `다음 두 가지를 말로 설명해 봐요: "${picked[0].text}", "${picked[1].text}"`;
+    setSummaryRec({ text:'', audio:'', stars:0, sticker:null, prompt });
+    setSummaryPhase('record');
+    setKeyboardMode(false);
+    setStep('summaryrec');
+    if (isSpeakerOn) speak(prompt);
+  };
+
+  const finishSummaryRec = () => {
+    if (summaryRec.stars <= 3) {
+      alert('별점이 3개 이하면 다시 녹음해 봐요!');
+      setSummaryRec({...summaryRec, text:'', audio:'', stars:0, sticker:null});
+      setSummaryPhase('record');
+      return;
+    }
+    callGAS('saveRecording', {
+      student: studentName, area: 'int',
+      kind: 'summary',
+      prompt: summaryRec.prompt,
+      transcript: summaryRec.text,
+      stars: summaryRec.stars,
+      sticker: summaryRec.sticker,
+      audioBase64: summaryRec.audio
+    });
+    setTotalStars(s => s + summaryRec.stars);
+    setStep('eval');
+    if (isSpeakerOn) speak('정말 잘했어요! 스스로 평가해 볼까요?');
+  };
+
+  // ===== 자기평가 → 사후 녹음 =====
+  const finishEval = () => {
+    if (selfStars === 0) { alert('별점을 매겨 주세요!'); return; }
+    setStep('postrecord');
+    if (isSpeakerOn) speak('이제 배운 후 다짐을 녹음해 봐요.');
+  };
+
+  const restartEval = () => {
+    // 별 3개 이하 → 다시 학습 (지도로)
+    setSelfStars(0);
+    setCompletedAreas(new Set());
+    setStep('map');
+  };
+
+  // ===== 최종 제출 =====
+  const submitAll = async () => {
+    if (recordTarget === 'post' && isRecording) stopRecording();
+    setIsSubmitting(true);
+    // 사전 녹음
+    if (preRecordText || preRecordAudio) {
+      await callGAS('saveRecording', {
+        student: studentName, area: 'pre', kind:'pre',
+        prompt: '사전 학습 생각 말하기',
+        transcript: preRecordText, audioBase64: preRecordAudio,
+        stars: 0, sticker: null
+      });
+    }
+    // 사후 녹음
+    if (postRecordText || postRecordAudio) {
+      await callGAS('saveRecording', {
+        student: studentName, area: 'post', kind:'post',
+        prompt: '사후 학습 다짐 말하기',
+        transcript: postRecordText, audioBase64: postRecordAudio,
+        stars: 0, sticker: null
+      });
+    }
+    // 최종 결과
+    await callGAS('saveResult', {
+      student: studentName,
+      accuracy: totalAnswered ? Math.round(correctCount/totalAnswered*100) : 0,
+      stars: totalStars,
+      recordings: midRecCount + (preRecordAudio?1:0) + (postRecordAudio?1:0) + 1,
+      areasDone: Array.from(completedAreas),
+      selfStars,
+      progress: '완료',
+      bestStreak
+    });
+    setIsSubmitting(false);
+    setStep('result');
+    triggerConfetti();
+    setTimeout(triggerConfetti, 600);
+    if (isSpeakerOn) playSfx('fanfare');
+  };
+
+  // ===== 스피커 토글 =====
+  const toggleSpeaker = () => {
+    const next = !isSpeakerOn;
+    setIsSpeakerOn(next);
+    if (!next) stopSpeak();
+    else {
+      // 현재 화면 안내 한 줄 읽기
+      if (step === 'play' && areaQuestions[currentQIdx]) speak(areaQuestions[currentQIdx].text);
+    }
+  };
+
+  // ===== 로딩 =====
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center flex-col text-blue-500 font-bold text-xl">
+        <Loader2 className="animate-spin w-16 h-16 mb-4"/>
+        데이터를 불러오는 중...
+      </div>
+    );
   }
+
+  // ============================================================
+  // 렌더링
+  // ============================================================
+  return (
+    <div className="h-screen w-full bg-gradient-to-br from-pink-50 via-blue-50 to-yellow-50 font-sans text-slate-800 flex flex-col items-center justify-center overflow-hidden relative p-3">
+      
+      {/* 상단 바: 스피커 + 도움말 */}
+      <div className="absolute top-3 right-3 z-50 flex gap-2">
+        {(step === 'login' || step === 'intro') && (
+          <button onClick={() => { setShowTutorial(true); setTutorialStep(0); }}
+            className="p-3 bg-white rounded-full shadow-md border-2 border-slate-200">
+            <HelpCircle size={24} className="text-purple-500"/>
+          </button>
+        )}
+        <button onClick={toggleSpeaker}
+          className={`p-3 bg-white rounded-full shadow-md border-2 ${isSpeakerOn?'border-blue-400':'border-slate-200'}`}>
+          {isSpeakerOn ? <Volume2 size={24} className="text-blue-500"/> : <VolumeX size={24} className="text-slate-400"/>}
+        </button>
+      </div>
+
+      {/* 좌상단 정보 (학생 이름 + 별) */}
+      {step !== 'login' && step !== 'result' && (
+        <div className="absolute top-3 left-3 z-50 flex gap-2 items-center">
+          <div className="bg-white px-3 py-2 rounded-full shadow font-bold text-sm">🙋 {studentName}</div>
+          <div className="bg-yellow-100 px-3 py-2 rounded-full shadow font-bold text-sm">⭐ {totalStars}</div>
+          {streak >= 2 && <div className="bg-orange-100 px-3 py-2 rounded-full shadow font-bold text-sm">🔥 {streak}연속</div>}
+        </div>
+      )}
+
+      {/* 튜토리얼 모달 */}
+      <AnimatePresence>
+        {showTutorial && (
+          <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+            <motion.div initial={{scale:0.8}} animate={{scale:1}} className="bg-white rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl">
+              <div className="min-h-[260px] flex flex-col items-center justify-center gap-3">
+                <div className="text-7xl">{TUTORIAL_PAGES[tutorialStep].em}</div>
+                <div className="text-3xl font-black bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent">
+                  {TUTORIAL_PAGES[tutorialStep].title}
+                </div>
+                <div className="text-xl font-bold whitespace-pre-wrap">{TUTORIAL_PAGES[tutorialStep].desc}</div>
+              </div>
+              <div className="flex gap-2 justify-center my-4">
+                {TUTORIAL_PAGES.map((_,i) => (
+                  <div key={i} className={`w-3 h-3 rounded-full transition-all ${i===tutorialStep?'bg-pink-500 scale-125':'bg-slate-300'}`}/>
+                ))}
+              </div>
+              <div className="flex gap-2 justify-center">
+                {tutorialStep > 0 && (
+                  <button onClick={() => setTutorialStep(s => s-1)}
+                    className="px-4 py-2 bg-slate-200 rounded-full font-bold">← 이전</button>
+                )}
+                {tutorialStep < TUTORIAL_PAGES.length - 1 ? (
+                  <button onClick={() => setTutorialStep(s => s+1)}
+                    className="px-6 py-2 bg-gradient-to-r from-pink-500 to-orange-400 text-white rounded-full font-bold shadow">다음 →</button>
+                ) : (
+                  <button onClick={() => setShowTutorial(false)}
+                    className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-full font-bold shadow">시작! 🚀</button>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence mode="wait">
+
+        {/* 1. 로그인 */}
+        {step === 'login' && (
+          <motion.div key="login" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
+            className="bg-white p-7 rounded-[2.5rem] shadow-2xl border-4 border-blue-100 max-w-md w-full text-center space-y-5">
+            <SubjectFairy size={90}/>
+            <h1 className="text-4xl font-black bg-gradient-to-r from-pink-500 via-orange-400 to-blue-500 bg-clip-text text-transparent">안전탐험</h1>
+            <p className="text-lg font-bold text-slate-600">🌟 안전을 배우는 신나는 모험! 🌟</p>
+            <select value={studentName} onChange={e => setStudentName(e.target.value)}
+              className="w-full text-2xl font-bold p-4 border-4 border-pink-200 rounded-2xl outline-none bg-pink-50 text-pink-700">
+              <option value="">-- 이름 선택 --</option>
+              {students.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+            <button onClick={startApp}
+              className="w-full py-5 bg-gradient-to-r from-pink-500 to-orange-400 text-white rounded-3xl text-2xl font-black shadow-xl active:scale-95">
+              시작하기 🚀
+            </button>
+          </motion.div>
+        )}
+
+        {/* 2. 인트로 */}
+        {step === 'intro' && (
+          <motion.div key="intro" initial={{scale:0.9}} animate={{scale:1}} exit={{opacity:0}}
+            className="bg-white p-7 rounded-[2.5rem] shadow-2xl border-4 border-blue-100 max-w-md w-full text-center space-y-5">
+            <SubjectFairy size={100}/>
+            <h1 className="text-3xl font-black text-pink-600">반가워, {studentName} 대원!</h1>
+            <div className="bg-gradient-to-br from-yellow-100 to-orange-100 p-5 rounded-2xl border-2 border-orange-200">
+              <p className="text-xl font-black text-orange-700 mb-1">"나를 지키는 안전 약속을 배우자!"</p>
+              <p className="text-sm font-bold text-orange-800">🧚 통합교과 요정과 함께 5가지 영역을 탐험해요.</p>
+            </div>
+            <button onClick={() => { setStep('prerecord'); if (isSpeakerOn) speak('먼저 평소 알고 있던 안전 규칙을 자유롭게 말해 봐요.'); }}
+              className="w-full py-5 bg-gradient-to-r from-pink-500 to-orange-400 text-white rounded-3xl text-2xl font-black shadow-xl active:scale-95">
+              사전 학습 시작 <ChevronRight className="inline" size={24}/>
+            </button>
+          </motion.div>
+        )}
+
+        {/* 3. 사전 녹음 */}
+        {step === 'prerecord' && (
+          <motion.div key="pre" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
+            className="bg-white p-6 rounded-[2.5rem] shadow-2xl border-4 border-green-100 max-w-md w-full text-center space-y-4">
+            <h1 className="text-3xl font-black text-green-600">탐험 전 나의 생각</h1>
+            <p className="text-base font-bold text-slate-600 bg-green-50 p-3 rounded-xl">
+              평소 알고 있는 '안전 규칙'을<br/>자유롭게 말해 주세요!
+            </p>
+            {!keyboardMode ? (
+              <>
+                <button onClick={() => isRecording ? stopRecording() : startRecording('pre')}
+                  className={`w-28 h-28 rounded-full flex items-center justify-center mx-auto text-white shadow-xl transition-all ${isRecording?'bg-red-500 pulse-record':'bg-green-500'}`}>
+                  {isRecording ? <Square size={44}/> : <Mic size={44}/>}
+                </button>
+                <p className="text-sm font-bold text-slate-400">
+                  {isRecording ? '녹음 중... (네모 누르면 멈춤)' : '마이크 누르고 말해 봐요'}
+                </p>
+              </>
+            ) : (
+              <p className="text-sm font-bold text-blue-500">⌨️ 키보드로 직접 적어 보세요</p>
+            )}
+            <textarea value={preRecordText + (isRecording?interimText:'')}
+              onChange={e => setPreRecordText(e.target.value)}
+              placeholder="여기에 말한 내용이 글자로 나타나요. 직접 적어도 돼요!"
+              className="w-full h-24 bg-slate-50 rounded-2xl border-2 border-slate-200 p-3 text-left text-slate-700 font-bold resize-none outline-none focus:border-green-400"/>
+            <button onClick={() => setKeyboardMode(!keyboardMode)}
+              className="text-sm text-blue-500 underline">{keyboardMode?'🎤 마이크로 녹음':'⌨️ 키보드로 입력'}</button>
+            <button onClick={() => { if (isRecording) stopRecording(); setKeyboardMode(false); setStep('map'); }}
+              className="w-full py-4 bg-slate-800 text-white rounded-2xl text-xl font-black shadow-md active:scale-95">
+              안전 지도 보기 <ChevronRight className="inline" size={24}/>
+            </button>
+          </motion.div>
+        )}
+
+        {/* 4. 지도 */}
+        {step === 'map' && (
+          <motion.div key="map" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
+            className="relative w-full h-full max-w-3xl bg-gradient-to-br from-sky-50 to-blue-100 rounded-[2.5rem] border-[8px] border-white shadow-2xl overflow-hidden mt-12">
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-white px-4 py-2 rounded-full shadow font-black text-blue-600 text-lg whitespace-nowrap">
+              🗺️ 안전 지도 ({completedAreas.size} / {groupedAreas.length})
+            </div>
+            <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-30 z-0" viewBox="0 0 100 100" preserveAspectRatio="none">
+              {groupedAreas.length > 1 && (
+                <path d={`M ${groupedAreas.map(m => `${m.pos.x} ${m.pos.y}`).join(' L ')}`}
+                  fill="none" stroke="#0284C7" strokeWidth="1.2" strokeDasharray="3 3"/>
+              )}
+            </svg>
+            {groupedAreas.map(m => {
+              const isDone = completedAreas.has(m.id);
+              return (
+                <div key={m.id} className="absolute -translate-x-1/2 -translate-y-1/2 z-10"
+                  style={{ left:`${m.pos.x}%`, top:`${m.pos.y}%` }}>
+                  <motion.button whileHover={{scale:1.1}} whileTap={{scale:0.9}} onClick={() => !isDone && selectArea(m)}
+                    disabled={isDone}
+                    className={`px-4 py-3 rounded-2xl shadow-xl border-4 flex flex-col items-center gap-1 transition-colors ${isDone?'bg-slate-200 border-slate-300 opacity-60':`${m.bg} border-white text-white scale-110`}`}>
+                    <m.Icon size={32}/>
+                    <span className="text-sm font-black whitespace-nowrap">{m.name}</span>
+                    {isDone && <CheckCircle2 className="absolute -top-2 -right-2 text-green-600 bg-white rounded-full p-0.5" size={22}/>}
+                  </motion.button>
+                </div>
+              );
+            })}
+            {completedAreas.size === groupedAreas.length && groupedAreas.length > 0 && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30">
+                <button onClick={() => { setStep('summary'); if (isSpeakerOn) speak('이제 배운 것을 정리해 봐요.'); }}
+                  className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full text-lg font-black shadow-xl">
+                  배운 것 정리하기 ✨
+                </button>
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* 5. 개념학습 (드래그앤드롭) */}
+        {step === 'concept' && currentArea && (
+          <ConceptScreen
+            data={CONCEPT_DATA[currentArea.id]}
+            areaName={currentArea.name}
+            isSpeakerOn={isSpeakerOn}
+            onDone={() => setStep('count')}
+          />
+        )}
+
+        {/* 6. 문제수 선택 */}
+        {step === 'count' && currentArea && (
+          <motion.div key="count" initial={{opacity:0}} animate={{opacity:1}}
+            className="bg-white p-6 rounded-[2.5rem] shadow-2xl border-4 border-blue-100 max-w-md w-full text-center space-y-5">
+            <h1 className="text-2xl font-black text-blue-600">🎯 몇 문제 풀어 볼까요?</h1>
+            <p className="text-base font-bold text-slate-600">하고 싶은 만큼 골라 봐요!</p>
+            <div className="grid grid-cols-3 gap-3">
+              {[3,5,7].map(n => (
+                <button key={n} onClick={() => startQuiz(n)}
+                  className="bg-gradient-to-br from-pink-100 to-yellow-100 rounded-2xl p-4 border-4 border-transparent hover:border-pink-300 active:scale-95">
+                  <div className="text-5xl font-black bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent">{n}</div>
+                  <div className="text-base font-bold">문제</div>
+                  <div className="text-xs text-slate-500">{n===3?'짧게':n===5?'알맞게':'더 해볼래!'}</div>
+                </button>
+              ))}
+            </div>
+            <button onClick={() => setStep('map')} className="text-sm text-slate-500 underline">← 영역 다시 고르기</button>
+          </motion.div>
+        )}
+
+        {/* 7. 문제 풀이 */}
+        {step === 'play' && areaQuestions.length > 0 && (
+          <PlayScreen
+            area={currentArea}
+            question={areaQuestions[currentQIdx]}
+            qIdx={currentQIdx}
+            totalQ={areaQuestions.length}
+            feedback={feedback}
+            voiceAnswerText={voiceAnswerText}
+            setVoiceAnswerText={setVoiceAnswerText}
+            interimText={interimText}
+            isRecording={isRecording}
+            isSpeakerOn={isSpeakerOn}
+            keyboardMode={keyboardMode}
+            setKeyboardMode={setKeyboardMode}
+            helpUsedThisQ={helpUsedThisQ}
+            onChoice={handleChoice}
+            onVoiceCheck={handleVoiceCheck}
+            onToggleRec={() => isRecording ? stopRecording() : startRecording('voice')}
+            onHelp={useHelp}
+            onNext={nextQuestion}
+            onRetry={retryQuestion}
+          />
+        )}
+
+        {/* 8. 중간/최종 녹음 (영역별) */}
+        {step === 'midrec' && midRecording && (
+          <RecordReviewScreen
+            recording={midRecording}
+            setRecording={setMidRecording}
+            phase={midRecPhase}
+            setPhase={setMidRecPhase}
+            isRecording={isRecording}
+            interimText={interimText}
+            isSpeakerOn={isSpeakerOn}
+            keyboardMode={keyboardMode}
+            setKeyboardMode={setKeyboardMode}
+            onStartRec={() => startRecording('mid')}
+            onStopRec={stopRecording}
+            onRetry={retryMid}
+            onDone={finishMidReview}
+            title={midRecording.isFinal ? '🎙️ 영역 마무리 녹음' : '🎙️ 중간 녹음'}
+          />
+        )}
+
+        {/* 9. 성찰 */}
+        {step === 'reflect' && (
+          <motion.div key="reflect" initial={{opacity:0}} animate={{opacity:1}}
+            className="bg-white p-6 rounded-[2.5rem] shadow-2xl border-4 border-yellow-100 max-w-md w-full space-y-4">
+            <h1 className="text-2xl font-black text-yellow-600 text-center">💭 잠깐, 생각해 봐요</h1>
+            <div>
+              <p className="text-base font-bold mb-1">🌟 가장 기억에 남는 건?</p>
+              <textarea value={reflectA1} onChange={e=>setReflectA1(e.target.value)}
+                placeholder="자유롭게 적어 봐요..."
+                className="w-full h-16 bg-yellow-50 border-2 border-yellow-200 rounded-xl p-2 text-base font-bold resize-none outline-none focus:border-yellow-400"/>
+            </div>
+            <div>
+              <p className="text-base font-bold mb-1">🌈 어떤 약속을 지키고 싶나요?</p>
+              <textarea value={reflectA2} onChange={e=>setReflectA2(e.target.value)}
+                placeholder="다짐을 적어 봐요..."
+                className="w-full h-16 bg-pink-50 border-2 border-pink-200 rounded-xl p-2 text-base font-bold resize-none outline-none focus:border-pink-400"/>
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-bold text-slate-500 mb-1">⭐ 다짐을 별로 평가해요</p>
+              <div className="flex justify-center gap-1">
+                {[1,2,3,4,5].map(n => (
+                  <button key={n} onClick={() => setReflectStars(n)}>
+                    <Star size={38} className={n<=reflectStars?'fill-yellow-400 text-yellow-500':'text-slate-200'}/>
+                  </button>
+                ))}
+              </div>
+            </div>
+            {reflectStars > 0 && reflectStars <= 3 && (
+              <p className="text-center text-sm text-orange-500 font-bold">⚠️ 다짐이 약해요. 다시 적어 봐요!</p>
+            )}
+            <button onClick={finishReflect}
+              disabled={reflectStars === 0}
+              className="w-full py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-2xl text-lg font-black shadow disabled:opacity-50">
+              다음으로 ➡️
+            </button>
+          </motion.div>
+        )}
+
+        {/* 10. 카드 정리 */}
+        {step === 'summary' && (
+          <motion.div key="sum" initial={{opacity:0}} animate={{opacity:1}}
+            className="w-full max-w-2xl flex flex-col items-center gap-3 pt-12 px-3 h-full overflow-y-auto">
+            <h1 className="text-2xl font-black text-purple-600 text-center">📚 배운 것을 정리해요</h1>
+            <p className="text-sm font-bold text-slate-600 text-center">설명하고 싶은 카드 2장을 골라 봐요!</p>
+            <div className="grid grid-cols-3 gap-2 w-full">
+              {SUMMARY_CARDS.map(c => {
+                const picked = selectedCards.includes(c.id);
+                return (
+                  <button key={c.id} onClick={() => toggleSummaryCard(c.id)}
+                    className={`bg-white rounded-2xl p-3 text-left shadow transition-all relative ${picked?'border-4 border-pink-400 -translate-y-1':'border-2 border-transparent'}`}>
+                    <div className="text-2xl mb-1">{c.em}</div>
+                    <div className="text-xs font-bold leading-tight">{c.text}</div>
+                    {picked && <div className="absolute top-1 right-2 text-pink-500 font-black">✓</div>}
+                  </button>
+                );
+              })}
+            </div>
+            <button onClick={startSummaryRec} disabled={selectedCards.length !== 2}
+              className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full text-lg font-black shadow disabled:opacity-50 mt-2">
+              두 카드로 설명하기 🎙️
+            </button>
+          </motion.div>
+        )}
+
+        {/* 11. 최종 정리 녹음 */}
+        {step === 'summaryrec' && (
+          <RecordReviewScreen
+            recording={summaryRec}
+            setRecording={setSummaryRec}
+            phase={summaryPhase}
+            setPhase={setSummaryPhase}
+            isRecording={isRecording}
+            interimText={interimText}
+            isSpeakerOn={isSpeakerOn}
+            keyboardMode={keyboardMode}
+            setKeyboardMode={setKeyboardMode}
+            onStartRec={() => startRecording('summary')}
+            onStopRec={stopRecording}
+            onRetry={() => { setSummaryRec({...summaryRec, text:'', audio:'', stars:0, sticker:null}); setSummaryPhase('record'); }}
+            onDone={finishSummaryRec}
+            title="🎙️ 정리 녹음"
+          />
+        )}
+
+        {/* 12. 자기평가 */}
+        {step === 'eval' && (
+          <motion.div key="eval" initial={{scale:0.9}} animate={{scale:1}}
+            className="bg-white p-7 rounded-[2.5rem] shadow-2xl border-4 border-yellow-200 max-w-md w-full text-center space-y-5">
+            <h1 className="text-2xl font-black text-yellow-600">⭐ 나의 안전탐험 점수는?</h1>
+            <p className="text-base font-bold text-slate-600">스스로 얼마나 잘 배웠는지<br/>별을 눌러 평가해 봐요!</p>
+            <div className="flex justify-center gap-2">
+              {[1,2,3,4,5].map(n => (
+                <button key={n} onClick={() => setSelfStars(n)} className="transition-transform hover:scale-125">
+                  <Star size={52} className={n<=selfStars?'fill-yellow-400 text-yellow-500':'text-slate-200'} strokeWidth={1}/>
+                </button>
+              ))}
+            </div>
+            {selfStars > 0 && selfStars <= 3 && (
+              <button onClick={restartEval}
+                className="w-full py-3 bg-orange-100 text-orange-700 border-2 border-orange-300 rounded-2xl text-base font-black">
+                <RotateCcw className="inline mr-1" size={20}/> 조금 더 다시 해볼래요
+              </button>
+            )}
+            {selfStars > 0 && (
+              <button onClick={finishEval}
+                className="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-2xl text-xl font-black shadow active:scale-95">
+                다음 단계로 ➡️
+              </button>
+            )}
+          </motion.div>
+        )}
+
+        {/* 13. 사후 녹음 */}
+        {step === 'postrecord' && (
+          <motion.div key="post" initial={{opacity:0}} animate={{opacity:1}}
+            className="bg-white p-6 rounded-[2.5rem] shadow-2xl border-4 border-purple-100 max-w-md w-full text-center space-y-4">
+            <h1 className="text-3xl font-black text-purple-600">탐험 후 나의 다짐</h1>
+            <p className="text-base font-bold text-slate-600 bg-purple-50 p-3 rounded-xl">
+              새롭게 알게 된 점이나<br/>앞으로의 다짐을 말해 주세요!
+            </p>
+            {!keyboardMode ? (
+              <>
+                <button onClick={() => isRecording ? stopRecording() : startRecording('post')}
+                  className={`w-28 h-28 rounded-full flex items-center justify-center mx-auto text-white shadow-xl transition-all ${isRecording?'bg-red-500 pulse-record':'bg-purple-500'}`}>
+                  {isRecording ? <Square size={44}/> : <Mic size={44}/>}
+                </button>
+                <p className="text-sm font-bold text-slate-400">
+                  {isRecording ? '녹음 중...' : '마이크를 누르고 말해 봐요'}
+                </p>
+              </>
+            ) : (
+              <p className="text-sm font-bold text-blue-500">⌨️ 키보드로 직접 적어 보세요</p>
+            )}
+            <textarea value={postRecordText + (isRecording?interimText:'')}
+              onChange={e => setPostRecordText(e.target.value)}
+              placeholder="여기에 말한 내용이 글자로 나타나요"
+              className="w-full h-24 bg-slate-50 rounded-2xl border-2 border-slate-200 p-3 text-left text-slate-700 font-bold resize-none outline-none focus:border-purple-400"/>
+            <button onClick={() => setKeyboardMode(!keyboardMode)}
+              className="text-sm text-blue-500 underline">{keyboardMode?'🎤 마이크로':'⌨️ 키보드로'}</button>
+            <button disabled={isSubmitting} onClick={submitAll}
+              className="w-full flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl text-lg font-black shadow disabled:opacity-50">
+              {isSubmitting ? <><Loader2 className="animate-spin"/> 저장 중...</> : <>최종 제출하기 <ChevronRight/></>}
+            </button>
+          </motion.div>
+        )}
+
+        {/* 14. 수료증 */}
+        {step === 'result' && (
+          <motion.div key="result" initial={{scale:0.8}} animate={{scale:1}}
+            className="bg-white p-6 rounded-[2.5rem] shadow-2xl border-[6px] border-orange-300 max-w-md w-full text-center space-y-4">
+            <SubjectFairy size={80}/>
+            <h1 className="text-3xl font-black text-orange-600">🏆 안전탐험 완료!</h1>
+            <div className="bg-gradient-to-br from-orange-50 to-yellow-50 p-4 rounded-2xl border-4 border-dashed border-orange-300 space-y-2 relative">
+              <ShieldCheck size={48} className="text-orange-500 mx-auto"/>
+              <p className="text-xl font-black">안전 지킴이 수료증</p>
+              <p className="text-base font-bold">{studentName}</p>
+              <p className="text-xs text-slate-600">위 대원은 모든 안전 미션을<br/>훌륭히 마쳤음을 증명합니다.</p>
+              <div className="bg-white p-3 rounded-xl border border-orange-200 text-left text-xs space-y-1">
+                <div className="flex justify-between"><span>정답률</span><b className="text-orange-600">{totalAnswered?Math.round(correctCount/totalAnswered*100):0}%</b></div>
+                <div className="flex justify-between"><span>받은 별</span><b className="text-yellow-600">⭐ {totalStars}</b></div>
+                <div className="flex justify-between"><span>최고 연속</span><b className="text-red-500">🔥 {bestStreak}</b></div>
+                <div className="flex justify-between"><span>완료 영역</span><b className="text-blue-600">{completedAreas.size} / {groupedAreas.length}</b></div>
+              </div>
+              <p className="text-xs font-bold text-orange-500 mt-2">{new Date().toLocaleDateString('ko-KR')}</p>
+              <div className="absolute -bottom-3 -right-3 w-20 h-20 bg-red-500 text-white rounded-full flex items-center justify-center border-4 border-white shadow-lg rotate-12">
+                <span className="font-black text-sm leading-tight">참!<br/>잘했어요</span>
+              </div>
+            </div>
+            <button onClick={() => window.location.reload()}
+              className="w-full py-3 bg-slate-200 rounded-2xl font-black text-slate-600">🔄 다시 시작</button>
+          </motion.div>
+        )}
+
+      </AnimatePresence>
+    </div>
+  );
 }
 
-document.getElementById('btnAgain').addEventListener('click', () => location.reload());
-document.getElementById('btnFinish').addEventListener('click', () => {
-  // 메시지로 마무리
-  document.getElementById('app').innerHTML = `
-    <div style="display:flex; align-items:center; justify-content:center; height:100%; flex-direction:column; gap:18px;">
-      <div style="font-size:120px">🎉</div>
-      <div style="font-size:42px; font-weight:700;">고마워요!</div>
-      <div style="font-size:24px; color:var(--c-soft);">${S.student} 어린이의 안전탐험이 멋지게 끝났어요!</div>
-    </div>`;
-});
+// ============================================================
+// 개념학습 컴포넌트 (드래그앤드롭 + 클릭 둘 다 지원)
+// ============================================================
+function ConceptScreen({ data, areaName, isSpeakerOn, onDone }) {
+  const [placed, setPlaced] = useState({}); // targetId -> itemId
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [wrongs, setWrongs] = useState({});
 
-// ====== 반응형 스케일 ======
-function applyScale() {
-  const wrap = document.getElementById('scaleWrap');
-  const baseW = 1024, baseH = 720;
-  const sw = window.innerWidth, sh = window.innerHeight;
-  const sx = sw / baseW, sy = sh / baseH;
-  const scale = Math.min(sx, sy, 1.5);
-  wrap.style.transform = `scale(${scale})`;
+  const handleItemClick = (itemId) => {
+    if (isSpeakerOn) playSfx('click');
+    setSelectedItem(itemId === selectedItem ? null : itemId);
+  };
+
+  const placeOn = (targetId) => {
+    if (!selectedItem) return;
+    const target = data.targets.find(t => t.id === targetId);
+    const correct = target.accepts === selectedItem;
+    setPlaced(prev => ({...prev, [targetId]: selectedItem}));
+    setWrongs(prev => ({...prev, [targetId]: !correct}));
+    setSelectedItem(null);
+    if (correct) {
+      playSfx(isSpeakerOn ? 'pop' : null);
+      triggerBurst(['✨','🌟'], 8);
+    }
+  };
+
+  const unplace = (targetId) => {
+    setPlaced(prev => {
+      const c = {...prev};
+      delete c[targetId];
+      return c;
+    });
+    setWrongs(prev => {
+      const c = {...prev};
+      delete c[targetId];
+      return c;
+    });
+  };
+
+  const allDone = data.targets.every(t => placed[t.id] && !wrongs[t.id]);
+  const placedItems = new Set(Object.values(placed));
+
+  useEffect(() => {
+    if (allDone) {
+      if (isSpeakerOn) playSfx('correct');
+      triggerConfetti();
+    }
+  }, [allDone]);
+
+  return (
+    <motion.div key="concept" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
+      className="w-full max-w-2xl flex flex-col items-center gap-3 pt-12 px-3">
+      <h1 className="text-2xl font-black text-purple-600 text-center">🧩 {areaName} 개념 익히기</h1>
+      <p className="text-sm font-bold text-slate-600 text-center">{data.sub}</p>
+      <p className="text-xs text-slate-500 text-center">💡 아래 카드를 골라 → 위 칸에 옮겨 봐요!<br/>틀린 카드는 다시 누르면 돌아와요</p>
+
+      <div className="w-full space-y-2">
+        {data.targets.map(t => {
+          const itemId = placed[t.id];
+          const item = itemId && data.items.find(i => i.id === itemId);
+          const isWrong = wrongs[t.id];
+          return (
+            <div key={t.id}
+              onClick={() => itemId ? unplace(t.id) : placeOn(t.id)}
+              className={`bg-gradient-to-r from-blue-50 to-pink-50 border-4 border-dashed rounded-2xl p-3 flex items-center gap-3 cursor-pointer transition-all ${selectedItem && !itemId?'border-yellow-400 scale-[1.02]':'border-pink-300'}`}>
+              <div className="font-black text-base flex-shrink-0 w-32">{t.label}</div>
+              <div className={`flex-1 min-h-[44px] rounded-xl flex items-center justify-center font-black text-base ${item?(isWrong?'bg-red-200 text-red-800':'bg-green-200 text-green-800'):'bg-white/50 text-slate-400'}`}>
+                {item ? item.label : '여기로 옮겨요'}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="w-full grid grid-cols-3 gap-2 mt-2">
+        {data.items.map(i => {
+          const isPlaced = placedItems.has(i.id);
+          if (isPlaced) return <div key={i.id}/>;
+          return (
+            <button key={i.id} onClick={() => handleItemClick(i.id)}
+              className={`bg-gradient-to-br from-yellow-300 to-orange-400 text-white rounded-2xl p-3 font-black text-sm shadow-md transition-all ${selectedItem===i.id?'ring-4 ring-pink-400 scale-105':''}`}>
+              {i.label}
+            </button>
+          );
+        })}
+      </div>
+
+      <button onClick={onDone} disabled={!allDone}
+        className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-black text-base shadow disabled:opacity-40 mt-2">
+        다음으로 ➡️
+      </button>
+    </motion.div>
+  );
 }
-window.addEventListener('resize', applyScale);
-applyScale();
 
-// ====== 초기화 ======
-loadVoiceWhenReady();
-loadStudents();
-loadQuestions();
-updateChips();
+// ============================================================
+// 문제 풀이 컴포넌트
+// ============================================================
+function PlayScreen({ area, question, qIdx, totalQ, feedback, voiceAnswerText, setVoiceAnswerText, interimText, isRecording, isSpeakerOn, keyboardMode, setKeyboardMode, helpUsedThisQ, onChoice, onVoiceCheck, onToggleRec, onHelp, onNext, onRetry }) {
+  return (
+    <motion.div key="play" initial={{y:30,opacity:0}} animate={{y:0,opacity:1}}
+      className="w-full max-w-xl flex flex-col items-center gap-2 pt-12 px-3">
+      <div className="flex items-center gap-2 mb-1">
+        <span className={`${area.bg} text-white px-3 py-1 rounded-full text-sm font-black flex items-center gap-1`}>
+          <area.Icon size={16}/>{area.name}
+        </span>
+        <span className="text-sm font-bold text-slate-500">{qIdx+1} / {totalQ}</span>
+      </div>
 
-// 사용설명서 첫 진입 시 자동 표시 (1회)
-if (!localStorage.getItem('manual_seen')) {
-  setTimeout(()=> {
-    openTutorial();
-    localStorage.setItem('manual_seen','yes');
-  }, 800);
+      <div className={`bg-white p-5 rounded-3xl shadow-2xl border-4 border-blue-50 w-full transition-all ${feedback?'scale-95 opacity-80':''}`}>
+        <h2 className="text-xl font-black leading-tight flex items-start gap-2 mb-4">
+          <span className="bg-blue-500 text-white w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-base">Q</span>
+          <span>{question.text}</span>
+        </h2>
+
+        {question.type === '음성' ? (
+          <div className="flex flex-col items-center gap-3">
+            {!keyboardMode && (
+              <button disabled={feedback!==null} onClick={onToggleRec}
+                className={`w-24 h-24 rounded-full flex items-center justify-center text-white shadow-xl transition-all ${isRecording?'bg-red-500 pulse-record':'bg-blue-500'} ${feedback?'opacity-50':''}`}>
+                {isRecording ? <Square size={40}/> : <Mic size={40}/>}
+              </button>
+            )}
+            <p className="text-sm font-bold text-slate-500 text-center">
+              {keyboardMode ? '⌨️ 아래에 직접 적어요' : (isRecording ? '듣고 있어요... (네모 누르면 멈춤)' : '🎤 누르고 정답을 말해 봐요')}
+            </p>
+            <textarea
+              value={voiceAnswerText + (isRecording?interimText:'')}
+              onChange={e => setVoiceAnswerText(e.target.value)}
+              placeholder="여기에 글로 적어도 돼요!"
+              disabled={feedback!==null}
+              className="w-full h-16 bg-slate-50 rounded-xl border-2 border-slate-200 p-2 text-base font-bold resize-none outline-none focus:border-blue-400"/>
+            <button onClick={() => setKeyboardMode(!keyboardMode)}
+              className="text-xs text-blue-500 underline">{keyboardMode?'🎤 마이크로':'⌨️ 키보드로'}</button>
+            {!feedback && voiceAnswerText && !isRecording && (
+              <button onClick={onVoiceCheck}
+                className="px-5 py-3 bg-green-500 text-white rounded-2xl text-base font-black shadow active:scale-95">
+                ✅ 정답 확인하기
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {question.options.map((opt, idx) => (
+              <button key={idx} disabled={feedback!==null} onClick={() => onChoice(idx)}
+                className={`w-full p-3 rounded-2xl border-4 text-left text-base font-bold transition-all ${feedback?((idx+1)===Number(question.answer)?'border-green-500 bg-green-50 text-green-700':'opacity-30 border-slate-100'):'border-slate-100 hover:border-blue-300 hover:bg-blue-50'}`}>
+                <span className="inline-block w-7 h-7 bg-blue-100 text-blue-700 rounded-full text-center mr-2 font-black">{idx+1}</span>
+                {opt}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="flex justify-between items-center mt-3">
+          <button onClick={onHelp} disabled={helpUsedThisQ}
+            className="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-full text-sm font-black flex items-center gap-1 disabled:opacity-50">
+            💜 도움받기 {helpUsedThisQ && '✓'}
+          </button>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {feedback && (
+          <motion.div initial={{y:20,opacity:0}} animate={{y:0,opacity:1}}
+            className={`p-4 rounded-3xl border-4 shadow-xl w-full ${feedback.correct?'bg-green-50 border-green-200':'bg-red-50 border-red-200'}`}>
+            <div className="flex items-start gap-2 mb-2">
+              <div className="text-3xl">{feedback.correct?'🌟':'💡'}</div>
+              <div className="flex-1">
+                <p className={`text-lg font-black ${feedback.correct?'text-green-800':'text-red-800'}`}>{feedback.main}</p>
+                <p className="text-sm font-bold whitespace-pre-wrap mt-1">{feedback.sub}</p>
+              </div>
+            </div>
+            <button onClick={feedback.correct?onNext:onRetry}
+              className={`w-full py-2 rounded-xl text-white font-black ${feedback.correct?'bg-green-600':'bg-red-500'}`}>
+              {feedback.correct ? <>다음으로 ➡️</> : <><RotateCcw className="inline mr-1" size={18}/> 다시 풀기</>}
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
 }
+
+// ============================================================
+// 녹음 + 자기평가 컴포넌트
+// ============================================================
+function RecordReviewScreen({ recording, setRecording, phase, setPhase, isRecording, interimText, isSpeakerOn, keyboardMode, setKeyboardMode, onStartRec, onStopRec, onRetry, onDone, title }) {
+  const [audioPlay, setAudioPlay] = useState(null);
+
+  const stars = recording.stars || 0;
+  const sticker = recording.sticker;
+
+  const goReview = () => {
+    if (isRecording) onStopRec();
+    if (!recording.text && !recording.audio && !keyboardMode) {
+      alert('녹음하거나 글로 적어 주세요!');
+      return;
+    }
+    setPhase('review');
+  };
+
+  const playAudio = () => {
+    if (recording.audio) {
+      const a = new Audio(recording.audio);
+      a.play().catch(()=>{});
+    } else if (recording.text) {
+      const wasOn = isSpeakerOn;
+      const u = new SpeechSynthesisUtterance(recording.text);
+      u.lang='ko-KR'; const v=selectKoreanVoice(); if(v) u.voice=v;
+      u.pitch=1.0; u.rate=0.95;
+      speechSynthesis.cancel(); speechSynthesis.speak(u);
+    }
+  };
+
+  const playPrompt = () => {
+    const u = new SpeechSynthesisUtterance(recording.prompt);
+    u.lang='ko-KR'; const v=selectKoreanVoice(); if(v) u.voice=v;
+    u.pitch=1.0; u.rate=0.95;
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+  };
+
+  return (
+    <motion.div key="midrec" initial={{opacity:0}} animate={{opacity:1}}
+      className="bg-white p-5 rounded-[2.5rem] shadow-2xl border-4 border-pink-100 max-w-md w-full space-y-3">
+      <h1 className="text-xl font-black text-pink-600 text-center">{title}</h1>
+      <div className="bg-gradient-to-r from-pink-50 to-yellow-50 p-3 rounded-xl flex items-center gap-2">
+        <span className="text-3xl">{recording.em || '🎙️'}</span>
+        <p className="text-base font-bold">{recording.prompt}</p>
+      </div>
+
+      {phase === 'record' ? (
+        <>
+          {!keyboardMode ? (
+            <button onClick={isRecording ? onStopRec : onStartRec}
+              className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center text-white shadow-xl ${isRecording?'bg-red-500 pulse-record':'bg-pink-500'}`}>
+              {isRecording ? <Square size={40}/> : <Mic size={40}/>}
+            </button>
+          ) : null}
+          <p className="text-sm font-bold text-slate-500 text-center">
+            {keyboardMode ? '⌨️ 글로 적어 봐요' : (isRecording ? '듣고 있어요... (네모 누르면 멈춤)' : '🎤 누르고 또박또박 말해요')}
+          </p>
+          <textarea value={(recording.text||'') + (isRecording?interimText:'')}
+            onChange={e => setRecording(r => ({...r, text: e.target.value}))}
+            placeholder="여기에 글로 적어도 돼요"
+            className="w-full h-20 bg-slate-50 rounded-xl border-2 border-slate-200 p-2 text-base font-bold resize-none outline-none focus:border-pink-400"/>
+          <div className="flex justify-between">
+            <button onClick={() => setKeyboardMode(!keyboardMode)}
+              className="text-xs text-blue-500 underline">{keyboardMode?'🎤 마이크로':'⌨️ 키보드로'}</button>
+            <button onClick={goReview} disabled={!(recording.text || recording.audio || keyboardMode)}
+              className="px-4 py-2 bg-pink-500 text-white rounded-full text-sm font-black disabled:opacity-50">
+              📝 다 했어요!
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="bg-yellow-50 p-3 rounded-xl text-center">
+            <p className="text-base font-bold">🎧 들어 보고 별점을 줘 봐요</p>
+            <div className="flex justify-center gap-2 mt-2">
+              <button onClick={playAudio}
+                className="px-3 py-2 bg-emerald-500 text-white rounded-full text-sm font-black">
+                ▶️ 내 {recording.audio?'녹음':'글'} 듣기
+              </button>
+              <button onClick={playPrompt}
+                className="px-3 py-2 bg-blue-500 text-white rounded-full text-sm font-black">
+                📖 문장 듣기
+              </button>
+            </div>
+          </div>
+          {recording.text && (
+            <div className="bg-slate-50 p-2 rounded-xl text-sm font-bold">"{recording.text}"</div>
+          )}
+          <div className="flex justify-center gap-1">
+            {[1,2,3,4,5].map(n => (
+              <button key={n} onClick={() => setRecording(r => ({...r, stars: n}))}>
+                <Star size={36} className={n<=stars?'fill-yellow-400 text-yellow-500':'text-slate-200'}/>
+              </button>
+            ))}
+          </div>
+          {stars > 0 && stars <= 3 && (
+            <p className="text-center text-sm text-orange-500 font-bold">⚠️ 다시 해 봐요!</p>
+          )}
+          {stars >= 4 && (
+            <>
+              <p className="text-center text-sm font-bold">🎁 칭찬 스티커를 골라 봐요</p>
+              <div className="flex justify-center gap-2">
+                {['🌟','💖','🌸','🦋','🌈','🎉'].map(s => (
+                  <button key={s} onClick={() => { setRecording(r => ({...r, sticker:s})); playSfx(isSpeakerOn?'pop':null); }}
+                    className={`text-3xl p-2 rounded-full transition-all ${sticker===s?'bg-yellow-200 scale-125':''}`}>{s}</button>
+                ))}
+              </div>
+            </>
+          )}
+          <div className="flex gap-2">
+            <button onClick={onRetry}
+              className="flex-1 py-3 bg-orange-100 text-orange-700 border-2 border-orange-300 rounded-2xl font-black text-sm">
+              🔁 다시 녹음
+            </button>
+            <button onClick={onDone} disabled={stars < 4}
+              className="flex-1 py-3 bg-gradient-to-r from-pink-500 to-orange-400 text-white rounded-2xl font-black disabled:opacity-50 text-sm">
+              ➡️ 다음으로
+            </button>
+          </div>
+        </>
+      )}
+    </motion.div>
+  );
+}
+
+const root = createRoot(document.getElementById('root'));
+root.render(<App />);
 </script>
 </body>
 </html>
