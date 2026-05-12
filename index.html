@@ -434,10 +434,11 @@ function App() {
       });
   }, []);
 
-  // ===== 음성 인식 초기화 =====
+  // ===== 음성 인식 초기화 (⭐ 한 번만 생성, 현재 타깃은 ref로 읽음 — 첫 녹음 클로저 버그 해결) =====
+  const recordTargetRef = useRef(null);
   useEffect(() => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) return;
+    if (!SR) { console.warn('이 브라우저는 음성 인식을 지원하지 않아요'); return; }
     const rec = new SR();
     rec.lang = 'ko-KR'; rec.continuous = true; rec.interimResults = true;
     rec.onresult = (e) => {
@@ -446,18 +447,19 @@ function App() {
         if (e.results[i].isFinal) fin += e.results[i][0].transcript + ' ';
         else interim += e.results[i][0].transcript;
       }
+      const target = recordTargetRef.current;  // ⭐ ref로 현재 값 읽기 (closure 우회)
       if (fin) {
-        if (recordTarget === 'pre') setPreRecordText(p => p + fin);
-        else if (recordTarget === 'post') setPostRecordText(p => p + fin);
-        else if (recordTarget === 'voice') setVoiceAnswerText(p => p + fin);
-        else if (recordTarget === 'mid') setMidRecording(m => m ? {...m, text: (m.text||'') + fin} : m);
+        if (target === 'pre') setPreRecordText(p => p + fin);
+        else if (target === 'post') setPostRecordText(p => p + fin);
+        else if (target === 'voice') setVoiceAnswerText(p => p + fin);
+        else if (target === 'mid') setMidRecording(m => m ? {...m, text: (m.text||'') + fin} : m);
       }
       setInterimText(interim);
     };
-    rec.onerror = () => {};
+    rec.onerror = (e) => console.warn('STT 오류:', e.error || e);
     rec.onend = () => {};
     recognitionRef.current = rec;
-  }, [recordTarget]);
+  }, []);  // ⭐ 빈 deps - SR은 단 한 번만 생성
 
   // ===== TTS 음성 미리 로드 =====
   useEffect(() => {
@@ -896,7 +898,7 @@ function App() {
         )}
       </AnimatePresence>
 
-      <div className="w-full max-w-5xl mx-auto flex flex-col items-center justify-center">
+      <div className="w-full h-full max-w-5xl mx-auto flex flex-col items-center justify-center">
       <AnimatePresence mode="wait">
 
         {/* 1. 로그인 */}
@@ -952,15 +954,15 @@ function App() {
         {/* 3. 사전 녹음 */}
         {step === 'prerecord' && (
           <motion.div key="pre" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
-            className="bg-white p-6 rounded-[2.5rem] shadow-2xl border-4 border-green-100 w-full text-center space-y-4">
-            <h1 className="text-4xl font-black text-green-600">탐험 전 나의 생각</h1>
-            <p className="text-xl font-bold text-slate-600 bg-green-50 p-3 rounded-xl">
+            className="bg-white p-6 rounded-[2.5rem] shadow-2xl border-4 border-rose-200 w-full text-center space-y-4">
+            <h1 className="text-4xl font-black text-rose-500">탐험 전 나의 생각</h1>
+            <p className="text-xl font-bold text-slate-600 bg-rose-50 p-3 rounded-xl">
               평소 알고 있는 '안전 규칙'을<br/>자유롭게 말해 주세요!
             </p>
             {!keyboardMode ? (
               <>
                 <button onClick={() => isRecording ? stopRecording() : startRecording('pre')}
-                  className={`w-32 h-32 rounded-full flex items-center justify-center mx-auto text-white shadow-xl transition-all ${isRecording?'bg-red-500 pulse-record':'bg-green-500'}`}>
+                  className={`w-32 h-32 rounded-full flex items-center justify-center mx-auto text-white shadow-xl transition-all ${isRecording?'bg-red-500 pulse-record':'bg-rose-400'}`}>
                   {isRecording ? <Square size={52}/> : <Mic size={52}/>}
                 </button>
                 <p className="text-lg font-bold text-slate-500">
@@ -968,14 +970,14 @@ function App() {
                 </p>
               </>
             ) : (
-              <p className="text-xl font-bold text-blue-500 py-8">⌨️ 키보드로 직접 적어 보세요</p>
+              <p className="text-xl font-bold text-rose-500 py-8">⌨️ 키보드로 직접 적어 보세요</p>
             )}
             <textarea value={preRecordText + (isRecording?interimText:'')}
               onChange={e => setPreRecordText(e.target.value)}
               placeholder="여기에 말한 내용이 글자로 나타나요. 직접 적어도 돼요!"
-              className="w-full h-24 bg-slate-50 rounded-2xl border-2 border-slate-200 p-3 text-left text-slate-700 font-bold text-lg resize-none outline-none focus:border-green-400"/>
+              className="w-full h-24 bg-slate-50 rounded-2xl border-2 border-slate-200 p-3 text-left text-slate-700 font-bold text-lg resize-none outline-none focus:border-rose-400"/>
             <button onClick={() => { if (isRecording) stopRecording(); setKeyboardMode(!keyboardMode); }}
-              className="text-base text-blue-500 underline font-bold">{keyboardMode?'🎤 마이크로 녹음':'⌨️ 키보드로 입력'}</button>
+              className="text-base text-rose-500 underline font-bold">{keyboardMode?'🎤 마이크로 녹음':'⌨️ 키보드로 입력'}</button>
             <button onClick={() => { if (isRecording) stopRecording(); setKeyboardMode(false); setStep('map'); }}
               className="w-full py-4 bg-slate-800 text-white rounded-2xl text-2xl font-black shadow-md active:scale-95">
               안전 지도 보기 <ChevronRight className="inline" size={26}/>
@@ -1167,15 +1169,15 @@ function App() {
         {/* 11. 사후 녹음 */}
         {step === 'postrecord' && (
           <motion.div key="post" initial={{opacity:0}} animate={{opacity:1}}
-            className="bg-white p-6 rounded-[2.5rem] shadow-2xl border-4 border-purple-100 w-full text-center space-y-4">
-            <h1 className="text-4xl font-black text-purple-600">탐험 후 나의 다짐</h1>
-            <p className="text-xl font-bold text-slate-600 bg-purple-50 p-3 rounded-xl">
+            className="bg-white p-6 rounded-[2.5rem] shadow-2xl border-4 border-rose-200 w-full text-center space-y-4">
+            <h1 className="text-4xl font-black text-rose-500">탐험 후 나의 다짐</h1>
+            <p className="text-xl font-bold text-slate-600 bg-rose-50 p-3 rounded-xl">
               새롭게 알게 된 점이나<br/>앞으로의 다짐을 말해 주세요!
             </p>
             {!keyboardMode ? (
               <>
                 <button onClick={() => isRecording ? stopRecording() : startRecording('post')}
-                  className={`w-32 h-32 rounded-full flex items-center justify-center mx-auto text-white shadow-xl transition-all ${isRecording?'bg-red-500 pulse-record':'bg-purple-500'}`}>
+                  className={`w-32 h-32 rounded-full flex items-center justify-center mx-auto text-white shadow-xl transition-all ${isRecording?'bg-red-500 pulse-record':'bg-rose-400'}`}>
                   {isRecording ? <Square size={52}/> : <Mic size={52}/>}
                 </button>
                 <p className="text-lg font-bold text-slate-500">
@@ -1183,16 +1185,16 @@ function App() {
                 </p>
               </>
             ) : (
-              <p className="text-xl font-bold text-blue-500 py-8">⌨️ 키보드로 직접 적어 보세요</p>
+              <p className="text-xl font-bold text-rose-500 py-8">⌨️ 키보드로 직접 적어 보세요</p>
             )}
             <textarea value={postRecordText + (isRecording?interimText:'')}
               onChange={e => setPostRecordText(e.target.value)}
               placeholder="여기에 말한 내용이 글자로 나타나요"
-              className="w-full h-20 bg-slate-50 rounded-2xl border-2 border-slate-200 p-3 text-left text-slate-700 font-bold text-lg resize-none outline-none focus:border-purple-400"/>
+              className="w-full h-20 bg-slate-50 rounded-2xl border-2 border-slate-200 p-3 text-left text-slate-700 font-bold text-lg resize-none outline-none focus:border-rose-400"/>
             <button onClick={() => { if (isRecording) stopRecording(); setKeyboardMode(!keyboardMode); }}
-              className="text-base text-blue-500 underline font-bold">{keyboardMode?'🎤 마이크로':'⌨️ 키보드로'}</button>
+              className="text-base text-rose-500 underline font-bold">{keyboardMode?'🎤 마이크로':'⌨️ 키보드로'}</button>
             <button disabled={isSubmitting} onClick={submitAll}
-              className="w-full flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl text-2xl font-black shadow disabled:opacity-50">
+              className="w-full flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-rose-500 to-orange-400 text-white rounded-2xl text-2xl font-black shadow disabled:opacity-50">
               {isSubmitting ? <><Loader2 className="animate-spin"/> 저장 중...</> : <>최종 제출하기 <ChevronRight size={28}/></>}
             </button>
           </motion.div>
