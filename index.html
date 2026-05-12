@@ -95,6 +95,17 @@ body {
 /* 폭죽 */
 .burst-emoji { position:fixed; pointer-events:none; z-index:9998; font-size:40px; animation: burst 1.4s ease-out forwards; }
 @keyframes burst { 0% { transform: translate(0,0) scale(0); opacity:1; } 60% { opacity:1; } 100% { transform: translate(var(--x), var(--y)) scale(1.2) rotate(360deg); opacity:0; } }
+/* ⭐ 입력칸 가독성 — 저학년이 잘 보이게 (placeholder도 또렷하게) */
+textarea, input[type="text"], input[type="search"], select {
+  color: #1e293b;        /* slate-800 — 또렷한 어두운 글씨 */
+  font-weight: 700;
+}
+textarea::placeholder, input::placeholder {
+  color: #475569 !important;   /* slate-600 — placeholder도 충분히 진하게 */
+  opacity: 1 !important;        /* 브라우저 기본 반투명 제거 */
+  font-weight: 600;
+}
+
 /* 스크롤바 (혹시 모를 안전장치) */
 ::-webkit-scrollbar { width: 0; height: 0; }
 </style>
