@@ -26,1536 +26,1065 @@
   font-display: swap;
 }
 * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-html, body {
-  margin: 0; padding: 0;
-  width: 100%; height: 100%;
-  overflow: hidden;
-  -webkit-font-smoothing: antialiased;
-}
+html, body, #root { height: 100%; margin: 0; padding: 0; overflow: hidden; }
 body {
-  font-family: 'Cafe24Ssurround','Gowun Dodum','Jua','Gaegu','맑은 고딕',sans-serif;
+  font-family: 'Cafe24Ssurround', 'Gowun Dodum', 'Jua', 'Gaegu', sans-serif;
+  -webkit-font-smoothing: antialiased;
   background:
     radial-gradient(circle at 15% 25%, rgba(255,192,203,0.45) 0%, transparent 45%),
     radial-gradient(circle at 85% 70%, rgba(255,217,61,0.4) 0%, transparent 45%),
     radial-gradient(circle at 50% 90%, rgba(176,224,230,0.35) 0%, transparent 45%),
-    linear-gradient(135deg,#FFE5F1 0%,#FFF9E5 50%,#E5F4FF 100%);
+    linear-gradient(135deg, #FFE5F1 0%, #FFF9E5 50%, #E5F4FF 100%);
 }
+.font-cafe24 { font-family: 'Cafe24Ssurround', 'Jua', sans-serif; }
+.font-gowun  { font-family: 'Gowun Dodum', 'Jua', sans-serif; font-weight: 700; }
+.font-jua    { font-family: 'Jua', 'Cafe24Ssurround', sans-serif; }
+.font-gaegu  { font-family: 'Gaegu', cursive; font-weight: 700; }
 
-/* ===== ⭐ 반응형 스케일 디자인 (모든 기기에서 동일 레이아웃, 잘림/스크롤 없음) ===== */
-#scaler-wrap {
-  position: fixed; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  overflow: hidden;
-}
-#scaler {
-  transform-origin: center center;
-  position: relative;
-}
-#root { width: 100%; height: 100%; }
-
-/* 폰트 유틸리티 */
-.font-cafe24 { font-family:'Cafe24Ssurround','Jua',sans-serif; }
-.font-gowun  { font-family:'Gowun Dodum','Jua',sans-serif; font-weight:700; }
-.font-jua    { font-family:'Jua','Cafe24Ssurround',sans-serif; }
-.font-gaegu  { font-family:'Gaegu',cursive; font-weight:700; }
 /* 형광펜 */
-.hi-yellow { background: linear-gradient(180deg, transparent 55%, #FFE066 55%); padding:0 4px; }
-.hi-pink   { background: linear-gradient(180deg, transparent 55%, #FFB7C5 55%); padding:0 4px; }
-.hi-blue   { background: linear-gradient(180deg, transparent 55%, #B5E2FA 55%); padding:0 4px; }
-.hi-green  { background: linear-gradient(180deg, transparent 55%, #B7E4C7 55%); padding:0 4px; }
-.hi-orange { background: linear-gradient(180deg, transparent 55%, #FFD8B0 55%); padding:0 4px; }
-/* 통통 3D 버튼 */
-.btn-cute {
-  border: 4px solid white; border-radius: 24px;
-  transition: transform 0.12s, box-shadow 0.12s;
-  display: inline-flex; align-items: center; justify-content: center;
-}
-.btn-cute:active { transform: translateY(3px); }
-/* 배경 데코 */
-.bg-decor { position:absolute; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
-.bg-decor > span { position:absolute; opacity:0.28; animation: bgFloat 8s ease-in-out infinite; }
-@keyframes bgFloat { 0%,100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-15px) rotate(15deg); } }
-/* 흔들흔들 */
-.wiggle { animation: wiggle 2.5s ease-in-out infinite; transform-origin:center; }
-@keyframes wiggle { 0%,100% { transform:rotate(-4deg); } 50% { transform:rotate(4deg); } }
-/* 둥실둥실 */
-.float-y { animation: floatY 2.5s ease-in-out infinite; }
-@keyframes floatY { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-12px); } }
-/* 반짝반짝 */
-.glow-gold { animation: glowGold 2s ease-in-out infinite alternate; }
-@keyframes glowGold { 0% { filter: drop-shadow(0 0 6px rgba(255,215,0,0.4)); } 100% { filter: drop-shadow(0 0 18px rgba(255,215,0,0.9)); } }
-/* 텍스트 그림자 */
-.txt-shadow-pink { text-shadow: 3px 3px 0 #FF6B9D, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff; }
-/* 녹음 펄스 */
-.pulse-record { animation: pulseRec 1.3s infinite alternate; }
-@keyframes pulseRec { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.6); } 100% { box-shadow: 0 0 0 18px rgba(239,68,68,0); } }
-/* 컨페티 */
-.confetti { position:fixed; top:-20px; width:12px; height:12px; pointer-events:none; z-index:9999; }
-@keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity:0; } }
-/* 폭죽 */
-.burst-emoji { position:fixed; pointer-events:none; z-index:9998; font-size:40px; animation: burst 1.4s ease-out forwards; }
-@keyframes burst { 0% { transform: translate(0,0) scale(0); opacity:1; } 60% { opacity:1; } 100% { transform: translate(var(--x), var(--y)) scale(1.2) rotate(360deg); opacity:0; } }
-/* ⭐ 입력칸 가독성 — 저학년이 잘 보이게 (placeholder도 또렷하게) */
-textarea, input[type="text"], input[type="search"], select {
-  color: #1e293b;        /* slate-800 — 또렷한 어두운 글씨 */
-  font-weight: 700;
-}
-textarea::placeholder, input::placeholder {
-  color: #475569 !important;   /* slate-600 — placeholder도 충분히 진하게 */
-  opacity: 1 !important;        /* 브라우저 기본 반투명 제거 */
-  font-weight: 600;
-}
+.hi-yellow { background: linear-gradient(180deg, transparent 55%, #FFE066 55%); padding: 0 4px; }
+.hi-pink   { background: linear-gradient(180deg, transparent 55%, #FFB7C5 55%); padding: 0 4px; }
+.hi-blue   { background: linear-gradient(180deg, transparent 55%, #B5E2FA 55%); padding: 0 4px; }
+.hi-green  { background: linear-gradient(180deg, transparent 55%, #B7E4C7 55%); padding: 0 4px; }
 
-/* 스크롤바 (혹시 모를 안전장치) */
-::-webkit-scrollbar { width: 0; height: 0; }
-</style>
-<script>
-// ⭐ 적응형 스케일 — 높이 820 기준, 너비는 뷰포트에 맞게 자동 확장
-// (좌우 letterbox 없이 모든 기기에서 꽉 차게)
-function applyScale() {
-  var stage = document.getElementById('scaler');
-  if (!stage) return;
-  var vw = window.innerWidth;
-  var vh = window.innerHeight;
-  var MIN_W = 480;       // 최소 디자인 폭 (이보다 좁으면 letterbox)
-  var BASE_H = 820;      // 디자인 기준 높이
-  var scale = vh / BASE_H;
-  var baseW = vw / scale;
-  if (baseW < MIN_W) {   // 너무 좁은 뷰포트면 폭 기준으로 맞춤
-    scale = vw / MIN_W;
-    baseW = MIN_W;
-  }
-  stage.style.width = baseW + 'px';
-  stage.style.height = BASE_H + 'px';
-  stage.style.transform = 'scale(' + scale + ')';
+/* 떠다니는 데코 */
+@keyframes float-1 { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-15px) rotate(8deg)} }
+@keyframes float-2 { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-20px) rotate(-10deg)} }
+@keyframes float-3 { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-12px) rotate(5deg)} }
+.deco-1 { animation: float-1 4s ease-in-out infinite; }
+.deco-2 { animation: float-2 5s ease-in-out infinite; }
+.deco-3 { animation: float-3 3.5s ease-in-out infinite; }
+
+/* 폭죽 파티클 */
+@keyframes burst {
+  0% { transform: translate(0,0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--bx), var(--by)) scale(0.3); opacity: 0; }
 }
-window.addEventListener('resize', applyScale);
-window.addEventListener('orientationchange', applyScale);
-window.addEventListener('load', applyScale);
-</script>
+.burst-particle { position: absolute; pointer-events: none; animation: burst 1s ease-out forwards; }
+
+/* 흔들림 (오답) */
+@keyframes shake-x {
+  0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-10px)} 40%,80%{transform:translateX(10px)}
+}
+.shake { animation: shake-x 0.4s; }
+
+/* 살짝 통통 */
+@keyframes bounce-soft {
+  0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)}
+}
+.bounce-soft { animation: bounce-soft 1.6s ease-in-out infinite; }
+
+/* 카드 호버 */
+.card-hover { transition: all 0.2s; }
+.card-hover:hover { transform: translateY(-4px) scale(1.02); }
+.card-hover:active { transform: scale(0.98); }
+
+/* 스크롤바 숨김 */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
+/* 진행 점 */
+.dot { width: 10px; height: 10px; border-radius: 50%; background: #E5E7EB; transition: all 0.3s; }
+.dot.active { background: #FF6B9D; transform: scale(1.4); }
+
+/* 별 점수 */
+.star-btn { transition: transform 0.15s; cursor: pointer; }
+.star-btn:hover { transform: scale(1.15); }
+.star-btn:active { transform: scale(0.9); }
+
+/* 펄스 (녹음 중) */
+@keyframes pulse-red {
+  0%,100% { box-shadow: 0 0 0 0 rgba(255,107,107,0.7); }
+  50% { box-shadow: 0 0 0 20px rgba(255,107,107,0); }
+}
+.recording-pulse { animation: pulse-red 1.2s infinite; }
+
+/* 글자 한 자씩 등장 */
+@keyframes pop-in {
+  0% { transform: scale(0) rotate(-15deg); opacity: 0; }
+  60% { transform: scale(1.2) rotate(5deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+.pop-letter { display: inline-block; animation: pop-in 0.5s backwards; }
+
+</style>
 </head>
 <body>
-<div id="scaler-wrap">
-  <div id="scaler">
-    <div id="root"></div>
-  </div>
-</div>
-<script>applyScale();</script>
+<div id="root"></div>
+
 <script type="text/babel" data-type="module">
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { createRoot } from 'react-dom/client';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { createRoot } from "react-dom/client";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  Volume2, VolumeX, Star, ChevronRight, RotateCcw, ShieldCheck,
-  CheckCircle2, Mic, Square, Loader2, School, Car, FlameKindling,
-  Waves, HelpCircle, Trophy, Lightbulb, X, ArrowLeft
-} from 'lucide-react';
+  Volume2, VolumeX, Mic, MicOff, Play, Pause, RotateCcw, Star,
+  Heart, Sparkles, ChevronRight, ChevronLeft, Home, Award, Check, X,
+  HelpCircle, Send, Square, Trash2
+} from "lucide-react";
 
-// ===== GAS API URL =====
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbzuI75nXwyIpIlMPdvWlCcm3OHuOnSnv86DUDcfmUEaS87ln_Pl3Jw0KksFOHSqP5pJ/exec';
+/* =========================================================
+   설정값
+========================================================= */
+// 구글 시트 백엔드 URL (있으면 자동 저장, 없으면 로컬만)
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzuI75nXwyIpIlMPdvWlCcm3OHuOnSnv86DUDcfmUEaS87ln_Pl3Jw0KksFOHSqP5pJ/exec";
 
-// ===== 영역 정보 =====
-const AREA_INFO = {
-  traffic:  { name:'교통안전',   Icon:Car,           bg:'bg-red-500',     pos:{x:18, y:20} },
-  fire:     { name:'화재대피',   Icon:FlameKindling, bg:'bg-orange-500',  pos:{x:50, y:13} },
-  disaster: { name:'재난안전',   Icon:Waves,         bg:'bg-blue-500',    pos:{x:82, y:22} },
-  life:     { name:'학교생활',   Icon:School,        bg:'bg-emerald-500', pos:{x:78, y:62} },
-  guard:    { name:'안전지킴이', Icon:ShieldCheck,   bg:'bg-yellow-500',  pos:{x:30, y:72} }
-};
-
-// ===== 콘텐츠 =====
-const RECORD_PROMPTS = [
-  { em:'🛡️', text:'"나는 안전을 잘 지킬 거예요!" 라고 또박또박 말해 봐요' },
-  { em:'🚸', text:'"횡단보도에서는 좌우를 살펴요" 라고 말해 봐요' },
-  { em:'🚨', text:'"불이 나면 자세를 낮추고 119에 신고해요" 라고 말해 봐요' },
-  { em:'👤', text:'"낯선 사람을 따라가지 않아요" 라고 말해 봐요' },
-  { em:'🧼', text:'"급식 먹기 전에 손을 씻어요" 라고 말해 봐요' },
-  { em:'🛒', text:'"가족을 잃으면 안내 데스크에 가요" 라고 말해 봐요' },
-  { em:'🏚️', text:'"지진이 나면 책상 아래로 숨어요" 라고 말해 봐요' },
-  { em:'🏃', text:'"복도에서는 천천히 걸어요" 라고 약속해 봐요' },
-  { em:'🛴', text:'"자전거 탈 때 헬멧을 꼭 써요" 라고 말해 봐요' },
-  { em:'🌟', text:'"우리 모두 안전하게 지내요!" 라고 외쳐 봐요' }
+const AREAS = [
+  { id: "traffic",  name: "교통안전", emoji: "🚦", color: "from-rose-400 to-pink-500",   bg: "bg-rose-50",  ring: "ring-rose-300" },
+  { id: "fire",     name: "화재안전", emoji: "🧯", color: "from-orange-400 to-amber-500", bg: "bg-orange-50",ring: "ring-orange-300" },
+  { id: "disaster", name: "재난안전", emoji: "🌪️", color: "from-sky-400 to-blue-500",    bg: "bg-sky-50",   ring: "ring-sky-300" },
+  { id: "life",     name: "생활안전", emoji: "🏠", color: "from-emerald-400 to-green-500",bg: "bg-emerald-50",ring: "ring-emerald-300" },
+  { id: "int",      name: "통합탐험", emoji: "🧚", color: "from-purple-400 to-fuchsia-500",bg: "bg-purple-50",ring: "ring-purple-300" }
 ];
 
-const CONCEPT_DATA = {
-  traffic: { sub:'신호등 색깔에 맞는 행동을 옮겨 봐요',
-    targets:[{id:'t1',label:'🔴 빨간불',accepts:'stop'},{id:'t2',label:'🟢 초록불',accepts:'go'},{id:'t3',label:'🟡 노란불',accepts:'care'}],
-    items:[{id:'go',label:'건너요'},{id:'stop',label:'멈춰요'},{id:'care',label:'조심해요'}] },
-  fire: { sub:'화재 상황에 맞는 행동을 옮겨 봐요',
-    targets:[{id:'f1',label:'1️⃣ 불을 봤을 때',accepts:'shout'},{id:'f2',label:'2️⃣ 연기 속에서',accepts:'low'},{id:'f3',label:'3️⃣ 대피한 후',accepts:'call'}],
-    items:[{id:'low',label:'자세 낮추기'},{id:'shout',label:'"불이야!" 외치기'},{id:'call',label:'119에 신고하기'}] },
-  disaster: { sub:'재난 종류에 맞는 행동을 옮겨 봐요',
-    targets:[{id:'d1',label:'🏚️ 지진',accepts:'desk'},{id:'d2',label:'🌬️ 태풍',accepts:'inside'},{id:'d3',label:'🌊 홍수',accepts:'high'}],
-    items:[{id:'inside',label:'안전한 실내에서 기다려요'},{id:'desk',label:'책상 아래로 숨어요'},{id:'high',label:'높은 곳으로 가요'}] },
-  life: { sub:'학교생활에서 올바른 행동을 옮겨 봐요',
-    targets:[{id:'l1',label:'✂️ 가위 건네기',accepts:'grip'},{id:'l2',label:'🏃 복도에서',accepts:'walk'},{id:'l3',label:'🍽️ 급식 전에',accepts:'wash'}],
-    items:[{id:'walk',label:'천천히 걸어요'},{id:'grip',label:'손잡이 쪽으로 건네요'},{id:'wash',label:'손을 씻어요'}] },
-  guard: { sub:'위험한 상황에 맞는 행동을 옮겨 봐요',
-    targets:[{id:'g1',label:'👤 낯선 사람이 따라오라 할 때',accepts:'no'},{id:'g2',label:'🍭 모르는 어른이 뭘 줄 때',accepts:'refuse'},{id:'g3',label:'🛒 가족을 잃었을 때',accepts:'desk'}],
-    items:[{id:'refuse',label:'"안 받아요" 하고 떠나요'},{id:'no',label:'"싫어요!" 외치고 도망'},{id:'desk',label:'안내 데스크로 가요'}] }
-};
-
-const ENCOURAGEMENTS = ['정말 잘했어요!','대단해요!','완벽해요!','안전 박사예요!','와! 멋져요!','훌륭해요!','최고예요!','척척박사!'];
-
-const FUN_FACTS = {
-  traffic:['💡 차는 멈추는 데 시간이 걸려요!','💡 손을 들면 운전자에게 잘 보여요!','💡 신호등은 모두를 지켜주는 약속이에요.'],
-  fire:['💡 연기는 위로 올라가요. 자세를 낮춰요!','💡 엘리베이터는 멈출 수 있어 위험해요.','💡 "불이야!" 외치면 다른 사람도 알아요.'],
-  disaster:['💡 지진은 1분 정도 강하게 흔들려요.','💡 태풍 후 길은 미끄러워요. 조심!','💡 흐르는 물은 어른도 못 이겨요.'],
-  life:['💡 비누로 30초 이상 씻어야 깨끗!','💡 잠 잘 자고 손 씻으면 건강해요.','💡 깨끗한 책상에서 공부가 잘 돼요!'],
-  guard:['💡 어른은 어린이에게 길을 묻지 않아요.','💡 친절해 보여도 따라가지 않아요.','💡 내 정보는 비밀이에요!']
-};
-
-const TUTORIAL_PAGES = [
-  { em:'👋', title:'이름 고르기', desc:'내 이름을 골라요!' },
-  { em:'🗺️', title:'지도 탐험', desc:'영역을 골라\n안전을 배워요!' },
-  { em:'💜', title:'도움받기', desc:'모르겠으면\n💜 버튼!' },
-  { em:'🎤', title:'또박또박 말해요', desc:'버튼 누르고\n크게 말해요!' },
-  { em:'⭐', title:'별점 주기', desc:'내 목소리 듣고\n별을 줘요!' },
-  { em:'🔊', title:'스피커', desc:'켜면 읽어 줘요!\n위쪽에 있어요.' },
-  { em:'🏆', title:'수료증', desc:'끝나면 상을\n받아요!' }
+const QUESTIONS = [
+  // 교통
+  { area:"traffic", key:"🚸", q:"횡단보도를 건널 때 가장 먼저 할 일은?", opts:["그냥 뛰기","좌우를 살펴보기","휴대폰 보기"], ans:1, tip:"좌우를 살펴보고 차가 멈춘 걸 확인해요." },
+  { area:"traffic", key:"🚦", q:"빨간 신호등이 켜졌을 때는?", opts:["빨리 건너기","잠깐 멈춰 기다리기","뒤로 뛰기"], ans:1, tip:"빨간 불은 멈춤! 초록 불이 될 때까지 기다려요." },
+  { area:"traffic", key:"🚗", q:"차에 탔을 때 꼭 해야 하는 것은?", opts:["창문 열기","안전벨트 매기","노래 부르기"], ans:1, tip:"안전벨트는 내 몸을 지켜 줘요." },
+  // 화재
+  { area:"fire", key:"🔥", q:"불이 났을 때 가장 먼저 해야 할 일은?", opts:["숨기","'불이야!' 외치기","짐 챙기기"], ans:1, tip:"큰 소리로 알리고 어른에게 도움을 요청해요." },
+  { area:"fire", key:"🚨", q:"연기가 가득할 때는 어떻게?", opts:["똑바로 서서 뛰기","자세를 낮추고 천천히","눈 감고 뛰기"], ans:1, tip:"연기는 위로 올라가요. 자세를 낮춰요." },
+  { area:"fire", key:"📞", q:"불이 났을 때 거는 번호는?", opts:["112","119","114"], ans:1, tip:"불이 나면 119, 도움이 필요하면 112." },
+  // 재난
+  { area:"disaster", key:"🏚️", q:"지진이 났을 때 교실에서는?", opts:["창문 열기","책상 아래로 숨기","복도로 뛰기"], ans:1, tip:"머리를 보호하고 책상 아래로!" },
+  { area:"disaster", key:"🌧️", q:"태풍이 올 때는?", opts:["밖에서 놀기","집 안에 머물기","우산 들고 나가기"], ans:1, tip:"강한 바람과 비를 피해 집 안에 있어요." },
+  { area:"disaster", key:"🌊", q:"홍수가 났을 때 안전한 곳은?", opts:["낮은 곳","높은 곳","다리 아래"], ans:1, tip:"물이 차오르면 더 높은 곳으로 올라가요." },
+  // 생활
+  { area:"life", key:"✂️", q:"가위를 친구에게 줄 때는?", opts:["뾰족한 쪽 주기","손잡이 쪽 주기","던지기"], ans:1, tip:"손잡이 쪽을 잡아 줘야 친구가 다치지 않아요." },
+  { area:"life", key:"🔌", q:"젖은 손으로 콘센트를 만지면?", opts:["괜찮아요","감전될 수 있어요","시원해져요"], ans:1, tip:"전기는 물과 만나면 위험해요." },
+  { area:"life", key:"🍲", q:"뜨거운 냄비 가까이에서는?", opts:["만져 보기","멀리 떨어지기","뚜껑 열기"], ans:1, tip:"화상을 입을 수 있으니 어른께 부탁해요." },
+  // 통합
+  { area:"int", key:"🧚", q:"낯선 사람이 따라오라고 하면?", opts:["따라가기","'싫어요!' 외치고 도망","조용히 따라가기"], ans:1, tip:"안 돼요! 큰 소리로 외치고 어른께 알려요." },
+  { area:"int", key:"💜", q:"안전한 곳을 찾기 어려울 때는?", opts:["혼자 해결","어른께 도움 요청","숨어 있기"], ans:1, tip:"믿을 수 있는 어른께 꼭 알려요." }
 ];
 
-// ===== 한국어 음성 우선순위 =====
-let cachedVoice = null;
-const selectKoreanVoice = () => {
-  if (!window.speechSynthesis) return null;
-  if (cachedVoice) return cachedVoice;
-  const voices = speechSynthesis.getVoices();
-  if (!voices.length) return null;
-  const ko = voices.filter(v => (v.lang||'').toLowerCase().startsWith('ko'));
-  if (!ko.length) return voices[0];
-  let v = ko.find(x => x.name.toLowerCase().includes('google') && !x.localService);
-  if (!v) v = ko.find(x => x.name.toLowerCase().includes('google'));
-  if (!v) v = ko.find(x => /wavenet|neural2|neural-a/i.test(x.name));
-  if (!v) v = ko.find(x => /wavenet|neural|premium|enhanced|natural/i.test(x.name));
-  cachedVoice = v || ko[0];
-  return cachedVoice;
-};
+const STICKERS = ["⭐","🌟","💖","🌈","🦄","🎉","🌸","🍀","🎀","🦋"];
 
-const speak = (text, opts={}) => {
-  if (!window.speechSynthesis) return;
-  speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang='ko-KR';
-  const v = selectKoreanVoice();
-  if (v) u.voice = v;
-  u.pitch = 1.0;
-  u.rate = opts.rate || 0.95;
-  if (opts.onend) u.onend = opts.onend;
-  speechSynthesis.speak(u);
-};
-const stopSpeak = () => { if (window.speechSynthesis) speechSynthesis.cancel(); };
-
-// ===== 효과음 =====
-let audioCtx = null;
-const ac = () => { if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; };
-const playSfx = (kind) => {
-  if (!kind) return;
+/* =========================================================
+   유틸
+========================================================= */
+const beep = (freq=800, dur=0.12, type="sine", vol=0.15) => {
   try {
-    const ctx = ac();
-    if (kind==='correct') {
-      [523.25,659.25,783.99].forEach((f,i)=>{
-        const o=ctx.createOscillator(),g=ctx.createGain();
-        o.type='sine'; o.frequency.value=f;
-        g.gain.setValueAtTime(0.15,ctx.currentTime+i*0.1);
-        g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.1+0.15);
-        o.connect(g); g.connect(ctx.destination);
-        o.start(ctx.currentTime+i*0.1); o.stop(ctx.currentTime+i*0.1+0.16);
-      });
-    } else if (kind==='wrong') {
-      [440, 392].forEach((f, i) => {
-        const o = ctx.createOscillator(), g = ctx.createGain();
-        o.type = 'sine'; o.frequency.value = f;
-        g.gain.setValueAtTime(0.08, ctx.currentTime + i*0.18);
-        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i*0.18 + 0.25);
-        o.connect(g); g.connect(ctx.destination);
-        o.start(ctx.currentTime + i*0.18);
-        o.stop(ctx.currentTime + i*0.18 + 0.27);
-      });
-    } else if (kind==='pop') {
-      const o=ctx.createOscillator(),g=ctx.createGain();
-      o.type='sine'; o.frequency.value=880;
-      o.frequency.exponentialRampToValueAtTime(1500,ctx.currentTime+0.08);
-      g.gain.setValueAtTime(0.15,ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.12);
-      o.connect(g); g.connect(ctx.destination);
-      o.start(); o.stop(ctx.currentTime+0.13);
-    } else if (kind==='fanfare') {
-      [392,523.25,659.25,783.99,1046.5].forEach((f,i)=>{
-        const o=ctx.createOscillator(),g=ctx.createGain();
-        o.type='triangle'; o.frequency.value=f;
-        g.gain.setValueAtTime(0.13,ctx.currentTime+i*0.1);
-        g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+i*0.1+0.4);
-        o.connect(g); g.connect(ctx.destination);
-        o.start(ctx.currentTime+i*0.1); o.stop(ctx.currentTime+i*0.1+0.42);
-      });
-    } else if (kind==='click') {
-      const o=ctx.createOscillator(),g=ctx.createGain();
-      o.type='sine'; o.frequency.value=600;
-      g.gain.setValueAtTime(0.08,ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.08);
-      o.connect(g); g.connect(ctx.destination);
-      o.start(); o.stop(ctx.currentTime+0.1);
-    }
-  } catch(e) {}
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.value = vol; o.connect(g); g.connect(ctx.destination);
+    o.start();
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+    o.stop(ctx.currentTime + dur);
+  } catch(e){}
 };
+const happySound = () => { beep(660,0.1); setTimeout(()=>beep(880,0.12),120); setTimeout(()=>beep(1100,0.16),250); };
+const sadSound   = () => { beep(330,0.15,"triangle"); setTimeout(()=>beep(220,0.2,"triangle"),160); };
+const popSound   = () => beep(1000,0.08,"square",0.1);
 
-// ===== 폭죽 & 컨페티 =====
-const triggerBurst = (kinds=['🌟','💖','🌸','🦋','🌈','🎉','✨','⭐'], count=22) => {
-  const cx=window.innerWidth/2, cy=window.innerHeight/2;
-  for (let i=0;i<count;i++) {
-    const el=document.createElement('div');
-    el.className='burst-emoji';
-    el.textContent=kinds[Math.floor(Math.random()*kinds.length)];
-    el.style.left=cx+'px'; el.style.top=cy+'px';
-    const a=Math.random()*Math.PI*2, r=140+Math.random()*180;
-    el.style.setProperty('--x', Math.cos(a)*r+'px');
-    el.style.setProperty('--y', Math.sin(a)*r+'px');
-    document.body.appendChild(el);
-    setTimeout(()=>el.remove(),1500);
-  }
-};
-const triggerConfetti = () => {
-  const colors=['#FF6B9D','#FF9F43','#FFD93D','#6BCB77','#54A0FF','#C56CF0'];
-  for (let i=0;i<60;i++) {
-    const c=document.createElement('div');
-    c.className='confetti';
-    c.style.left=(Math.random()*100)+'%';
-    c.style.background=colors[Math.floor(Math.random()*colors.length)];
-    c.style.borderRadius=Math.random()>0.5?'50%':'2px';
-    c.style.animation=`fall ${2+Math.random()*2}s linear forwards`;
-    c.style.animationDelay=(Math.random()*0.5)+'s';
-    document.body.appendChild(c);
-    setTimeout(()=>c.remove(),4000);
-  }
-};
-
-// ===== 토끼 요정 =====
-const SubjectFairy = ({ size=80 }) => (
-  <motion.div animate={{y:[0,-8,0]}} transition={{repeat:Infinity,duration:2.5}} className="inline-block">
-    <svg width={size} height={size*1.25} viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg">
-      <path d="M40 70 C 30 20, 50 10, 55 40" fill="#FFF" stroke="#FFB6C1" strokeWidth="4"/>
-      <path d="M80 70 C 90 20, 70 10, 65 40" fill="#FFF" stroke="#FFB6C1" strokeWidth="4"/>
-      <path d="M45 55 C 40 25, 48 20, 50 45" fill="#FFC0CB"/>
-      <path d="M75 55 C 80 25, 72 20, 70 45" fill="#FFC0CB"/>
-      <ellipse cx="60" cy="85" rx="35" ry="30" fill="#FFF" stroke="#FFB6C1" strokeWidth="4"/>
-      <circle cx="48" cy="80" r="4" fill="#333"/>
-      <circle cx="72" cy="80" r="4" fill="#333"/>
-      <ellipse cx="40" cy="88" rx="5" ry="3" fill="#FFB6C1" opacity="0.6"/>
-      <ellipse cx="80" cy="88" rx="5" ry="3" fill="#FFB6C1" opacity="0.6"/>
-      <circle cx="60" cy="86" r="3" fill="#FF69B4"/>
-      <path d="M55 92 Q 60 98 65 92" stroke="#333" strokeWidth="2" fill="none" strokeLinecap="round"/>
-    </svg>
-  </motion.div>
-);
-
-// ===== GAS 호출 =====
-const callGAS = async (action, payload) => {
-  if (!GAS_URL) return { ok:false, error:'GAS URL 없음' };
-  try {
-    const res = await fetch(GAS_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action, payload })
-    });
-    return await res.json();
-  } catch(e) {
-    console.error('GAS error:', e);
-    return { ok:false, error: String(e) };
-  }
-};
-
-// ============================================================
-// 메인 App  ── 캔버스 480×820 기준, 모든 화면 w-full h-full
-// ============================================================
-function App() {
-  // 데이터
-  const [students, setStudents] = useState([]);
-  const [allQuestions, setAllQuestions] = useState([]);
-  const [groupedAreas, setGroupedAreas] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // 앱 상태
-  const [step, setStep] = useState('login');
-  const [studentName, setStudentName] = useState('');
-  const [isSpeakerOn, setIsSpeakerOn] = useState(false);
-  const [showTutorial, setShowTutorial] = useState(false);
-  const [tutorialStep, setTutorialStep] = useState(0);
-
-  // 진행 상태
-  const [completedAreas, setCompletedAreas] = useState(new Set());
-  const [currentArea, setCurrentArea] = useState(null);
-  const [areaQuestions, setAreaQuestions] = useState([]);
-  const [questionCount, setQuestionCount] = useState(5);
-  const [currentQIdx, setCurrentQIdx] = useState(0);
-  const [feedback, setFeedback] = useState(null);
-  const [totalStars, setTotalStars] = useState(0);
-  const [correctCount, setCorrectCount] = useState(0);
-  const [totalAnswered, setTotalAnswered] = useState(0);
-  const [streak, setStreak] = useState(0);
-  const [bestStreak, setBestStreak] = useState(0);
-  const [helpUsedThisQ, setHelpUsedThisQ] = useState(false);
-
-  // 녹음 관련
-  const [preRecordText, setPreRecordText] = useState('');
-  const [preRecordAudio, setPreRecordAudio] = useState('');
-  const [postRecordText, setPostRecordText] = useState('');
-  const [postRecordAudio, setPostRecordAudio] = useState('');
-  const [voiceAnswerText, setVoiceAnswerText] = useState('');
-  const [interimText, setInterimText] = useState('');
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordTarget, setRecordTarget] = useState(null);
-  const [keyboardMode, setKeyboardMode] = useState(false);
-
-  // 중간/최종 녹음 (영역마다)
-  const [midRecording, setMidRecording] = useState(null);
-  const [midRecCount, setMidRecCount] = useState(0);
-  const [midRecPhase, setMidRecPhase] = useState('record');
-
-  // 성찰
-  const [reflectA1, setReflectA1] = useState('');
-  const [reflectA2, setReflectA2] = useState('');
-  const [reflectStars, setReflectStars] = useState(0);
-
-  // 자기평가
-  const [selfStars, setSelfStars] = useState(0);
-
-  // refs
-  const mediaRecorderRef = useRef(null);
-  const recognitionRef = useRef(null);
-  const audioChunksRef = useRef([]);
-  const streamRef = useRef(null);
-
-  // ===== 데이터 로드 =====
-  useEffect(() => {
-    fetch(GAS_URL + '?action=getAppData')
-      .then(r => r.json())
-      .then(data => {
-        const stu = data.students || [];
-        const qs = data.questions || [];
-        setStudents(stu);
-        setAllQuestions(qs);
-        groupQuestions(qs);
-        setIsLoading(false);
-      })
-      .catch(err => {
-        console.error(err);
-        alert('데이터 로드 실패. 임시 데이터로 진행합니다.');
-        loadMock();
-      });
-  }, []);
-
-  // ===== 음성 인식 초기화 (⭐ 한 번만 생성, 현재 타깃은 ref로 읽음 — 첫 녹음 클로저 버그 해결) =====
-  const recordTargetRef = useRef(null);
-  useEffect(() => {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) { console.warn('이 브라우저는 음성 인식을 지원하지 않아요'); return; }
-    const rec = new SR();
-    rec.lang = 'ko-KR'; rec.continuous = true; rec.interimResults = true;
-    rec.onresult = (e) => {
-      let fin = '', interim = '';
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        if (e.results[i].isFinal) fin += e.results[i][0].transcript + ' ';
-        else interim += e.results[i][0].transcript;
-      }
-      const target = recordTargetRef.current;  // ⭐ ref로 현재 값 읽기 (closure 우회)
-      if (fin) {
-        if (target === 'pre') setPreRecordText(p => p + fin);
-        else if (target === 'post') setPostRecordText(p => p + fin);
-        else if (target === 'voice') setVoiceAnswerText(p => p + fin);
-        else if (target === 'mid') setMidRecording(m => m ? {...m, text: (m.text||'') + fin} : m);
-      }
-      setInterimText(interim);
-    };
-    rec.onerror = (e) => console.warn('STT 오류:', e.error || e);
-    rec.onend = () => {};
-    recognitionRef.current = rec;
-  }, []);  // ⭐ 빈 deps - SR은 단 한 번만 생성
-
-  // ===== TTS 음성 미리 로드 =====
-  useEffect(() => {
-    if (window.speechSynthesis) {
-      speechSynthesis.onvoiceschanged = () => selectKoreanVoice();
-      selectKoreanVoice();
-    }
-  }, []);
-
-  const loadMock = () => {
-    setStudents(['김민준','이서연','박지호','최예린','정도윤','장하은','윤시우','강유나']);
-    setAllQuestions([]);
-    setGroupedAreas([]);
-    setIsLoading(false);
-  };
-
-  const groupQuestions = (qs) => {
-    const groups = {};
-    qs.forEach(q => {
-      const a = q.area;
-      if (!a) return;
-      if (!groups[a]) groups[a] = [];
-      groups[a].push(q);
-    });
-    const mapped = Object.keys(groups).filter(id => AREA_INFO[id]).map(id => ({
-      id,
-      ...AREA_INFO[id],
-      questions: groups[id]
-    }));
-    setGroupedAreas(mapped);
-  };
-
-  // ===== 시작 (마이크 권한 1회) =====
-  const startApp = async () => {
-    if (!studentName) { alert('이름을 골라 주세요!'); return; }
-    if (isSpeakerOn) playSfx('click');
-    try {
-      const s = await navigator.mediaDevices.getUserMedia({ audio: true });
-      s.getTracks().forEach(t => t.stop());
-    } catch(e) {
-      console.warn('마이크 권한 거부됨');
-    }
-    setStep('intro');
-    if (isSpeakerOn) speak(`안녕, ${studentName} 대원! 안전탐험을 시작해 볼까요?`);
-  };
-
-  // ===== 녹음 토글 =====
-  const startRecording = async (target) => {
-    if (isSpeakerOn) playSfx('click');
-    if (isRecording) { stopRecording(); return; }
-    if (keyboardMode) { return; }
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
-      const mr = new MediaRecorder(stream);
-      audioChunksRef.current = [];
-      mr.ondataavailable = e => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
-      mr.onstop = () => {
-        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          const data = reader.result;
-          if (target === 'pre') setPreRecordAudio(data);
-          else if (target === 'post') setPostRecordAudio(data);
-          else if (target === 'mid') setMidRecording(m => m ? {...m, audio: data} : m);
-        };
-        reader.readAsDataURL(blob);
-        stream.getTracks().forEach(t => t.stop());
-      };
-      mr.start();
-      mediaRecorderRef.current = mr;
-      setRecordTarget(target);
-      setInterimText('');
-      try { recognitionRef.current?.start(); } catch(e) {}
-      setIsRecording(true);
-    } catch(e) {
-      alert('마이크 권한이 필요해요. 키보드로 입력해 보세요!');
-      setKeyboardMode(true);
-    }
-  };
-
-  const stopRecording = () => {
-    try { mediaRecorderRef.current?.stop(); } catch(e) {}
-    try { recognitionRef.current?.stop(); } catch(e) {}
-    setIsRecording(false);
-  };
-
-  // ===== 영역 선택 → 개념학습 → 문제수 선택 =====
-  const selectArea = (area) => {
-    if (isSpeakerOn) playSfx('click');
-    setCurrentArea(area);
-    setStep('concept');
-    if (isSpeakerOn) speak(CONCEPT_DATA[area.id].sub);
-  };
-
-  const startQuiz = (count) => {
-    if (isSpeakerOn) playSfx('click');
-    setQuestionCount(count);
-    const pool = [...currentArea.questions];
-    for (let i = pool.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i+1));
-      [pool[i], pool[j]] = [pool[j], pool[i]];
-    }
-    const selected = [];
-    for (let i = 0; i < count; i++) selected.push(pool[i % pool.length]);
-    setAreaQuestions(selected);
-    setCurrentQIdx(0);
-    setFeedback(null);
-    setVoiceAnswerText('');
-    setHelpUsedThisQ(false);
-    setMidRecCount(0);
-    setStep('play');
-    if (isSpeakerOn) speak(selected[0].text);
-  };
-
-  // ===== 정답 처리 =====
-  const handleChoice = (idx) => {
-    if (feedback) return;
-    const q = areaQuestions[currentQIdx];
-    const isCorrect = (idx + 1) === Number(q.answer);
-    processAnswer(q, q.options[idx], isCorrect);
-  };
-
-  const handleVoiceCheck = () => {
-    const q = areaQuestions[currentQIdx];
-    const userText = voiceAnswerText.trim().toLowerCase();
-    if (!userText) {
-      alert('녹음하거나 글로 적어 주세요!');
-      return;
-    }
-    const keywords = String(q.answer).split(',').map(k => k.trim().toLowerCase()).filter(Boolean);
-    const matched = keywords.some(k => userText.includes(k));
-    processAnswer(q, voiceAnswerText, matched);
-  };
-
-  const processAnswer = (q, picked, isCorrect) => {
-    setTotalAnswered(t => t+1);
-    let newStreak = streak;
-    if (isCorrect) {
-      setCorrectCount(c => c+1);
-      setTotalStars(s => s+1);
-      newStreak = streak + 1;
-      setStreak(newStreak);
-      if (newStreak > bestStreak) setBestStreak(newStreak);
-      if (isSpeakerOn) playSfx('correct');
-      triggerBurst(['🌟','✨','💫']);
-      if (newStreak === 3) triggerBurst(['🔥','🔥','🔥','✨','💥']);
-      if (newStreak === 5) { triggerBurst(['⚡','⚡','⚡','🎆','💫']); triggerConfetti(); }
-      if (newStreak >= 7) { triggerBurst(['🏆','✨','🎉','💎']); triggerConfetti(); }
-    } else {
-      setStreak(0);
-      if (isSpeakerOn) playSfx('wrong');
-    }
-
-    const praise = ENCOURAGEMENTS[Math.floor(Math.random()*ENCOURAGEMENTS.length)];
-    let mainText;
-    if (isCorrect) {
-      mainText = newStreak >= 3 ? `🔥 ${newStreak}연속 정답! ${praise}` : `정답이에요! ${praise}`;
-    } else {
-      mainText = '괜찮아요, 다시 기억해 봐요';
-    }
-    let subText = isCorrect ? q.correctFeedback : q.wrongFeedback;
-    if (isCorrect && Math.random() < 0.5 && FUN_FACTS[currentArea.id]) {
-      const facts = FUN_FACTS[currentArea.id];
-      subText += '\n' + facts[Math.floor(Math.random()*facts.length)];
-    }
-    setFeedback({ correct: isCorrect, main: mainText, sub: subText });
-    if (isSpeakerOn) speak(isCorrect ? `${praise} ${q.correctFeedback}` : `괜찮아요. ${q.wrongFeedback}`);
-
-    callGAS('saveAnswer', {
-      student: studentName, area: currentArea.id, q: q.text,
-      picked: String(picked), correctAns: String(q.answer),
-      correct: isCorrect, helpUsed: helpUsedThisQ
-    });
-  };
-
-  // ===== 다음 문제 / 영역 마무리 =====
-  const nextQuestion = () => {
-    setFeedback(null);
-    setVoiceAnswerText('');
-    setInterimText('');
-    setHelpUsedThisQ(false);
-    const nextIdx = currentQIdx + 1;
-    if (nextIdx > 0 && nextIdx % 5 === 0 && nextIdx < areaQuestions.length) {
-      goToMidRecording();
-    } else if (nextIdx >= areaQuestions.length) {
-      goToMidRecording(true);
-    } else {
-      setCurrentQIdx(nextIdx);
-      if (isSpeakerOn) speak(areaQuestions[nextIdx].text);
-    }
-  };
-
-  const retryQuestion = () => {
-    setFeedback(null);
-    setVoiceAnswerText('');
-    setInterimText('');
-  };
-
-  // ===== 도움받기 =====
-  const useHelp = () => {
-    const q = areaQuestions[currentQIdx];
-    setHelpUsedThisQ(true);
-    if (!isSpeakerOn) {
-      const u = new SpeechSynthesisUtterance(q.text);
-      u.lang='ko-KR'; const v = selectKoreanVoice(); if (v) u.voice = v;
-      u.pitch=1.0; u.rate=0.9;
-      speechSynthesis.cancel(); speechSynthesis.speak(u);
-    } else {
-      speak(q.text);
-    }
-  };
-
-  // ===== 중간/최종 녹음 =====
-  const goToMidRecording = (isFinal=false) => {
-    const prompt = RECORD_PROMPTS[Math.floor(Math.random()*RECORD_PROMPTS.length)];
-    setMidRecording({ prompt: prompt.text, em: prompt.em, text:'', audio:'', stars:0, sticker:null, isFinal });
-    setMidRecPhase('record');
-    setKeyboardMode(false);
-    setStep('midrec');
-    if (isSpeakerOn) speak(prompt.text);
-  };
-
-  const finishMidReview = () => {
-    if (!midRecording) return;
-    if (midRecording.stars <= 3) {
-      alert('별점이 3개 이하면 다시 녹음해 봐요!');
-      retryMid();
-      return;
-    }
-    saveMidRec();
-  };
-
-  const retryMid = () => {
-    setMidRecording(m => ({...m, text:'', audio:'', stars:0, sticker:null}));
-    setMidRecPhase('record');
-    setInterimText('');
-  };
-
-  const saveMidRec = () => {
-    if (!midRecording) return;
-    const isFinal = midRecording.isFinal;
-    callGAS('saveRecording', {
-      student: studentName, area: currentArea.id,
-      kind: isFinal ? 'final' : 'mid',
-      prompt: midRecording.prompt,
-      transcript: midRecording.text,
-      stars: midRecording.stars,
-      sticker: midRecording.sticker,
-      audioBase64: midRecording.audio
-    });
-    setTotalStars(s => s + midRecording.stars);
-    setMidRecCount(c => c + 1);
-
-    if (isFinal) {
-      setStep('reflect');
-      if (isSpeakerOn) speak('잠깐, 오늘 배운 것을 정리해 봐요.');
-    } else {
-      const nextIdx = currentQIdx + 1;
-      setCurrentQIdx(nextIdx);
-      setStep('play');
-      setFeedback(null);
-      setVoiceAnswerText('');
-      if (isSpeakerOn && areaQuestions[nextIdx]) speak(areaQuestions[nextIdx].text);
-    }
-  };
-
-  // ===== 성찰 마무리 =====
-  const finishReflect = () => {
-    if (reflectStars > 0 && reflectStars <= 3) {
-      alert('다짐이 약해요. 다시 적어 봐요!');
-      setReflectA2(''); setReflectStars(0);
-      return;
-    }
-    callGAS('saveReflection', {
-      student: studentName, area: currentArea.id,
-      a1: reflectA1, a2: reflectA2, stars: reflectStars
-    });
-    setReflectA1(''); setReflectA2(''); setReflectStars(0);
-    const newDone = new Set(completedAreas).add(currentArea.id);
-    setCompletedAreas(newDone);
-    triggerConfetti();
-    if (isSpeakerOn) playSfx('fanfare');
-    if (newDone.size >= groupedAreas.length) {
-      setStep('eval');
-      if (isSpeakerOn) speak('모든 탐험을 마쳤어요! 스스로 평가해 볼까요?');
-    } else {
-      setStep('map');
-    }
-  };
-
-  // ===== 자기평가 → 사후 녹음 =====
-  const finishEval = () => {
-    if (selfStars === 0) { alert('별점을 매겨 주세요!'); return; }
-    setStep('postrecord');
-    if (isSpeakerOn) speak('이제 배운 후 다짐을 녹음해 봐요.');
-  };
-
-  const restartEval = () => {
-    setSelfStars(0);
-    setCompletedAreas(new Set());
-    setStep('map');
-  };
-
-  // ===== 최종 제출 =====
-  const submitAll = async () => {
-    if (recordTarget === 'post' && isRecording) stopRecording();
-    setIsSubmitting(true);
-    if (preRecordText || preRecordAudio) {
-      await callGAS('saveRecording', {
-        student: studentName, area: 'pre', kind:'pre',
-        prompt: '사전 학습 생각 말하기',
-        transcript: preRecordText, audioBase64: preRecordAudio,
-        stars: 0, sticker: null
-      });
-    }
-    if (postRecordText || postRecordAudio) {
-      await callGAS('saveRecording', {
-        student: studentName, area: 'post', kind:'post',
-        prompt: '사후 학습 다짐 말하기',
-        transcript: postRecordText, audioBase64: postRecordAudio,
-        stars: 0, sticker: null
-      });
-    }
-    await callGAS('saveResult', {
-      student: studentName,
-      accuracy: totalAnswered ? Math.round(correctCount/totalAnswered*100) : 0,
-      stars: totalStars,
-      recordings: midRecCount + (preRecordAudio?1:0) + (postRecordAudio?1:0),
-      areasDone: Array.from(completedAreas),
-      selfStars,
-      progress: '완료',
-      bestStreak
-    });
-    setIsSubmitting(false);
-    setStep('result');
-    triggerConfetti();
-    setTimeout(triggerConfetti, 600);
-    if (isSpeakerOn) playSfx('fanfare');
-  };
-
-  // ===== 스피커 토글 =====
-  const toggleSpeaker = () => {
-    const next = !isSpeakerOn;
-    setIsSpeakerOn(next);
-    if (!next) stopSpeak();
-    else {
-      if (step === 'play' && areaQuestions[currentQIdx]) speak(areaQuestions[currentQIdx].text);
-    }
-  };
-
-  // ===== 로딩 =====
-  if (isLoading) {
-    return (
-      <div className="w-full h-full flex items-center justify-center flex-col text-blue-500 font-bold text-2xl">
-        <Loader2 className="animate-spin w-20 h-20 mb-4"/>
-        데이터를 불러오는 중...
-      </div>
-    );
-  }
-
-  // ============================================================
-  // 렌더링 — 480×820 캔버스 안에 모든 화면 꽉 채우기
-  // ============================================================
+const pickKoreanVoice = () => {
+  const all = window.speechSynthesis?.getVoices() || [];
+  const kor = all.filter(v => /ko/i.test(v.lang));
   return (
-    <div className="w-full h-full font-gowun text-slate-800 flex flex-col items-center justify-center overflow-hidden relative p-3">
-      
-      {/* 배경 떠다니는 데코 */}
-      <div className="bg-decor">
-        <span style={{top:'5%',left:'8%',fontSize:'42px',animationDelay:'0s'}}>✨</span>
-        <span style={{top:'15%',right:'10%',fontSize:'38px',animationDelay:'1s'}}>⭐</span>
-        <span style={{top:'40%',left:'5%',fontSize:'34px',animationDelay:'2s'}}>💖</span>
-        <span style={{top:'55%',right:'8%',fontSize:'46px',animationDelay:'0.5s'}}>🌈</span>
-        <span style={{top:'72%',left:'12%',fontSize:'40px',animationDelay:'1.5s'}}>🌸</span>
-        <span style={{top:'85%',right:'15%',fontSize:'44px',animationDelay:'2.5s'}}>🦋</span>
-        <span style={{top:'25%',left:'45%',fontSize:'32px',animationDelay:'3s'}}>🎀</span>
-        <span style={{top:'62%',right:'42%',fontSize:'36px',animationDelay:'3.5s'}}>💫</span>
-      </div>
-      
-      {/* 상단 바: 스피커 + 도움말 */}
-      <div className="absolute top-3 right-3 z-50 flex gap-2">
-        {(step === 'login' || step === 'intro') && (
-          <button onClick={() => { setShowTutorial(true); setTutorialStep(0); }}
-            className="p-3 bg-white rounded-full shadow-md border-2 border-slate-200">
-            <HelpCircle size={26} className="text-purple-500"/>
-          </button>
+    kor.find(v => /Google/i.test(v.name)) ||
+    kor.find(v => /Wavenet|Neural/i.test(v.name)) ||
+    kor.find(v => /female|여/i.test(v.name)) ||
+    kor[0]
+  );
+};
+const speak = (text, speakerOn=true, opts={}) => {
+  if (!speakerOn && !opts.force) return;
+  try {
+    window.speechSynthesis?.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "ko-KR";
+    u.rate = opts.rate ?? 0.95;
+    u.pitch = opts.pitch ?? 1.05;
+    u.volume = 1.0;
+    const v = pickKoreanVoice();
+    if (v) u.voice = v;
+    window.speechSynthesis.speak(u);
+  } catch(e){}
+};
+
+const saveToGAS = (action, payload) => {
+  if (!GAS_URL) return Promise.resolve({ok:false, reason:"no GAS_URL"});
+  return fetch(GAS_URL, {
+    method:"POST",
+    body: JSON.stringify({ action, payload }),
+    headers:{"Content-Type":"text/plain;charset=utf-8"}
+  }).then(r=>r.json()).catch(e=>({ok:false, error:String(e)}));
+};
+
+/* =========================================================
+   파티클 폭죽
+========================================================= */
+function Burst({ x, y, onDone }) {
+  const colors = ["#FF6B9D","#FFD93D","#6BCB77","#54A0FF","#C56CF0","#FF9F43"];
+  const particles = Array.from({length: 18}, (_,i)=> {
+    const a = (Math.PI * 2 * i) / 18;
+    const d = 80 + Math.random()*60;
+    return { bx: Math.cos(a)*d, by: Math.sin(a)*d, c: colors[i % colors.length] };
+  });
+  useEffect(() => { const t = setTimeout(onDone, 1000); return ()=>clearTimeout(t); }, []);
+  return (
+    <div className="fixed pointer-events-none z-50" style={{ left:x, top:y }}>
+      {particles.map((p,i)=>(
+        <span key={i} className="burst-particle"
+          style={{ "--bx":`${p.bx}px`, "--by":`${p.by}px`, background:p.c, width:14, height:14, borderRadius:"50%", display:"block" }} />
+      ))}
+    </div>
+  );
+}
+
+/* =========================================================
+   떠다니는 배경 데코
+========================================================= */
+function FloatingDeco() {
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      <div className="absolute text-5xl opacity-30 deco-1" style={{top:"8%", left:"6%"}}>☁️</div>
+      <div className="absolute text-4xl opacity-30 deco-2" style={{top:"15%", right:"8%"}}>⭐</div>
+      <div className="absolute text-5xl opacity-25 deco-3" style={{bottom:"12%", left:"10%"}}>🌈</div>
+      <div className="absolute text-4xl opacity-30 deco-1" style={{bottom:"18%", right:"12%"}}>💖</div>
+      <div className="absolute text-3xl opacity-25 deco-2" style={{top:"45%", left:"4%"}}>✨</div>
+      <div className="absolute text-3xl opacity-25 deco-3" style={{top:"50%", right:"5%"}}>🎈</div>
+    </div>
+  );
+}
+
+/* =========================================================
+   상단 바
+========================================================= */
+function TopBar({ name, speakerOn, setSpeakerOn, micOn, setMicOn, onHome, progress }) {
+  return (
+    <div className="absolute top-0 left-0 right-0 h-16 px-4 flex items-center justify-between z-30 bg-white/60 backdrop-blur-md border-b border-white/40">
+      <button onClick={onHome} className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-white/80 hover:bg-white shadow-sm card-hover">
+        <Home size={20} className="text-pink-500"/>
+        <span className="font-cafe24 text-base">처음</span>
+      </button>
+      <div className="flex-1 mx-4">
+        {progress != null && (
+          <div className="h-3 bg-white/60 rounded-full overflow-hidden shadow-inner">
+            <motion.div initial={{width:0}} animate={{width:`${progress*100}%`}}
+              className="h-full bg-gradient-to-r from-pink-400 via-yellow-300 to-emerald-400 rounded-full"/>
+          </div>
         )}
-        <button onClick={toggleSpeaker}
-          className={`p-3 bg-white rounded-full shadow-md border-2 ${isSpeakerOn?'border-blue-400':'border-slate-200'}`}>
-          {isSpeakerOn ? <Volume2 size={26} className="text-blue-500"/> : <VolumeX size={26} className="text-slate-400"/>}
+      </div>
+      <div className="flex items-center gap-2">
+        {name && <div className="px-3 py-2 rounded-2xl bg-yellow-200/80 font-cafe24 text-sm">{name} 친구</div>}
+        <button onClick={()=>setSpeakerOn(v=>!v)} className={`p-2 rounded-2xl shadow-sm card-hover ${speakerOn?"bg-emerald-400 text-white":"bg-white/80 text-gray-500"}`}>
+          {speakerOn ? <Volume2 size={20}/> : <VolumeX size={20}/>}
         </button>
-      </div>
-
-      {/* 좌상단 정보 */}
-      {step !== 'login' && step !== 'result' && (
-        <div className="absolute top-3 left-3 z-50 flex gap-2 items-center">
-          <div className="bg-white px-3 py-2 rounded-full shadow font-bold text-base">🙋 {studentName}</div>
-          <div className="bg-yellow-100 px-3 py-2 rounded-full shadow font-bold text-base">⭐ {totalStars}</div>
-          {streak >= 2 && <div className="bg-orange-100 px-3 py-2 rounded-full shadow font-bold text-base">🔥 {streak}</div>}
-        </div>
-      )}
-
-      {/* 튜토리얼 모달 */}
-      <AnimatePresence>
-        {showTutorial && (
-          <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-            <motion.div initial={{scale:0.8}} animate={{scale:1}} className="bg-white rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl">
-              <div className="min-h-[280px] flex flex-col items-center justify-center gap-3">
-                <div className="text-8xl">{TUTORIAL_PAGES[tutorialStep].em}</div>
-                <div className="text-4xl font-black bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent">
-                  {TUTORIAL_PAGES[tutorialStep].title}
-                </div>
-                <div className="text-2xl font-bold whitespace-pre-wrap">{TUTORIAL_PAGES[tutorialStep].desc}</div>
-              </div>
-              <div className="flex gap-2 justify-center my-4">
-                {TUTORIAL_PAGES.map((_,i) => (
-                  <div key={i} className={`w-3 h-3 rounded-full transition-all ${i===tutorialStep?'bg-pink-500 scale-125':'bg-slate-300'}`}/>
-                ))}
-              </div>
-              <div className="flex gap-2 justify-center">
-                {tutorialStep > 0 && (
-                  <button onClick={() => setTutorialStep(s => s-1)}
-                    className="px-5 py-3 bg-slate-200 rounded-full font-black text-lg">← 이전</button>
-                )}
-                {tutorialStep < TUTORIAL_PAGES.length - 1 ? (
-                  <button onClick={() => setTutorialStep(s => s+1)}
-                    className="px-6 py-3 bg-gradient-to-r from-pink-500 to-orange-400 text-white rounded-full font-black text-lg shadow">다음 →</button>
-                ) : (
-                  <button onClick={() => setShowTutorial(false)}
-                    className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-full font-black text-lg shadow">시작! 🚀</button>
-                )}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div className="w-full h-full max-w-5xl mx-auto flex flex-col items-center justify-center">
-      <AnimatePresence mode="wait">
-
-        {/* 1. 로그인 */}
-        {step === 'login' && (
-          <motion.div key="login" initial={{opacity:0,scale:0.9}} animate={{opacity:1,scale:1}} exit={{opacity:0}}
-            className="bg-white p-7 rounded-[2.5rem] shadow-2xl border-[6px] border-pink-200 w-full text-center space-y-5 relative z-10">
-            <div className="absolute -top-5 -left-5 text-6xl wiggle">🌸</div>
-            <div className="absolute -top-5 -right-5 text-6xl float-y" style={{animationDelay:'0.5s'}}>🎀</div>
-            <div className="absolute -bottom-3 -left-3 text-5xl float-y" style={{animationDelay:'1s'}}>💖</div>
-            <div className="absolute -bottom-3 -right-3 text-5xl wiggle" style={{animationDelay:'1.5s'}}>✨</div>
-            <SubjectFairy size={120}/>
-            <div className="space-y-2">
-              <h1 className="text-6xl font-cafe24 leading-tight">
-                <span className="bg-gradient-to-r from-pink-500 via-orange-400 to-blue-500 bg-clip-text text-transparent">🛡️ 안전탐험 ✨</span>
-              </h1>
-              <p className="text-2xl font-gowun text-slate-600">
-                <span className="hi-yellow">🌟 안전을 배우는</span><br/><span className="hi-pink">신나는 모험! 🌟</span>
-              </p>
-            </div>
-            <div className="bg-gradient-to-br from-pink-50 to-yellow-50 p-5 rounded-3xl border-4 border-pink-200">
-              <p className="text-2xl font-jua text-pink-700 mb-3">👋 내 이름을 골라요!</p>
-              <select value={studentName} onChange={e => setStudentName(e.target.value)}
-                className="w-full text-3xl font-jua p-3 border-4 border-pink-300 rounded-2xl outline-none bg-white text-pink-700 focus:border-pink-500">
-                <option value="">🙋 -- 이름 선택 --</option>
-                {students.map(s => <option key={s} value={s}>{s} 친구</option>)}
-              </select>
-            </div>
-            <button onClick={startApp}
-              className="btn-cute w-full py-5 bg-gradient-to-r from-pink-500 via-rose-500 to-orange-400 text-white text-4xl font-cafe24"
-              style={{boxShadow:'0 6px 0 #DB2777, 0 12px 24px rgba(0,0,0,0.15)'}}>
-              🚀 시작하기 ✨
-            </button>
-          </motion.div>
-        )}
-
-        {/* 2. 인트로 */}
-        {step === 'intro' && (
-          <motion.div key="intro" initial={{scale:0.9}} animate={{scale:1}} exit={{opacity:0}}
-            className="bg-white p-7 rounded-[2.5rem] shadow-2xl border-4 border-blue-100 w-full text-center space-y-5">
-            <SubjectFairy size={120}/>
-            <h1 className="text-4xl font-black text-pink-600">반가워, {studentName} 대원!</h1>
-            <div className="bg-gradient-to-br from-yellow-100 to-orange-100 p-5 rounded-2xl border-2 border-orange-200">
-              <p className="text-2xl font-black text-orange-700 mb-2">"나를 지키는<br/>안전 약속을 배우자!"</p>
-              <p className="text-lg font-bold text-orange-800">🧚 통합교과 요정과 함께<br/>5가지 영역을 탐험해요.</p>
-            </div>
-            <button onClick={() => { setStep('prerecord'); if (isSpeakerOn) speak('먼저 평소 알고 있던 안전 규칙을 자유롭게 말해 봐요.'); }}
-              className="w-full py-5 bg-gradient-to-r from-pink-500 to-orange-400 text-white rounded-3xl text-3xl font-black shadow-xl active:scale-95">
-              사전 학습 시작 <ChevronRight className="inline" size={28}/>
-            </button>
-          </motion.div>
-        )}
-
-        {/* 3. 사전 녹음 */}
-        {step === 'prerecord' && (
-          <motion.div key="pre" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
-            className="bg-white p-6 rounded-[2.5rem] shadow-2xl border-4 border-rose-200 w-full text-center space-y-4">
-            <h1 className="text-4xl font-black text-rose-500">탐험 전 나의 생각</h1>
-            <p className="text-xl font-bold text-slate-600 bg-rose-50 p-3 rounded-xl">
-              평소 알고 있는 '안전 규칙'을<br/>자유롭게 말해 주세요!
-            </p>
-            {!keyboardMode ? (
-              <>
-                <button onClick={() => isRecording ? stopRecording() : startRecording('pre')}
-                  className={`w-32 h-32 rounded-full flex items-center justify-center mx-auto text-white shadow-xl transition-all ${isRecording?'bg-red-500 pulse-record':'bg-rose-400'}`}>
-                  {isRecording ? <Square size={52}/> : <Mic size={52}/>}
-                </button>
-                <p className="text-lg font-bold text-slate-500">
-                  {isRecording ? '녹음 중... (네모 누르면 멈춤)' : '마이크 누르고 말해 봐요'}
-                </p>
-              </>
-            ) : (
-              <p className="text-xl font-bold text-rose-500 py-8">⌨️ 키보드로 직접 적어 보세요</p>
-            )}
-            <textarea value={preRecordText + (isRecording?interimText:'')}
-              onChange={e => setPreRecordText(e.target.value)}
-              placeholder="여기에 말한 내용이 글자로 나타나요. 직접 적어도 돼요!"
-              className="w-full h-24 bg-slate-50 rounded-2xl border-2 border-slate-200 p-3 text-left text-slate-700 font-bold text-lg resize-none outline-none focus:border-rose-400"/>
-            <button onClick={() => { if (isRecording) stopRecording(); setKeyboardMode(!keyboardMode); }}
-              className="text-base text-rose-500 underline font-bold">{keyboardMode?'🎤 마이크로 녹음':'⌨️ 키보드로 입력'}</button>
-            <button onClick={() => { if (isRecording) stopRecording(); setKeyboardMode(false); setStep('map'); }}
-              className="w-full py-4 bg-slate-800 text-white rounded-2xl text-2xl font-black shadow-md active:scale-95">
-              안전 지도 보기 <ChevronRight className="inline" size={26}/>
-            </button>
-          </motion.div>
-        )}
-
-        {/* 4. 지도 */}
-        {step === 'map' && (
-          <motion.div key="map" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
-            className="relative w-full h-full bg-gradient-to-br from-sky-50 to-blue-100 rounded-[2.5rem] border-[8px] border-white shadow-2xl overflow-hidden mt-16">
-            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-white px-5 py-2 rounded-full shadow font-black text-blue-600 text-xl whitespace-nowrap">
-              🗺️ 안전 지도 ({completedAreas.size} / {groupedAreas.length})
-            </div>
-            <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-30 z-0" viewBox="0 0 100 100" preserveAspectRatio="none">
-              {groupedAreas.length > 1 && (
-                <path d={`M ${groupedAreas.map(m => `${m.pos.x} ${m.pos.y}`).join(' L ')}`}
-                  fill="none" stroke="#0284C7" strokeWidth="1.2" strokeDasharray="3 3"/>
-              )}
-            </svg>
-            {groupedAreas.map(m => {
-              const isDone = completedAreas.has(m.id);
-              return (
-                <div key={m.id} className="absolute -translate-x-1/2 -translate-y-1/2 z-10"
-                  style={{ left:`${m.pos.x}%`, top:`${m.pos.y}%` }}>
-                  <motion.button whileHover={{scale:1.1}} whileTap={{scale:0.9}} onClick={() => !isDone && selectArea(m)}
-                    disabled={isDone}
-                    className={`px-4 py-3 rounded-2xl shadow-xl border-4 flex flex-col items-center gap-1 transition-colors relative ${isDone?'bg-slate-200 border-slate-300 opacity-60':`${m.bg} border-white text-white scale-110`}`}>
-                    <m.Icon size={36}/>
-                    <span className="text-base font-black whitespace-nowrap">{m.name}</span>
-                    {isDone && <CheckCircle2 className="absolute -top-2 -right-2 text-green-600 bg-white rounded-full p-0.5" size={24}/>}
-                  </motion.button>
-                </div>
-              );
-            })}
-            {completedAreas.size === groupedAreas.length && groupedAreas.length > 0 && (
-              <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-30">
-                <button onClick={() => { setStep('eval'); if (isSpeakerOn) speak('스스로 평가해 볼까요?'); }}
-                  className="px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full text-2xl font-black shadow-xl">
-                  최종 평가하기 ⭐
-                </button>
-              </div>
-            )}
-          </motion.div>
-        )}
-
-        {/* 5. 개념학습 */}
-        {step === 'concept' && currentArea && (
-          <ConceptScreen
-            data={CONCEPT_DATA[currentArea.id]}
-            areaName={currentArea.name}
-            isSpeakerOn={isSpeakerOn}
-            onDone={() => setStep('count')}
-          />
-        )}
-
-        {/* 6. 문제수 선택 */}
-        {step === 'count' && currentArea && (
-          <motion.div key="count" initial={{opacity:0}} animate={{opacity:1}}
-            className="bg-white p-6 rounded-[2.5rem] shadow-2xl border-4 border-blue-100 w-full text-center space-y-5">
-            <h1 className="text-3xl font-black text-blue-600">🎯 몇 문제 풀어 볼까요?</h1>
-            <p className="text-xl font-bold text-slate-600">하고 싶은 만큼 골라 봐요!</p>
-            <div className="grid grid-cols-3 gap-3">
-              {[3,5,10].map(n => (
-                <button key={n} onClick={() => startQuiz(n)}
-                  className="bg-gradient-to-br from-pink-100 to-yellow-100 rounded-2xl p-5 border-4 border-transparent hover:border-pink-300 active:scale-95">
-                  <div className="text-6xl font-black bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent">{n}</div>
-                  <div className="text-xl font-bold mt-1">문제</div>
-                  <div className="text-sm text-slate-500 mt-1">{n===3?'짧게':n===5?'알맞게':'더 해볼래!'}</div>
-                </button>
-              ))}
-            </div>
-            <button onClick={() => setStep('map')} className="text-base text-slate-500 underline font-bold">← 영역 다시 고르기</button>
-          </motion.div>
-        )}
-
-        {/* 7. 문제 풀이 */}
-        {step === 'play' && areaQuestions.length > 0 && (
-          <PlayScreen
-            area={currentArea}
-            question={areaQuestions[currentQIdx]}
-            qIdx={currentQIdx}
-            totalQ={areaQuestions.length}
-            feedback={feedback}
-            voiceAnswerText={voiceAnswerText}
-            setVoiceAnswerText={setVoiceAnswerText}
-            interimText={interimText}
-            isRecording={isRecording}
-            isSpeakerOn={isSpeakerOn}
-            keyboardMode={keyboardMode}
-            setKeyboardMode={setKeyboardMode}
-            helpUsedThisQ={helpUsedThisQ}
-            onChoice={handleChoice}
-            onVoiceCheck={handleVoiceCheck}
-            onToggleRec={() => isRecording ? stopRecording() : startRecording('voice')}
-            onHelp={useHelp}
-            onNext={nextQuestion}
-            onRetry={retryQuestion}
-            onStopRec={stopRecording}
-          />
-        )}
-
-        {/* 8. 중간/최종 녹음 */}
-        {step === 'midrec' && midRecording && (
-          <RecordReviewScreen
-            recording={midRecording}
-            setRecording={setMidRecording}
-            phase={midRecPhase}
-            setPhase={setMidRecPhase}
-            isRecording={isRecording}
-            interimText={interimText}
-            isSpeakerOn={isSpeakerOn}
-            keyboardMode={keyboardMode}
-            setKeyboardMode={setKeyboardMode}
-            onStartRec={() => startRecording('mid')}
-            onStopRec={stopRecording}
-            onRetry={retryMid}
-            onDone={finishMidReview}
-            title={midRecording.isFinal ? '🎙️ 영역 마무리 녹음' : '🎙️ 중간 녹음'}
-          />
-        )}
-
-        {/* 9. 성찰 */}
-        {step === 'reflect' && (
-          <motion.div key="reflect" initial={{opacity:0}} animate={{opacity:1}}
-            className="bg-white p-6 rounded-[2.5rem] shadow-2xl border-4 border-yellow-100 w-full space-y-4">
-            <h1 className="text-3xl font-black text-yellow-600 text-center">💭 잠깐, 생각해 봐요</h1>
-            <div>
-              <p className="text-xl font-bold mb-2">🌟 가장 기억에 남는 건?</p>
-              <textarea value={reflectA1} onChange={e=>setReflectA1(e.target.value)}
-                placeholder="자유롭게 적어 봐요..."
-                className="w-full h-16 bg-yellow-50 border-2 border-yellow-200 rounded-xl p-2 text-lg font-bold resize-none outline-none focus:border-yellow-400"/>
-            </div>
-            <div>
-              <p className="text-xl font-bold mb-2">🌈 어떤 약속을 지키고 싶나요?</p>
-              <textarea value={reflectA2} onChange={e=>setReflectA2(e.target.value)}
-                placeholder="다짐을 적어 봐요..."
-                className="w-full h-16 bg-pink-50 border-2 border-pink-200 rounded-xl p-2 text-lg font-bold resize-none outline-none focus:border-pink-400"/>
-            </div>
-            <div className="text-center">
-              <p className="text-base font-bold text-slate-500 mb-1">⭐ 다짐을 별로 평가해요</p>
-              <div className="flex justify-center gap-1">
-                {[1,2,3,4,5].map(n => (
-                  <button key={n} onClick={() => setReflectStars(n)}>
-                    <Star size={44} className={n<=reflectStars?'fill-yellow-400 text-yellow-500':'text-slate-200'}/>
-                  </button>
-                ))}
-              </div>
-            </div>
-            {reflectStars > 0 && reflectStars <= 3 && (
-              <p className="text-center text-base text-orange-500 font-bold">⚠️ 다짐이 약해요. 다시 적어 봐요!</p>
-            )}
-            <button onClick={finishReflect}
-              disabled={reflectStars === 0}
-              className="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-2xl text-2xl font-black shadow disabled:opacity-50">
-              다음으로 ➡️
-            </button>
-          </motion.div>
-        )}
-
-        {/* 10. 자기평가 */}
-        {step === 'eval' && (
-          <motion.div key="eval" initial={{scale:0.9}} animate={{scale:1}}
-            className="bg-white p-7 rounded-[2.5rem] shadow-2xl border-4 border-yellow-200 w-full text-center space-y-5">
-            <h1 className="text-3xl font-black text-yellow-600">⭐ 나의 안전탐험 점수는?</h1>
-            <p className="text-xl font-bold text-slate-600">스스로 얼마나 잘 배웠는지<br/>별을 눌러 평가해 봐요!</p>
-            <div className="flex justify-center gap-2">
-              {[1,2,3,4,5].map(n => (
-                <button key={n} onClick={() => setSelfStars(n)} className="transition-transform hover:scale-125">
-                  <Star size={60} className={n<=selfStars?'fill-yellow-400 text-yellow-500':'text-slate-200'} strokeWidth={1}/>
-                </button>
-              ))}
-            </div>
-            {selfStars > 0 && selfStars <= 3 && (
-              <button onClick={restartEval}
-                className="w-full py-3 bg-orange-100 text-orange-700 border-2 border-orange-300 rounded-2xl text-lg font-black">
-                <RotateCcw className="inline mr-1" size={22}/> 조금 더 다시 해볼래요
-              </button>
-            )}
-            {selfStars > 0 && (
-              <button onClick={finishEval}
-                className="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-2xl text-2xl font-black shadow active:scale-95">
-                다음 단계로 ➡️
-              </button>
-            )}
-          </motion.div>
-        )}
-
-        {/* 11. 사후 녹음 */}
-        {step === 'postrecord' && (
-          <motion.div key="post" initial={{opacity:0}} animate={{opacity:1}}
-            className="bg-white p-6 rounded-[2.5rem] shadow-2xl border-4 border-rose-200 w-full text-center space-y-4">
-            <h1 className="text-4xl font-black text-rose-500">탐험 후 나의 다짐</h1>
-            <p className="text-xl font-bold text-slate-600 bg-rose-50 p-3 rounded-xl">
-              새롭게 알게 된 점이나<br/>앞으로의 다짐을 말해 주세요!
-            </p>
-            {!keyboardMode ? (
-              <>
-                <button onClick={() => isRecording ? stopRecording() : startRecording('post')}
-                  className={`w-32 h-32 rounded-full flex items-center justify-center mx-auto text-white shadow-xl transition-all ${isRecording?'bg-red-500 pulse-record':'bg-rose-400'}`}>
-                  {isRecording ? <Square size={52}/> : <Mic size={52}/>}
-                </button>
-                <p className="text-lg font-bold text-slate-500">
-                  {isRecording ? '녹음 중...' : '마이크를 누르고 말해 봐요'}
-                </p>
-              </>
-            ) : (
-              <p className="text-xl font-bold text-rose-500 py-8">⌨️ 키보드로 직접 적어 보세요</p>
-            )}
-            <textarea value={postRecordText + (isRecording?interimText:'')}
-              onChange={e => setPostRecordText(e.target.value)}
-              placeholder="여기에 말한 내용이 글자로 나타나요"
-              className="w-full h-20 bg-slate-50 rounded-2xl border-2 border-slate-200 p-3 text-left text-slate-700 font-bold text-lg resize-none outline-none focus:border-rose-400"/>
-            <button onClick={() => { if (isRecording) stopRecording(); setKeyboardMode(!keyboardMode); }}
-              className="text-base text-rose-500 underline font-bold">{keyboardMode?'🎤 마이크로':'⌨️ 키보드로'}</button>
-            <button disabled={isSubmitting} onClick={submitAll}
-              className="w-full flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-rose-500 to-orange-400 text-white rounded-2xl text-2xl font-black shadow disabled:opacity-50">
-              {isSubmitting ? <><Loader2 className="animate-spin"/> 저장 중...</> : <>최종 제출하기 <ChevronRight size={28}/></>}
-            </button>
-          </motion.div>
-        )}
-
-        {/* 12. 수료증 */}
-        {step === 'result' && (
-          <motion.div key="result" initial={{scale:0.8,opacity:0}} animate={{scale:1,opacity:1}}
-            className="bg-white p-5 rounded-[2.5rem] shadow-2xl border-[8px] border-orange-300 w-full text-center space-y-3 relative z-10">
-            <div className="absolute -top-6 -left-6 text-6xl wiggle glow-gold">🏆</div>
-            <div className="absolute -top-6 -right-6 text-5xl float-y glow-gold" style={{animationDelay:'0.5s'}}>🎉</div>
-            <div className="absolute -bottom-4 -left-4 text-5xl wiggle" style={{animationDelay:'1s'}}>🎊</div>
-            <div className="absolute -bottom-4 -right-4 text-5xl float-y" style={{animationDelay:'1.5s'}}>✨</div>
-            <SubjectFairy size={100}/>
-            <h1 className="text-4xl font-cafe24">
-              <span className="bg-gradient-to-r from-orange-500 via-pink-500 to-purple-500 bg-clip-text text-transparent">🏆 안전탐험 완료! 🎉</span>
-            </h1>
-            <div className="bg-gradient-to-br from-orange-50 via-yellow-50 to-pink-50 p-4 rounded-3xl border-4 border-dashed border-orange-300 space-y-2 relative">
-              <ShieldCheck size={56} className="text-orange-500 mx-auto float-y"/>
-              <p className="text-2xl font-cafe24 text-orange-700">안전 지킴이 수료증</p>
-              <p className="text-3xl font-jua text-pink-600 txt-shadow-pink">{studentName}</p>
-              <p className="text-base font-gowun text-slate-700">
-                위 대원은 <span className="hi-yellow">모든 안전 미션</span>을<br/>
-                <span className="hi-pink">훌륭히 마쳤음</span>을 증명합니다 ✨
-              </p>
-              <div className="bg-white p-3 rounded-2xl border-2 border-orange-200 text-left text-base space-y-1.5 font-gowun">
-                <div className="flex justify-between"><span>🎯 정답률</span><b className="font-jua text-xl text-orange-600">{totalAnswered?Math.round(correctCount/totalAnswered*100):0}%</b></div>
-                <div className="flex justify-between"><span>⭐ 받은 별</span><b className="font-jua text-xl text-yellow-600">{totalStars}</b></div>
-                <div className="flex justify-between"><span>🔥 최고 연속</span><b className="font-jua text-xl text-red-500">{bestStreak}</b></div>
-                <div className="flex justify-between"><span>🗺️ 완료 영역</span><b className="font-jua text-xl text-blue-600">{completedAreas.size} / {groupedAreas.length}</b></div>
-              </div>
-              <p className="text-sm font-gaegu text-orange-500">{new Date().toLocaleDateString('ko-KR')}</p>
-              <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-red-500 text-white rounded-full flex items-center justify-center border-[5px] border-double border-white shadow-xl rotate-12">
-                <span className="font-cafe24 text-lg leading-tight">참!<br/>잘했어요</span>
-              </div>
-            </div>
-            <button onClick={() => window.location.reload()}
-              className="btn-cute w-full py-3 bg-gradient-to-r from-slate-400 to-slate-500 text-white text-2xl font-cafe24"
-              style={{boxShadow:'0 5px 0 #475569'}}>
-              🔄 다시 시작
-            </button>
-          </motion.div>
-        )}
-
-      </AnimatePresence>
+        <button onClick={()=>setMicOn(v=>!v)} className={`p-2 rounded-2xl shadow-sm card-hover ${micOn?"bg-pink-400 text-white":"bg-white/80 text-gray-500"}`}>
+          {micOn ? <Mic size={20}/> : <MicOff size={20}/>}
+        </button>
       </div>
     </div>
   );
 }
 
-// ============================================================
-// 개념학습 컴포넌트
-// ============================================================
-function ConceptScreen({ data, areaName, isSpeakerOn, onDone }) {
-  const [placed, setPlaced] = useState({});
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [wrongs, setWrongs] = useState({});
+/* =========================================================
+   튜토리얼 카드 (7페이지)
+========================================================= */
+const TUTORIAL_PAGES = [
+  { emoji:"👋", title:"안녕!", text:"우리 이름을 골라 보자.", tts:"안녕 친구! 우리 이름을 골라 볼까요?" },
+  { emoji:"🌈", title:"영역 고르기", text:"교통, 화재, 재난, 생활, 통합 중에 하나!", tts:"다섯 가지 영역 중에서 골라 보세요." },
+  { emoji:"💜", title:"도움받기", text:"모르면 💜 버튼을 눌러요.", tts:"문제를 모르면 도움받기 버튼을 눌러요." },
+  { emoji:"🎤", title:"녹음하기", text:"5문제마다 내 생각을 말해 봐요.", tts:"5문제마다 녹음을 해서 내 생각을 말해 봐요." },
+  { emoji:"⭐", title:"별점 주기", text:"내 녹음을 듣고 별점을 줘요.", tts:"내 녹음을 듣고 별점을 매겨 봐요." },
+  { emoji:"🔊", title:"스피커", text:"스피커 켜면 읽어 줄게요.", tts:"스피커를 켜면 글자를 읽어 줘요." },
+  { emoji:"🏆", title:"수료증!", text:"끝까지 하면 수료증을 받아요!", tts:"끝까지 잘하면 멋진 수료증을 받아요!" }
+];
 
-  const handleItemClick = (itemId) => {
-    if (isSpeakerOn) playSfx('click');
-    setSelectedItem(itemId === selectedItem ? null : itemId);
-  };
-
-  const placeOn = (targetId) => {
-    if (!selectedItem) return;
-    const target = data.targets.find(t => t.id === targetId);
-    const correct = target.accepts === selectedItem;
-    setPlaced(prev => ({...prev, [targetId]: selectedItem}));
-    setWrongs(prev => ({...prev, [targetId]: !correct}));
-    setSelectedItem(null);
-    if (correct) {
-      if (isSpeakerOn) playSfx('pop');
-      triggerBurst(['✨','🌟'], 8);
-    }
-  };
-
-  const unplace = (targetId) => {
-    setPlaced(prev => { const c = {...prev}; delete c[targetId]; return c; });
-    setWrongs(prev => { const c = {...prev}; delete c[targetId]; return c; });
-  };
-
-  const allDone = data.targets.every(t => placed[t.id] && !wrongs[t.id]);
-  const placedItems = new Set(Object.values(placed));
-
-  useEffect(() => {
-    if (allDone) {
-      if (isSpeakerOn) playSfx('correct');
-      triggerConfetti();
-    }
-  }, [allDone]);
-
+function Tutorial({ speakerOn, onClose }) {
+  const [page, setPage] = useState(0);
+  const p = TUTORIAL_PAGES[page];
+  useEffect(()=>{ speak(p.tts, speakerOn); }, [page]);
   return (
-    <motion.div key="concept" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
-      className="w-full h-full flex flex-col items-center gap-3 pt-16 px-3">
-      <h1 className="text-3xl font-black text-purple-600 text-center">🧩 {areaName} 익히기</h1>
-      <p className="text-lg font-bold text-slate-600 text-center">{data.sub}</p>
-      <p className="text-sm text-slate-500 text-center">💡 아래 카드를 골라 → 위 칸에 옮겨 봐요!<br/>틀린 카드는 다시 누르면 돌아와요</p>
-
-      <div className="w-full space-y-2">
-        {data.targets.map(t => {
-          const itemId = placed[t.id];
-          const item = itemId && data.items.find(i => i.id === itemId);
-          const isWrong = wrongs[t.id];
-          return (
-            <div key={t.id}
-              onClick={() => itemId ? unplace(t.id) : placeOn(t.id)}
-              className={`bg-gradient-to-r from-blue-50 to-pink-50 border-4 border-dashed rounded-2xl p-3 flex items-center gap-3 cursor-pointer transition-all ${selectedItem && !itemId?'border-yellow-400 scale-[1.02]':'border-pink-300'}`}>
-              <div className="font-black text-lg flex-shrink-0 w-36">{t.label}</div>
-              <div className={`flex-1 min-h-[52px] rounded-xl flex items-center justify-center font-black text-lg ${item?(isWrong?'bg-red-200 text-red-800':'bg-green-200 text-green-800'):'bg-white/50 text-slate-400'}`}>
-                {item ? item.label : '여기로 옮겨요'}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="w-full grid grid-cols-3 gap-2 mt-1">
-        {data.items.map(i => {
-          const isPlaced = placedItems.has(i.id);
-          if (isPlaced) return <div key={i.id}/>;
-          return (
-            <button key={i.id} onClick={() => handleItemClick(i.id)}
-              className={`bg-gradient-to-br from-yellow-300 to-orange-400 text-white rounded-2xl p-3 font-black text-base shadow-md transition-all ${selectedItem===i.id?'ring-4 ring-pink-400 scale-105':''}`}>
-              {i.label}
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
+      <motion.div initial={{scale:0.7, opacity:0}} animate={{scale:1, opacity:1}}
+        className="bg-white rounded-[36px] shadow-2xl w-full max-w-md p-8 relative">
+        <AnimatePresence mode="wait">
+          <motion.div key={page}
+            initial={{x:50, opacity:0}} animate={{x:0, opacity:1}} exit={{x:-50, opacity:0}}
+            className="text-center py-6">
+            <div className="text-[110px] leading-none mb-4 bounce-soft">{p.emoji}</div>
+            <h2 className="font-cafe24 text-3xl text-pink-500 mb-3">{p.title}</h2>
+            <p className="font-cafe24 text-2xl text-gray-700">{p.text}</p>
+          </motion.div>
+        </AnimatePresence>
+        <div className="flex justify-center gap-2 my-4">
+          {TUTORIAL_PAGES.map((_,i)=><div key={i} className={`dot ${i===page?"active":""}`}/>)}
+        </div>
+        <div className="flex justify-between gap-3 mt-2">
+          <button onClick={()=>setPage(p=>Math.max(0,p-1))}
+            className={`flex-1 py-3 rounded-2xl font-cafe24 text-xl bg-gray-100 hover:bg-gray-200 ${page===0?"invisible":""}`}>
+            ← 이전
+          </button>
+          {page < TUTORIAL_PAGES.length-1 ? (
+            <button onClick={()=>setPage(p=>p+1)}
+              className="flex-1 py-3 rounded-2xl font-cafe24 text-xl bg-gradient-to-r from-pink-400 to-rose-500 text-white shadow-lg card-hover">
+              다음 →
             </button>
-          );
-        })}
-      </div>
-
-      <button onClick={onDone} disabled={!allDone}
-        className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-black text-xl shadow disabled:opacity-40 mt-2">
-        다음으로 ➡️
-      </button>
-    </motion.div>
+          ) : (
+            <button onClick={onClose}
+              className="flex-1 py-3 rounded-2xl font-cafe24 text-xl bg-gradient-to-r from-emerald-400 to-green-500 text-white shadow-lg card-hover">
+              시작! 🚀
+            </button>
+          )}
+        </div>
+      </motion.div>
+    </div>
   );
 }
 
-// ============================================================
-// 문제 풀이 컴포넌트
-// ============================================================
-function PlayScreen({ area, question, qIdx, totalQ, feedback, voiceAnswerText, setVoiceAnswerText, interimText, isRecording, isSpeakerOn, keyboardMode, setKeyboardMode, helpUsedThisQ, onChoice, onVoiceCheck, onToggleRec, onHelp, onNext, onRetry, onStopRec }) {
+/* =========================================================
+   시작 화면
+========================================================= */
+function StartScreen({ onStart, onShowTutorial }) {
+  const [name, setName] = useState("");
+  const students = ["김민준","이서연","박지호","최예린","정도윤","장하은","윤시우","강유나","직접 입력"];
+  const [customName, setCustomName] = useState("");
   return (
-    <motion.div key="play" initial={{y:30,opacity:0}} animate={{y:0,opacity:1}}
-      className="w-full flex flex-col items-center gap-2 pt-16 px-2">
-      <div className="flex items-center gap-2 mb-1">
-        <span className={`${area.bg} text-white px-4 py-1.5 rounded-full text-base font-black flex items-center gap-1`}>
-          <area.Icon size={18}/>{area.name}
-        </span>
-        <span className="text-base font-bold text-slate-500">{qIdx+1} / {totalQ}</span>
-      </div>
+    <div className="absolute inset-0 flex flex-col items-center justify-center p-8">
+      <FloatingDeco/>
+      <motion.h1 initial={{y:-30,opacity:0}} animate={{y:0,opacity:1}}
+        className="font-cafe24 text-6xl md:text-7xl mb-2 text-center">
+        <span className="hi-yellow text-rose-500">안전탐험</span> <span className="bounce-soft inline-block">🛡️</span>
+      </motion.h1>
+      <p className="font-cafe24 text-2xl text-gray-600 mb-8">우리 함께 안전하게! ✨</p>
 
-      <div className={`bg-white p-4 rounded-3xl shadow-2xl border-4 border-blue-50 w-full transition-all ${feedback?'scale-95 opacity-80':''}`}>
-        <h2 className="text-xl font-black leading-tight flex items-start gap-2 mb-3">
-          <span className="bg-blue-500 text-white w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-lg">Q</span>
-          <span>{question.text}</span>
-        </h2>
-
-        {question.type === '음성' ? (
-          <div className="flex flex-col items-center gap-2">
-            {!keyboardMode && (
-              <button disabled={feedback!==null} onClick={onToggleRec}
-                className={`w-24 h-24 rounded-full flex items-center justify-center text-white shadow-xl transition-all ${isRecording?'bg-red-500 pulse-record':'bg-blue-500'} ${feedback?'opacity-50':''}`}>
-                {isRecording ? <Square size={40}/> : <Mic size={40}/>}
-              </button>
-            )}
-            <p className="text-base font-bold text-slate-500 text-center">
-              {keyboardMode ? '⌨️ 아래에 직접 적어요' : (isRecording ? '듣고 있어요...' : '🎤 누르고 정답을 말해 봐요')}
-            </p>
-            <textarea
-              value={voiceAnswerText + (isRecording?interimText:'')}
-              onChange={e => setVoiceAnswerText(e.target.value)}
-              placeholder="여기에 글로 적어도 돼요!"
-              disabled={feedback!==null}
-              className="w-full h-14 bg-slate-50 rounded-xl border-2 border-slate-200 p-2 text-base font-bold resize-none outline-none focus:border-blue-400"/>
-            <button onClick={() => { if (isRecording) onStopRec(); setKeyboardMode(!keyboardMode); }}
-              className="text-sm text-blue-500 underline font-bold">{keyboardMode?'🎤 마이크로':'⌨️ 키보드로'}</button>
-            {!feedback && voiceAnswerText && !isRecording && (
-              <button onClick={onVoiceCheck}
-                className="px-5 py-3 bg-green-500 text-white rounded-2xl text-lg font-black shadow active:scale-95">
-                ✅ 정답 확인하기
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {question.options.map((opt, idx) => (
-              <button key={idx} disabled={feedback!==null} onClick={() => onChoice(idx)}
-                className={`w-full p-3 rounded-2xl border-4 text-left text-lg font-bold transition-all ${feedback?((idx+1)===Number(question.answer)?'border-green-500 bg-green-50 text-green-700':'opacity-30 border-slate-100'):'border-slate-100 hover:border-blue-300 hover:bg-blue-50'}`}>
-                <span className="inline-block w-8 h-8 bg-blue-100 text-blue-700 rounded-full text-center mr-2 font-black leading-8">{idx+1}</span>
-                {opt}
-              </button>
-            ))}
-          </div>
+      <div className="bg-white/80 rounded-[32px] shadow-xl p-8 w-full max-w-md backdrop-blur">
+        <label className="font-cafe24 text-2xl text-pink-500 block mb-3">내 이름을 골라요</label>
+        <select value={name} onChange={e=>setName(e.target.value)}
+          className="w-full p-4 rounded-2xl border-4 border-pink-200 font-cafe24 text-2xl bg-white">
+          <option value="">— 이름을 골라주세요 —</option>
+          {students.map(s=> <option key={s} value={s}>{s}</option>)}
+        </select>
+        {name === "직접 입력" && (
+          <input value={customName} onChange={e=>setCustomName(e.target.value)} placeholder="이름을 적어주세요"
+            className="w-full mt-3 p-4 rounded-2xl border-4 border-yellow-200 font-cafe24 text-2xl"/>
         )}
-
-        <div className="flex justify-between items-center mt-3">
-          <button onClick={onHelp} disabled={helpUsedThisQ}
-            className="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-full text-base font-black flex items-center gap-1 disabled:opacity-50">
-            💜 도움받기 {helpUsedThisQ && '✓'}
+        <div className="flex gap-3 mt-6">
+          <button onClick={onShowTutorial}
+            className="flex-1 py-4 rounded-2xl font-cafe24 text-xl bg-purple-100 text-purple-700 hover:bg-purple-200 card-hover">
+            📖 사용법
+          </button>
+          <button
+            disabled={!name || (name==="직접 입력" && !customName.trim())}
+            onClick={()=> onStart(name==="직접 입력" ? customName.trim() : name)}
+            className="flex-[2] py-4 rounded-2xl font-cafe24 text-2xl text-white shadow-lg bg-gradient-to-r from-pink-400 via-rose-400 to-orange-400 hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
+            시작하기 🚀
           </button>
         </div>
       </div>
-
-      <AnimatePresence>
-        {feedback && (
-          <motion.div initial={{y:20,opacity:0}} animate={{y:0,opacity:1}}
-            className={`p-3 rounded-3xl border-4 shadow-xl w-full ${feedback.correct?'bg-green-50 border-green-200':'bg-red-50 border-red-200'}`}>
-            <div className="flex items-start gap-2 mb-2">
-              <div className="text-3xl">{feedback.correct?'🌟':'💡'}</div>
-              <div className="flex-1">
-                <p className={`text-lg font-black ${feedback.correct?'text-green-800':'text-red-800'}`}>{feedback.main}</p>
-                <p className="text-base font-bold whitespace-pre-wrap mt-1">{feedback.sub}</p>
-              </div>
-            </div>
-            <button onClick={feedback.correct?onNext:onRetry}
-              className={`w-full py-2 rounded-xl text-white font-black text-lg ${feedback.correct?'bg-green-600':'bg-red-500'}`}>
-              {feedback.correct ? <>다음으로 ➡️</> : <><RotateCcw className="inline mr-1" size={20}/> 다시 풀기</>}
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+    </div>
   );
 }
 
-// ============================================================
-// 녹음 + 자기평가 컴포넌트
-// ============================================================
-function RecordReviewScreen({ recording, setRecording, phase, setPhase, isRecording, interimText, isSpeakerOn, keyboardMode, setKeyboardMode, onStartRec, onStopRec, onRetry, onDone, title }) {
-  const stars = recording.stars || 0;
-  const sticker = recording.sticker;
+/* =========================================================
+   영역 선택
+========================================================= */
+function AreaSelect({ name, speakerOn, onPick }) {
+  useEffect(()=>{ speak(`${name} 친구, 탐험할 영역을 골라 볼까요?`, speakerOn); }, []);
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center p-8 pt-20">
+      <FloatingDeco/>
+      <h2 className="font-cafe24 text-4xl mb-2 text-center">
+        <span className="hi-pink">{name}</span> 친구, 어디로 갈까? 🗺️
+      </h2>
+      <p className="font-cafe24 text-xl text-gray-600 mb-8">탐험할 영역을 골라요!</p>
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 w-full max-w-4xl">
+        {AREAS.map((a,i)=>(
+          <motion.button key={a.id}
+            initial={{y:30, opacity:0}} animate={{y:0, opacity:1}} transition={{delay: i*0.08}}
+            onClick={()=>{ popSound(); onPick(a.id); }}
+            className={`bg-white rounded-3xl shadow-lg p-6 card-hover ring-4 ${a.ring} flex flex-col items-center gap-2`}>
+            <div className={`text-6xl mb-1 bounce-soft`} style={{animationDelay:`${i*0.2}s`}}>{a.emoji}</div>
+            <div className="font-cafe24 text-xl text-gray-800">{a.name}</div>
+            <div className={`mt-1 text-xs font-cafe24 px-3 py-1 rounded-full text-white bg-gradient-to-r ${a.color}`}>탐험 시작</div>
+          </motion.button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
-  const goReview = () => {
-    if (isRecording) onStopRec();
-    if (!recording.text && !recording.audio && !keyboardMode) {
-      alert('녹음하거나 글로 적어 주세요!');
-      return;
+/* =========================================================
+   퀴즈 화면
+========================================================= */
+function Quiz({ area, name, speakerOn, micOn, onDone, helpUsed, setHelpUsed }) {
+  const pool = useMemo(()=> {
+    const list = area === "int" ? QUESTIONS : QUESTIONS.filter(q=>q.area===area);
+    return list.length ? list : QUESTIONS;
+  }, [area]);
+
+  const [idx, setIdx] = useState(0);
+  const [picked, setPicked] = useState(null);
+  const [revealed, setRevealed] = useState(false);
+  const [score, setScore] = useState(0);
+  const [bursts, setBursts] = useState([]);
+  const [showHelp, setShowHelp] = useState(false);
+  const q = pool[idx];
+  const areaInfo = AREAS.find(a=>a.id === q.area) || AREAS[0];
+
+  useEffect(()=>{ speak(q.q, speakerOn); }, [idx]);
+
+  const choose = (i, evt) => {
+    if (revealed) return;
+    setPicked(i);
+    setRevealed(true);
+    const correct = i === q.ans;
+    if (correct) {
+      setScore(s=>s+1);
+      happySound();
+      const r = evt.currentTarget.getBoundingClientRect();
+      const id = Date.now();
+      setBursts(b=>[...b, {id, x:r.left+r.width/2, y:r.top+r.height/2}]);
+      speak("정답이에요! 잘했어요!", speakerOn);
+    } else {
+      sadSound();
+      speak("앗, 다시 생각해 볼까요? " + q.tip, speakerOn);
     }
-    setPhase('review');
   };
 
-  const playAudio = () => {
-    if (recording.audio) {
-      const a = new Audio(recording.audio);
-      a.play().catch(()=>{});
-    } else if (recording.text) {
-      const u = new SpeechSynthesisUtterance(recording.text);
-      u.lang='ko-KR'; const v=selectKoreanVoice(); if(v) u.voice=v;
-      u.pitch=1.0; u.rate=0.95;
-      speechSynthesis.cancel(); speechSynthesis.speak(u);
+  const next = () => {
+    setPicked(null); setRevealed(false);
+    if (idx + 1 >= pool.length) {
+      onDone({ total: pool.length, score: score + (picked===q.ans?0:0), helpUsed });
+    } else {
+      setIdx(i=>i+1);
     }
   };
 
-  const playPrompt = () => {
-    const u = new SpeechSynthesisUtterance(recording.prompt);
-    u.lang='ko-KR'; const v=selectKoreanVoice(); if(v) u.voice=v;
-    u.pitch=1.0; u.rate=0.95;
-    speechSynthesis.cancel(); speechSynthesis.speak(u);
+  const askHelp = () => {
+    setHelpUsed(h=> h+1);
+    setShowHelp(true);
+    speak(q.tip, true, { force: true });
+    saveToGAS("help", { name, area: q.area, q: q.q, time: new Date().toISOString() });
   };
 
   return (
-    <motion.div key="midrec" initial={{opacity:0}} animate={{opacity:1}}
-      className="bg-white p-5 rounded-[2.5rem] shadow-2xl border-4 border-pink-100 w-full space-y-3">
-      <h1 className="text-2xl font-black text-pink-600 text-center">{title}</h1>
-      <div className="bg-gradient-to-r from-pink-50 to-yellow-50 p-3 rounded-xl flex items-center gap-2">
-        <span className="text-4xl">{recording.em || '🎙️'}</span>
-        <p className="text-lg font-bold">{recording.prompt}</p>
+    <div className="absolute inset-0 pt-20 px-6 pb-6 overflow-hidden">
+      <FloatingDeco/>
+      {/* 영역 뱃지 */}
+      <div className="flex items-center justify-between mb-3">
+        <div className={`px-4 py-2 rounded-full font-cafe24 text-white bg-gradient-to-r ${areaInfo.color} shadow`}>
+          {areaInfo.emoji} {areaInfo.name}
+        </div>
+        <div className="font-cafe24 text-xl text-gray-600">
+          {idx+1} / {pool.length} 문제 · ⭐ {score}
+        </div>
       </div>
 
-      {phase === 'record' ? (
-        <>
-          {!keyboardMode ? (
-            <button onClick={isRecording ? onStopRec : onStartRec}
-              className={`w-28 h-28 mx-auto rounded-full flex items-center justify-center text-white shadow-xl ${isRecording?'bg-red-500 pulse-record':'bg-pink-500'}`}>
-              {isRecording ? <Square size={46}/> : <Mic size={46}/>}
-            </button>
-          ) : null}
-          <p className="text-base font-bold text-slate-500 text-center">
-            {keyboardMode ? '⌨️ 글로 적어 봐요' : (isRecording ? '듣고 있어요... (네모 누르면 멈춤)' : '🎤 누르고 또박또박 말해요')}
-          </p>
-          <textarea value={(recording.text||'') + (isRecording?interimText:'')}
-            onChange={e => setRecording(r => ({...r, text: e.target.value}))}
-            placeholder="여기에 글로 적어도 돼요"
-            className="w-full h-20 bg-slate-50 rounded-xl border-2 border-slate-200 p-2 text-lg font-bold resize-none outline-none focus:border-pink-400"/>
-          <div className="flex justify-between items-center">
-            <button onClick={() => { if (isRecording) onStopRec(); setKeyboardMode(!keyboardMode); }}
-              className="text-sm text-blue-500 underline font-bold">{keyboardMode?'🎤 마이크로':'⌨️ 키보드로'}</button>
-            <button onClick={goReview} disabled={!(recording.text || recording.audio || keyboardMode)}
-              className="px-5 py-2.5 bg-pink-500 text-white rounded-full text-lg font-black disabled:opacity-50">
-              📝 다 했어요!
-            </button>
-          </div>
-        </>
-      ) : (
-        <>
-          <div className="bg-yellow-50 p-3 rounded-xl text-center">
-            <p className="text-lg font-bold">🎧 들어 보고 별점을 줘 봐요</p>
-            <div className="flex justify-center gap-2 mt-2">
-              <button onClick={playAudio}
-                className="px-4 py-2 bg-emerald-500 text-white rounded-full text-base font-black">
-                ▶️ 내 {recording.audio?'녹음':'글'} 듣기
-              </button>
-              <button onClick={playPrompt}
-                className="px-4 py-2 bg-blue-500 text-white rounded-full text-base font-black">
-                📖 문장 듣기
-              </button>
+      {/* 큰 키워드 이미지 */}
+      <div className="flex justify-center mb-3">
+        <motion.div key={idx}
+          initial={{scale:0.4, rotate:-15, opacity:0}}
+          animate={{scale:1, rotate:0, opacity:1}}
+          transition={{type:"spring", stiffness:200, damping:15}}
+          className={`text-[100px] leading-none rounded-[40px] bg-gradient-to-br ${areaInfo.color} p-6 shadow-2xl`}>
+          {q.key}
+        </motion.div>
+      </div>
+
+      {/* 문제 */}
+      <motion.div key={"q"+idx}
+        initial={{y:20, opacity:0}} animate={{y:0, opacity:1}}
+        className="bg-white/90 rounded-3xl shadow-xl p-5 mb-4 backdrop-blur">
+        <p className="font-cafe24 text-3xl text-center text-gray-800 leading-tight">
+          {q.q.split("").map((ch,i)=>(
+            <span key={i} className="pop-letter" style={{animationDelay:`${i*0.03}s`}}>{ch}</span>
+          ))}
+        </p>
+      </motion.div>
+
+      {/* 보기 */}
+      <div className="grid grid-cols-1 gap-3 max-w-2xl mx-auto">
+        {q.opts.map((opt, i)=> {
+          const isPicked = picked === i;
+          const isAns = i === q.ans;
+          let cls = "bg-white hover:bg-yellow-50";
+          if (revealed && isAns) cls = "bg-emerald-400 text-white";
+          else if (revealed && isPicked && !isAns) cls = "bg-rose-400 text-white shake";
+          return (
+            <motion.button key={i}
+              whileHover={{ scale: revealed?1:1.02 }} whileTap={{ scale: 0.98 }}
+              onClick={(e)=>choose(i, e)} disabled={revealed}
+              className={`${cls} rounded-2xl p-4 shadow-md flex items-center gap-4 font-cafe24 text-2xl text-left card-hover`}>
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-200 to-pink-200 flex items-center justify-center text-xl">
+                {["①","②","③"][i]}
+              </div>
+              <span className="flex-1">{opt}</span>
+              {revealed && isAns && <Check size={28}/>}
+              {revealed && isPicked && !isAns && <X size={28}/>}
+            </motion.button>
+          );
+        })}
+      </div>
+
+      {/* 하단 버튼 */}
+      <div className="absolute bottom-6 left-6 right-6 flex justify-between items-center gap-3">
+        <button onClick={askHelp}
+          className="px-5 py-3 rounded-2xl bg-purple-200 text-purple-700 font-cafe24 text-xl shadow card-hover flex items-center gap-2">
+          <HelpCircle size={22}/> 💜 도움받기
+        </button>
+        {revealed && (
+          <motion.button initial={{scale:0}} animate={{scale:1}}
+            onClick={next}
+            className="px-8 py-3 rounded-2xl bg-gradient-to-r from-emerald-400 to-green-500 text-white font-cafe24 text-2xl shadow-lg card-hover">
+            {idx+1 >= pool.length ? "끝내기 🎉" : "다음 →"}
+          </motion.button>
+        )}
+      </div>
+
+      {bursts.map(b=> <Burst key={b.id} x={b.x} y={b.y} onDone={()=>setBursts(bs=>bs.filter(x=>x.id!==b.id))}/>)}
+
+      <AnimatePresence>
+        {showHelp && (
+          <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
+            className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-6"
+            onClick={()=>setShowHelp(false)}>
+            <motion.div initial={{scale:0.7}} animate={{scale:1}}
+              className="bg-white rounded-3xl p-8 max-w-md shadow-2xl text-center">
+              <div className="text-6xl mb-3 bounce-soft">💜</div>
+              <p className="font-cafe24 text-2xl text-gray-800 mb-4">{q.tip}</p>
+              <button onClick={()=>setShowHelp(false)}
+                className="px-6 py-3 bg-purple-400 text-white rounded-2xl font-cafe24 text-xl">알겠어요!</button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/* =========================================================
+   개념학습 (드래그앤드롭 분류)
+========================================================= */
+const CONCEPTS = {
+  traffic: {
+    title: "안전한 행동을 골라요",
+    intro: "카드를 끌어서 알맞은 상자에 넣어요",
+    leftBox: { label: "위험해요", emoji: "🚫", from:"#FCA5A5", to:"#EF4444" },
+    rightBox: { label: "안전해요", emoji: "✅", from:"#86EFAC", to:"#10B981" },
+    cards: [
+      { id:"t1", emoji:"🏃", text:"뛰어서 건너요", correct:"left" },
+      { id:"t2", emoji:"👀", text:"좌우 살펴봐요", correct:"right" },
+      { id:"t3", emoji:"📱", text:"휴대폰 보면서", correct:"left" },
+      { id:"t4", emoji:"🚦", text:"신호 지켜요", correct:"right" }
+    ]
+  },
+  fire: {
+    title: "불이 났을 때!",
+    intro: "어떻게 해야 안전할까요?",
+    leftBox: { label: "위험해요", emoji: "🚫", from:"#FCA5A5", to:"#EF4444" },
+    rightBox: { label: "안전해요", emoji: "✅", from:"#86EFAC", to:"#10B981" },
+    cards: [
+      { id:"f1", emoji:"🙈", text:"숨어 있어요", correct:"left" },
+      { id:"f2", emoji:"📣", text:"불이야 외쳐요", correct:"right" },
+      { id:"f3", emoji:"🧎", text:"자세 낮춰요", correct:"right" },
+      { id:"f4", emoji:"🛗", text:"엘리베이터로", correct:"left" }
+    ]
+  },
+  disaster: {
+    title: "지진이 났어요!",
+    intro: "안전한 행동을 골라봐요",
+    leftBox: { label: "위험해요", emoji: "🚫", from:"#FCA5A5", to:"#EF4444" },
+    rightBox: { label: "안전해요", emoji: "✅", from:"#86EFAC", to:"#10B981" },
+    cards: [
+      { id:"d1", emoji:"🪟", text:"창문 옆에", correct:"left" },
+      { id:"d2", emoji:"🪑", text:"책상 아래로", correct:"right" },
+      { id:"d3", emoji:"🏃", text:"복도로 뛰기", correct:"left" },
+      { id:"d4", emoji:"🙇", text:"머리 보호해요", correct:"right" }
+    ]
+  },
+  life: {
+    title: "생활 속 안전",
+    intro: "위험한 행동을 알아봐요",
+    leftBox: { label: "위험해요", emoji: "🚫", from:"#FCA5A5", to:"#EF4444" },
+    rightBox: { label: "안전해요", emoji: "✅", from:"#86EFAC", to:"#10B981" },
+    cards: [
+      { id:"l1", emoji:"💧", text:"젖은 손 콘센트", correct:"left" },
+      { id:"l2", emoji:"✂️", text:"손잡이로 주기", correct:"right" },
+      { id:"l3", emoji:"🍲", text:"뜨거운 냄비 만지기", correct:"left" },
+      { id:"l4", emoji:"🚪", text:"문 천천히 닫기", correct:"right" }
+    ]
+  },
+  int: {
+    title: "우리의 안전 약속",
+    intro: "지켜야 할 약속을 골라요",
+    leftBox: { label: "위험해요", emoji: "🚫", from:"#FCA5A5", to:"#EF4444" },
+    rightBox: { label: "안전해요", emoji: "✅", from:"#86EFAC", to:"#10B981" },
+    cards: [
+      { id:"i1", emoji:"🚶", text:"낯선 사람 따라가기", correct:"left" },
+      { id:"i2", emoji:"📢", text:"싫어요 외치기", correct:"right" },
+      { id:"i3", emoji:"🤫", text:"혼자만 알기", correct:"left" },
+      { id:"i4", emoji:"🧑‍🏫", text:"어른께 알리기", correct:"right" }
+    ]
+  }
+};
+
+function ConceptLearn({ area, speakerOn, onDone }) {
+  const data = CONCEPTS[area] || CONCEPTS.traffic;
+  const [placed, setPlaced] = useState({});
+  const [wrongCard, setWrongCard] = useState(null);
+  const [bursts, setBursts] = useState([]);
+  const leftRef = useRef(null);
+  const rightRef = useRef(null);
+
+  useEffect(()=>{ speak(`${data.title}. ${data.intro}.`, speakerOn); }, []);
+
+  const remaining = data.cards.filter(c => !placed[c.id]);
+  const allDone = remaining.length === 0;
+
+  useEffect(()=>{
+    if (allDone) {
+      happySound();
+      setTimeout(()=> happySound(), 350);
+      setTimeout(()=> speak("정말 잘했어요! 다음으로 가요!", speakerOn, {force:true}), 200);
+    }
+  }, [allDone]);
+
+  const handleDrop = (card, side, point) => {
+    if (side === card.correct) {
+      setPlaced(p => ({...p, [card.id]: side}));
+      popSound();
+      const id = Date.now() + Math.random();
+      setBursts(b => [...b, {id, x: point.x, y: point.y}]);
+    } else {
+      sadSound();
+      setWrongCard(card.id);
+      setTimeout(()=> setWrongCard(null), 500);
+      speak("다시 생각해 봐요", speakerOn);
+    }
+  };
+
+  const resetAll = () => setPlaced({});
+
+  return (
+    <div className="absolute inset-0 pt-20 px-6 pb-4 overflow-hidden">
+      <FloatingDeco/>
+      <div className="max-w-4xl mx-auto h-full flex flex-col">
+        <h2 className="font-cafe24 text-3xl text-center mb-1">
+          🧩 <span className="hi-green">{data.title}</span>
+        </h2>
+        <p className="font-cafe24 text-lg text-center text-gray-600 mb-3">{data.intro}</p>
+
+        {/* 카드 영역 */}
+        <div className="flex-1 flex flex-wrap items-start justify-center gap-3 content-start mb-3 min-h-[150px]">
+          <AnimatePresence>
+            {remaining.map((card)=>(
+              <motion.div key={card.id}
+                drag dragSnapToOrigin
+                dragElastic={1}
+                whileDrag={{ scale: 1.15, zIndex: 50, rotate: 4 }}
+                onDragEnd={(e, info)=>{
+                  const lb = leftRef.current?.getBoundingClientRect();
+                  const rb = rightRef.current?.getBoundingClientRect();
+                  const {x, y} = info.point;
+                  if (lb && x>=lb.left && x<=lb.right && y>=lb.top && y<=lb.bottom) {
+                    handleDrop(card, "left", {x, y});
+                  } else if (rb && x>=rb.left && x<=rb.right && y>=rb.top && y<=rb.bottom) {
+                    handleDrop(card, "right", {x, y});
+                  }
+                }}
+                animate={wrongCard === card.id ? { x: [0,-12,12,-12,12,0] } : { x: 0 }}
+                transition={wrongCard === card.id ? { duration: 0.4 } : undefined}
+                exit={{ scale: 0, opacity: 0 }}
+                className="bg-white rounded-3xl shadow-xl p-3 w-32 text-center cursor-grab select-none active:cursor-grabbing border-4 border-yellow-200">
+                <div className="text-5xl mb-1 pointer-events-none">{card.emoji}</div>
+                <div className="font-cafe24 text-base text-gray-700 leading-tight pointer-events-none">{card.text}</div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+
+        {/* 두 박스 */}
+        <div className="grid grid-cols-2 gap-4 mb-3">
+          <div ref={leftRef}
+            style={{background: `linear-gradient(135deg, ${data.leftBox.from}, ${data.leftBox.to})`}}
+            className="rounded-3xl p-4 min-h-[160px] border-4 border-dashed border-white/60 text-white shadow-lg">
+            <div className="text-center font-cafe24 text-2xl mb-2">{data.leftBox.emoji} {data.leftBox.label}</div>
+            <div className="flex flex-wrap justify-center gap-2">
+              {data.cards.filter(c=>placed[c.id]==="left").map(c=>(
+                <motion.div key={c.id} initial={{scale:0.3, rotate:-15}} animate={{scale:1, rotate:0}}
+                  className="bg-white/95 text-gray-800 rounded-2xl px-3 py-1 font-cafe24 text-sm shadow flex items-center gap-1">
+                  <span className="text-2xl">{c.emoji}</span>{c.text}
+                </motion.div>
+              ))}
             </div>
           </div>
-          {recording.text && (
-            <div className="bg-slate-50 p-2 rounded-xl text-base font-bold">"{recording.text}"</div>
+          <div ref={rightRef}
+            style={{background: `linear-gradient(135deg, ${data.rightBox.from}, ${data.rightBox.to})`}}
+            className="rounded-3xl p-4 min-h-[160px] border-4 border-dashed border-white/60 text-white shadow-lg">
+            <div className="text-center font-cafe24 text-2xl mb-2">{data.rightBox.emoji} {data.rightBox.label}</div>
+            <div className="flex flex-wrap justify-center gap-2">
+              {data.cards.filter(c=>placed[c.id]==="right").map(c=>(
+                <motion.div key={c.id} initial={{scale:0.3, rotate:15}} animate={{scale:1, rotate:0}}
+                  className="bg-white/95 text-gray-800 rounded-2xl px-3 py-1 font-cafe24 text-sm shadow flex items-center gap-1">
+                  <span className="text-2xl">{c.emoji}</span>{c.text}
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* 하단 버튼 */}
+        <div className="flex justify-center gap-3">
+          {!allDone && Object.keys(placed).length > 0 && (
+            <button onClick={resetAll}
+              className="px-5 py-2 rounded-2xl bg-gray-100 font-cafe24 text-lg card-hover">
+              🔄 처음부터
+            </button>
           )}
-          <div className="flex justify-center gap-1">
-            {[1,2,3,4,5].map(n => (
-              <button key={n} onClick={() => setRecording(r => ({...r, stars: n}))}>
-                <Star size={42} className={n<=stars?'fill-yellow-400 text-yellow-500':'text-slate-200'}/>
+          {allDone && (
+            <motion.button initial={{scale:0}} animate={{scale:1}}
+              onClick={onDone}
+              className="px-8 py-3 rounded-2xl bg-gradient-to-r from-emerald-400 to-green-500 text-white font-cafe24 text-2xl shadow-lg card-hover">
+              퀴즈 풀러 가기 🚀
+            </motion.button>
+          )}
+        </div>
+      </div>
+      {bursts.map(b=> <Burst key={b.id} x={b.x} y={b.y} onDone={()=>setBursts(bs=>bs.filter(x=>x.id!==b.id))}/>)}
+    </div>
+  );
+}
+
+/* =========================================================
+   녹음 + 별점
+========================================================= */
+function RecordReflect({ name, speakerOn, micOn, score, total, onDone }) {
+  const [recording, setRecording] = useState(false);
+  const [audioURL, setAudioURL] = useState(null);
+  const [stt, setStt] = useState("");
+  const [textInput, setTextInput] = useState("");
+  const [stars, setStars] = useState(0);
+  const [stickerPicked, setStickerPicked] = useState(null);
+  const recRef = useRef(null);
+  const chunksRef = useRef([]);
+  const recogRef = useRef(null);
+
+  const prompt = "오늘 가장 기억에 남는 안전 규칙 한 가지를 말해 봐요.";
+  useEffect(()=>{ speak(prompt, speakerOn); },[]);
+
+  const startRec = async () => {
+    setStt(""); setAudioURL(null); chunksRef.current = [];
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+      const mr = new MediaRecorder(stream);
+      recRef.current = mr;
+      mr.ondataavailable = e => chunksRef.current.push(e.data);
+      mr.onstop = () => {
+        const blob = new Blob(chunksRef.current, {type:"audio/webm"});
+        setAudioURL(URL.createObjectURL(blob));
+        stream.getTracks().forEach(t=>t.stop());
+      };
+      mr.start();
+      setRecording(true);
+      // STT
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SR) {
+        const r = new SR();
+        r.lang = "ko-KR"; r.continuous = true; r.interimResults = true;
+        r.onresult = (ev) => {
+          let s = "";
+          for (let i=ev.resultIndex; i<ev.results.length; i++) s += ev.results[i][0].transcript;
+          setStt(s);
+        };
+        r.start();
+        recogRef.current = r;
+      }
+    } catch(e) {
+      alert("마이크를 사용할 수 없어요. 글로 적어 주세요.");
+    }
+  };
+  const stopRec = () => {
+    recRef.current?.stop();
+    recogRef.current?.stop();
+    setRecording(false);
+  };
+
+  const finalText = (stt || textInput).trim();
+  const canFinish = stars >= 4 || (stars >=1 && audioURL && stars >= 4);
+  const needRetry = stars >= 1 && stars <= 3;
+
+  const finish = () => {
+    if (!stars) return;
+    if (needRetry) {
+      // 다시
+      setStars(0); setAudioURL(null); setStt(""); setTextInput("");
+      return;
+    }
+    saveToGAS("reflection", {
+      name, text: finalText, stars, sticker: stickerPicked,
+      score, total, time: new Date().toISOString()
+    });
+    onDone({ stars, text: finalText, sticker: stickerPicked });
+  };
+
+  return (
+    <div className="absolute inset-0 pt-20 px-6 pb-6 overflow-auto no-scrollbar">
+      <FloatingDeco/>
+      <div className="max-w-2xl mx-auto">
+        <h2 className="font-cafe24 text-3xl text-center mb-2">
+          🎤 <span className="hi-blue">내 생각 말하기</span>
+        </h2>
+        <p className="font-cafe24 text-xl text-center text-gray-600 mb-5">{prompt}</p>
+
+        <div className="bg-white/90 rounded-3xl p-6 shadow-xl mb-4">
+          <div className="flex justify-center mb-4">
+            {!recording ? (
+              <button onClick={startRec}
+                className="w-24 h-24 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 text-white shadow-2xl flex items-center justify-center card-hover">
+                <Mic size={40}/>
+              </button>
+            ) : (
+              <button onClick={stopRec}
+                className="w-24 h-24 rounded-full bg-rose-500 text-white shadow-2xl flex items-center justify-center recording-pulse">
+                <Square size={32}/>
+              </button>
+            )}
+          </div>
+          <p className="text-center font-cafe24 text-lg text-gray-500">
+            {recording ? "🎙️ 듣고 있어요…" : audioURL ? "✅ 녹음 완료!" : "마이크를 눌러서 말해 봐요"}
+          </p>
+
+          {(stt || textInput || audioURL) && (
+            <div className="mt-4">
+              <div className="font-cafe24 text-base text-gray-500 mb-1">📝 내가 말한 내용</div>
+              <textarea value={stt || textInput} onChange={e=>setTextInput(e.target.value)} rows={2}
+                placeholder="여기에 직접 적어도 돼요!"
+                className="w-full p-3 rounded-2xl border-4 border-yellow-100 font-cafe24 text-lg"/>
+            </div>
+          )}
+
+          {audioURL && (
+            <div className="mt-3 flex gap-2">
+              <audio src={audioURL} controls className="w-full"/>
+              <button onClick={()=>{ setAudioURL(null); setStt(""); }} className="p-3 bg-gray-100 rounded-2xl card-hover">
+                <Trash2 size={20}/>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* 별점 */}
+        <div className="bg-white/90 rounded-3xl p-6 shadow-xl mb-4">
+          <p className="font-cafe24 text-xl text-center text-gray-700 mb-3">
+            내 녹음을 들어보고 ⭐ 점수를 줘요
+          </p>
+          <div className="flex justify-center gap-2">
+            {[1,2,3,4,5].map(n=>(
+              <button key={n} onClick={()=>{ setStars(n); popSound(); }}
+                className="star-btn">
+                <Star size={48} fill={n<=stars?"#FBBF24":"none"} stroke={n<=stars?"#F59E0B":"#D1D5DB"} strokeWidth={2}/>
               </button>
             ))}
           </div>
           {stars > 0 && stars <= 3 && (
-            <p className="text-center text-base text-orange-500 font-bold">⚠️ 다시 해 봐요!</p>
+            <p className="text-center mt-3 font-cafe24 text-lg text-rose-500">
+              💪 한 번 더 녹음해 볼까요? 더 멋지게 할 수 있어요!
+            </p>
           )}
           {stars >= 4 && (
-            <>
-              <p className="text-center text-base font-bold">🎁 칭찬 스티커를 골라 봐요</p>
-              <div className="flex justify-center gap-2">
-                {['🌟','💖','🌸','🦋','🌈','🎉'].map(s => (
-                  <button key={s} onClick={() => { setRecording(r => ({...r, sticker:s})); if (isSpeakerOn) playSfx('pop'); }}
-                    className={`text-4xl p-2 rounded-full transition-all ${sticker===s?'bg-yellow-200 scale-125':''}`}>{s}</button>
+            <div className="mt-4">
+              <p className="text-center font-cafe24 text-lg text-emerald-600 mb-2">
+                와! 정말 잘했어요. 스티커를 골라 주세요! 🎁
+              </p>
+              <div className="flex justify-center flex-wrap gap-2">
+                {STICKERS.map(s=>(
+                  <button key={s} onClick={()=>{ setStickerPicked(s); popSound(); }}
+                    className={`text-4xl p-2 rounded-2xl card-hover ${stickerPicked===s?"bg-yellow-200 scale-110":"bg-white"}`}>
+                    {s}
+                  </button>
                 ))}
               </div>
-            </>
+            </div>
           )}
-          <div className="flex gap-2">
-            <button onClick={onRetry}
-              className="flex-1 py-3 bg-orange-100 text-orange-700 border-2 border-orange-300 rounded-2xl font-black text-base">
-              🔁 다시 녹음
-            </button>
-            <button onClick={onDone} disabled={stars < 4}
-              className="flex-1 py-3 bg-gradient-to-r from-pink-500 to-orange-400 text-white rounded-2xl font-black disabled:opacity-50 text-base">
-              ➡️ 다음으로
-            </button>
-          </div>
-        </>
-      )}
-    </motion.div>
+        </div>
+
+        <div className="flex justify-center">
+          <button onClick={finish} disabled={!stars || (stars>=4 && !stickerPicked)}
+            className="px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-400 to-green-500 text-white font-cafe24 text-2xl shadow-lg card-hover disabled:opacity-40 disabled:cursor-not-allowed">
+            {needRetry ? "다시 녹음하기 🔄" : "다음으로 🚀"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
-const root = createRoot(document.getElementById('root'));
-root.render(<App />);
+/* =========================================================
+   수료증
+========================================================= */
+function Certificate({ name, area, score, total, stars, sticker, helpUsed, onHome }) {
+  const areaInfo = AREAS.find(a=>a.id===area) || AREAS[0];
+  useEffect(()=>{
+    speak(`${name} 친구, 안전탐험을 모두 마쳤어요! 정말 멋져요!`, true, {force:true});
+    // 폭죽 사운드
+    happySound();
+    setTimeout(happySound, 400);
+    setTimeout(happySound, 900);
+  },[]);
+  const today = new Date();
+  const dateStr = `${today.getFullYear()}년 ${today.getMonth()+1}월 ${today.getDate()}일`;
+  return (
+    <div className="absolute inset-0 pt-20 px-6 pb-6 overflow-auto no-scrollbar">
+      <FloatingDeco/>
+      <motion.div initial={{scale:0.7, opacity:0, y:30}} animate={{scale:1, opacity:1, y:0}}
+        transition={{type:"spring", stiffness:120}}
+        className="max-w-2xl mx-auto bg-white rounded-[40px] shadow-2xl p-8 border-8 border-double border-yellow-300 relative">
+        <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-300 to-pink-300 rounded-full px-6 py-2 shadow-lg">
+          <span className="font-cafe24 text-2xl">🏆 안전탐험 수료증 🏆</span>
+        </div>
+
+        <div className="text-center mt-6">
+          <div className="text-7xl mb-3 bounce-soft">{sticker || "🎉"}</div>
+          <p className="font-cafe24 text-3xl mb-2">
+            <span className="hi-yellow">{name}</span> 친구
+          </p>
+          <p className="font-cafe24 text-xl text-gray-600 mb-5">위 어린이는</p>
+          <div className={`inline-block px-5 py-2 rounded-full text-white font-cafe24 text-xl bg-gradient-to-r ${areaInfo.color} mb-4 shadow`}>
+            {areaInfo.emoji} {areaInfo.name}
+          </div>
+          <p className="font-cafe24 text-2xl text-gray-700 leading-relaxed mb-5">
+            안전탐험을 끝까지 잘 마쳤음을 칭찬합니다!
+          </p>
+
+          <div className="grid grid-cols-3 gap-2 max-w-md mx-auto mb-6">
+            <div className="bg-rose-50 rounded-2xl p-3">
+              <div className="text-3xl mb-1">📝</div>
+              <div className="font-cafe24 text-base text-gray-500">맞춘 문제</div>
+              <div className="font-cafe24 text-2xl text-rose-500">{score}/{total}</div>
+            </div>
+            <div className="bg-yellow-50 rounded-2xl p-3">
+              <div className="text-3xl mb-1">⭐</div>
+              <div className="font-cafe24 text-base text-gray-500">자기 별점</div>
+              <div className="font-cafe24 text-2xl text-amber-500">{stars}/5</div>
+            </div>
+            <div className="bg-purple-50 rounded-2xl p-3">
+              <div className="text-3xl mb-1">💜</div>
+              <div className="font-cafe24 text-base text-gray-500">도움 횟수</div>
+              <div className="font-cafe24 text-2xl text-purple-500">{helpUsed}</div>
+            </div>
+          </div>
+
+          <p className="font-cafe24 text-lg text-gray-500">{dateStr}</p>
+          <p className="font-cafe24 text-lg text-gray-500">안전탐험 🛡️</p>
+        </div>
+      </motion.div>
+
+      <div className="text-center mt-6">
+        <button onClick={onHome}
+          className="px-8 py-3 rounded-2xl bg-gradient-to-r from-pink-400 to-rose-500 text-white font-cafe24 text-2xl shadow-lg card-hover">
+          🏠 처음으로
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   메인 App
+========================================================= */
+function App() {
+  const [step, setStep] = useState("start"); // start, area, quiz, reflect, cert
+  const [name, setName] = useState("");
+  const [area, setArea] = useState("");
+  const [speakerOn, setSpeakerOn] = useState(false);
+  const [micOn, setMicOn] = useState(true);
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [quizResult, setQuizResult] = useState({score:0, total:0});
+  const [reflectResult, setReflectResult] = useState({stars:0, sticker:null});
+  const [helpUsed, setHelpUsed] = useState(0);
+
+  // 마이크 권한 한 번만
+  useEffect(()=>{
+    const asked = localStorage.getItem("mic_asked");
+    if (!asked && navigator.mediaDevices) {
+      navigator.mediaDevices.getUserMedia({audio:true})
+        .then(s=> { s.getTracks().forEach(t=>t.stop()); localStorage.setItem("mic_asked","1"); })
+        .catch(()=> localStorage.setItem("mic_asked","1"));
+    }
+    // TTS 음성 로딩 트리거
+    window.speechSynthesis?.getVoices();
+    window.speechSynthesis?.addEventListener?.("voiceschanged", ()=>{});
+  },[]);
+
+  const reset = () => {
+    setStep("start"); setName(""); setArea("");
+    setQuizResult({score:0,total:0}); setReflectResult({stars:0, sticker:null});
+    setHelpUsed(0);
+  };
+
+  const progress =
+    step === "start" ? 0 :
+    step === "area" ? 0.1 :
+    step === "concept" ? 0.3 :
+    step === "quiz" ? 0.6 :
+    step === "reflect" ? 0.85 :
+    step === "cert" ? 1 : 0;
+
+  return (
+    <div className="relative w-full h-full">
+      {step !== "start" && (
+        <TopBar name={name} speakerOn={speakerOn} setSpeakerOn={setSpeakerOn}
+          micOn={micOn} setMicOn={setMicOn} onHome={reset} progress={progress}/>
+      )}
+
+      <AnimatePresence mode="wait">
+        {step === "start" && (
+          <motion.div key="start" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="absolute inset-0">
+            <StartScreen
+              onStart={(n)=>{ setName(n); setStep("area"); }}
+              onShowTutorial={()=>setShowTutorial(true)}
+            />
+          </motion.div>
+        )}
+        {step === "area" && (
+          <motion.div key="area" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="absolute inset-0">
+            <AreaSelect name={name} speakerOn={speakerOn}
+              onPick={(a)=>{ setArea(a); setStep("concept"); }}/>
+          </motion.div>
+        )}
+        {step === "concept" && (
+          <motion.div key="concept" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="absolute inset-0">
+            <ConceptLearn area={area} speakerOn={speakerOn}
+              onDone={()=> setStep("quiz")}/>
+          </motion.div>
+        )}
+        {step === "quiz" && (
+          <motion.div key="quiz" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="absolute inset-0">
+            <Quiz area={area} name={name} speakerOn={speakerOn} micOn={micOn}
+              helpUsed={helpUsed} setHelpUsed={setHelpUsed}
+              onDone={(r)=>{ setQuizResult(r); setStep("reflect"); }}/>
+          </motion.div>
+        )}
+        {step === "reflect" && (
+          <motion.div key="reflect" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="absolute inset-0">
+            <RecordReflect name={name} speakerOn={speakerOn} micOn={micOn}
+              score={quizResult.score} total={quizResult.total}
+              onDone={(r)=>{ setReflectResult(r); setStep("cert"); }}/>
+          </motion.div>
+        )}
+        {step === "cert" && (
+          <motion.div key="cert" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="absolute inset-0">
+            <Certificate name={name} area={area}
+              score={quizResult.score} total={quizResult.total}
+              stars={reflectResult.stars} sticker={reflectResult.sticker}
+              helpUsed={helpUsed}
+              onHome={reset}/>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showTutorial && <Tutorial speakerOn={speakerOn} onClose={()=>setShowTutorial(false)}/>}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+createRoot(document.getElementById("root")).render(<App/>);
 </script>
 </body>
 </html>
