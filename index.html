@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>안전탐험</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script type="importmap">
@@ -19,36 +19,53 @@
 </script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Do+Hyeon&family=Gowun+Dodum&family=Hi+Melody&family=Yeon+Sung&family=Single+Day&family=Black+Han+Sans&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Do+Hyeon&family=Gowun+Dodum&family=Hi+Melody&family=Yeon+Sung&family=Black+Han+Sans&display=swap');
 @font-face {
   font-family: 'Cafe24Ssurround';
   src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/Cafe24Ssurround.woff') format('woff');
   font-display: swap;
 }
-* { -webkit-tap-highlight-color: transparent; }
+* { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0;
+  width: 100%; height: 100%;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
 body {
   font-family: 'Cafe24Ssurround','Gowun Dodum','Jua','Gaegu','맑은 고딕',sans-serif;
-  margin:0; padding:0; overflow:hidden; -webkit-font-smoothing:antialiased;
   background:
     radial-gradient(circle at 15% 25%, rgba(255,192,203,0.45) 0%, transparent 45%),
     radial-gradient(circle at 85% 70%, rgba(255,217,61,0.4) 0%, transparent 45%),
     radial-gradient(circle at 50% 90%, rgba(176,224,230,0.35) 0%, transparent 45%),
     linear-gradient(135deg,#FFE5F1 0%,#FFF9E5 50%,#E5F4FF 100%);
 }
+
+/* ===== ⭐ 반응형 스케일 디자인 (모든 기기에서 동일 레이아웃, 잘림/스크롤 없음) ===== */
+#scaler-wrap {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+#scaler {
+  width: 480px;
+  height: 820px;
+  transform-origin: center center;
+  position: relative;
+}
+#root { width: 100%; height: 100%; }
+
 /* 폰트 유틸리티 */
 .font-cafe24 { font-family:'Cafe24Ssurround','Jua',sans-serif; }
 .font-gowun  { font-family:'Gowun Dodum','Jua',sans-serif; font-weight:700; }
 .font-jua    { font-family:'Jua','Cafe24Ssurround',sans-serif; }
 .font-gaegu  { font-family:'Gaegu',cursive; font-weight:700; }
-.font-hi     { font-family:'Hi Melody',cursive; }
-.font-yeon   { font-family:'Yeon Sung',cursive; }
 /* 형광펜 */
 .hi-yellow { background: linear-gradient(180deg, transparent 55%, #FFE066 55%); padding:0 4px; }
 .hi-pink   { background: linear-gradient(180deg, transparent 55%, #FFB7C5 55%); padding:0 4px; }
 .hi-blue   { background: linear-gradient(180deg, transparent 55%, #B5E2FA 55%); padding:0 4px; }
 .hi-green  { background: linear-gradient(180deg, transparent 55%, #B7E4C7 55%); padding:0 4px; }
 .hi-orange { background: linear-gradient(180deg, transparent 55%, #FFD8B0 55%); padding:0 4px; }
-.hi-purple { background: linear-gradient(180deg, transparent 55%, #E0BBE4 55%); padding:0 4px; }
 /* 통통 3D 버튼 */
 .btn-cute {
   border: 4px solid white; border-radius: 24px;
@@ -69,10 +86,8 @@ body {
 /* 반짝반짝 */
 .glow-gold { animation: glowGold 2s ease-in-out infinite alternate; }
 @keyframes glowGold { 0% { filter: drop-shadow(0 0 6px rgba(255,215,0,0.4)); } 100% { filter: drop-shadow(0 0 18px rgba(255,215,0,0.9)); } }
-/* 텍스트 그림자 (카페24 폰트 강조) */
+/* 텍스트 그림자 */
 .txt-shadow-pink { text-shadow: 3px 3px 0 #FF6B9D, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff; }
-.txt-shadow-blue { text-shadow: 3px 3px 0 #54A0FF, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff; }
-.txt-shadow-orange { text-shadow: 3px 3px 0 #FF9F43, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff; }
 /* 녹음 펄스 */
 .pulse-record { animation: pulseRec 1.3s infinite alternate; }
 @keyframes pulseRec { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.6); } 100% { box-shadow: 0 0 0 18px rgba(239,68,68,0); } }
@@ -82,14 +97,31 @@ body {
 /* 폭죽 */
 .burst-emoji { position:fixed; pointer-events:none; z-index:9998; font-size:40px; animation: burst 1.4s ease-out forwards; }
 @keyframes burst { 0% { transform: translate(0,0) scale(0); opacity:1; } 60% { opacity:1; } 100% { transform: translate(var(--x), var(--y)) scale(1.2) rotate(360deg); opacity:0; } }
-/* 스크롤바 */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #FFB6C1; border-radius: 4px; }
+/* 스크롤바 (혹시 모를 안전장치) */
+::-webkit-scrollbar { width: 0; height: 0; }
 </style>
+<script>
+// ⭐ 반응형 스케일 계산 — 모든 기기에서 480×820 캔버스를 가운데에 꽉 차게
+function applyScale() {
+  var stage = document.getElementById('scaler');
+  if (!stage) return;
+  var sx = window.innerWidth / 480;
+  var sy = window.innerHeight / 820;
+  var s = Math.min(sx, sy);
+  stage.style.transform = 'scale(' + s + ')';
+}
+window.addEventListener('resize', applyScale);
+window.addEventListener('orientationchange', applyScale);
+window.addEventListener('load', applyScale);
+</script>
 </head>
 <body>
-<div id="root"></div>
+<div id="scaler-wrap">
+  <div id="scaler">
+    <div id="root"></div>
+  </div>
+</div>
+<script>applyScale();</script>
 <script type="text/babel" data-type="module">
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -212,7 +244,6 @@ const playSfx = (kind) => {
         o.start(ctx.currentTime+i*0.1); o.stop(ctx.currentTime+i*0.1+0.16);
       });
     } else if (kind==='wrong') {
-      // 부드러운 두 톤 — "음~음~" 같이 격려하는 느낌 (저학년 친화)
       [440, 392].forEach((f, i) => {
         const o = ctx.createOscillator(), g = ctx.createGain();
         o.type = 'sine'; o.frequency.value = f;
@@ -299,7 +330,7 @@ const SubjectFairy = ({ size=80 }) => (
   </motion.div>
 );
 
-// ===== GAS 호출 (CORS 회피용 text/plain) =====
+// ===== GAS 호출 =====
 const callGAS = async (action, payload) => {
   if (!GAS_URL) return { ok:false, error:'GAS URL 없음' };
   try {
@@ -315,7 +346,7 @@ const callGAS = async (action, payload) => {
 };
 
 // ============================================================
-// 메인 App
+// 메인 App  ── 캔버스 480×820 기준, 모든 화면 w-full h-full
 // ============================================================
 function App() {
   // 데이터
@@ -358,9 +389,9 @@ function App() {
   const [keyboardMode, setKeyboardMode] = useState(false);
 
   // 중간/최종 녹음 (영역마다)
-  const [midRecording, setMidRecording] = useState(null); // {prompt, text, audio, stars, sticker, isFinal}
+  const [midRecording, setMidRecording] = useState(null);
   const [midRecCount, setMidRecCount] = useState(0);
-  const [midRecPhase, setMidRecPhase] = useState('record'); // record | review
+  const [midRecPhase, setMidRecPhase] = useState('record');
 
   // 성찰
   const [reflectA1, setReflectA1] = useState('');
@@ -469,7 +500,7 @@ function App() {
   const startRecording = async (target) => {
     if (isSpeakerOn) playSfx('click');
     if (isRecording) { stopRecording(); return; }
-    if (keyboardMode) { return; }  // 키보드 모드에서는 녹음 X
+    if (keyboardMode) { return; }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
@@ -492,7 +523,6 @@ function App() {
       mediaRecorderRef.current = mr;
       setRecordTarget(target);
       setInterimText('');
-      // STT 시작
       try { recognitionRef.current?.start(); } catch(e) {}
       setIsRecording(true);
     } catch(e) {
@@ -518,7 +548,6 @@ function App() {
   const startQuiz = (count) => {
     if (isSpeakerOn) playSfx('click');
     setQuestionCount(count);
-    // 풀에서 섞어 count만큼 (반복 허용)
     const pool = [...currentArea.questions];
     for (let i = pool.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i+1));
@@ -590,7 +619,6 @@ function App() {
     setFeedback({ correct: isCorrect, main: mainText, sub: subText });
     if (isSpeakerOn) speak(isCorrect ? `${praise} ${q.correctFeedback}` : `괜찮아요. ${q.wrongFeedback}`);
 
-    // GAS 저장
     callGAS('saveAnswer', {
       student: studentName, area: currentArea.id, q: q.text,
       picked: String(picked), correctAns: String(q.answer),
@@ -605,7 +633,6 @@ function App() {
     setInterimText('');
     setHelpUsedThisQ(false);
     const nextIdx = currentQIdx + 1;
-    // 5문제마다 중간 녹음 (단, 마지막 문제 다음엔 영역 마무리)
     if (nextIdx > 0 && nextIdx % 5 === 0 && nextIdx < areaQuestions.length) {
       goToMidRecording();
     } else if (nextIdx >= areaQuestions.length) {
@@ -626,7 +653,6 @@ function App() {
   const useHelp = () => {
     const q = areaQuestions[currentQIdx];
     setHelpUsedThisQ(true);
-    // 스피커 꺼져있어도 도움은 들려주기
     if (!isSpeakerOn) {
       const u = new SpeechSynthesisUtterance(q.text);
       u.lang='ko-KR'; const v = selectKoreanVoice(); if (v) u.voice = v;
@@ -650,7 +676,6 @@ function App() {
   const finishMidReview = () => {
     if (!midRecording) return;
     if (midRecording.stars <= 3) {
-      // 다시 녹음 강제
       alert('별점이 3개 이하면 다시 녹음해 봐요!');
       retryMid();
       return;
@@ -667,7 +692,6 @@ function App() {
   const saveMidRec = () => {
     if (!midRecording) return;
     const isFinal = midRecording.isFinal;
-    // GAS 저장
     callGAS('saveRecording', {
       student: studentName, area: currentArea.id,
       kind: isFinal ? 'final' : 'mid',
@@ -681,11 +705,9 @@ function App() {
     setMidRecCount(c => c + 1);
 
     if (isFinal) {
-      // 영역 종료 → 성찰
       setStep('reflect');
       if (isSpeakerOn) speak('잠깐, 오늘 배운 것을 정리해 봐요.');
     } else {
-      // 다음 문제로
       const nextIdx = currentQIdx + 1;
       setCurrentQIdx(nextIdx);
       setStep('play');
@@ -695,10 +717,9 @@ function App() {
     }
   };
 
-  // ===== 성찰 마무리 → 지도 / 자기평가 =====
+  // ===== 성찰 마무리 =====
   const finishReflect = () => {
     if (reflectStars > 0 && reflectStars <= 3) {
-      // 별 3개 이하 → 다시 다짐
       alert('다짐이 약해요. 다시 적어 봐요!');
       setReflectA2(''); setReflectStars(0);
       return;
@@ -713,7 +734,6 @@ function App() {
     triggerConfetti();
     if (isSpeakerOn) playSfx('fanfare');
     if (newDone.size >= groupedAreas.length) {
-      // 모든 영역 완료 → 바로 자기평가
       setStep('eval');
       if (isSpeakerOn) speak('모든 탐험을 마쳤어요! 스스로 평가해 볼까요?');
     } else {
@@ -729,7 +749,6 @@ function App() {
   };
 
   const restartEval = () => {
-    // 별 3개 이하 → 다시 학습 (지도로)
     setSelfStars(0);
     setCompletedAreas(new Set());
     setStep('map');
@@ -739,7 +758,6 @@ function App() {
   const submitAll = async () => {
     if (recordTarget === 'post' && isRecording) stopRecording();
     setIsSubmitting(true);
-    // 사전 녹음
     if (preRecordText || preRecordAudio) {
       await callGAS('saveRecording', {
         student: studentName, area: 'pre', kind:'pre',
@@ -748,7 +766,6 @@ function App() {
         stars: 0, sticker: null
       });
     }
-    // 사후 녹음
     if (postRecordText || postRecordAudio) {
       await callGAS('saveRecording', {
         student: studentName, area: 'post', kind:'post',
@@ -757,7 +774,6 @@ function App() {
         stars: 0, sticker: null
       });
     }
-    // 최종 결과
     await callGAS('saveResult', {
       student: studentName,
       accuracy: totalAnswered ? Math.round(correctCount/totalAnswered*100) : 0,
@@ -781,7 +797,6 @@ function App() {
     setIsSpeakerOn(next);
     if (!next) stopSpeak();
     else {
-      // 현재 화면 안내 한 줄 읽기
       if (step === 'play' && areaQuestions[currentQIdx]) speak(areaQuestions[currentQIdx].text);
     }
   };
@@ -789,29 +804,29 @@ function App() {
   // ===== 로딩 =====
   if (isLoading) {
     return (
-      <div className="h-screen flex items-center justify-center flex-col text-blue-500 font-bold text-xl">
-        <Loader2 className="animate-spin w-16 h-16 mb-4"/>
+      <div className="w-full h-full flex items-center justify-center flex-col text-blue-500 font-bold text-2xl">
+        <Loader2 className="animate-spin w-20 h-20 mb-4"/>
         데이터를 불러오는 중...
       </div>
     );
   }
 
   // ============================================================
-  // 렌더링
+  // 렌더링 — 480×820 캔버스 안에 모든 화면 꽉 채우기
   // ============================================================
   return (
-    <div className="h-screen w-full font-gowun text-slate-800 flex flex-col items-center justify-center overflow-hidden relative p-3">
+    <div className="w-full h-full font-gowun text-slate-800 flex flex-col items-center justify-center overflow-hidden relative p-3">
       
       {/* 배경 떠다니는 데코 */}
       <div className="bg-decor">
-        <span style={{top:'5%',left:'8%',fontSize:'40px',animationDelay:'0s'}}>✨</span>
-        <span style={{top:'15%',right:'10%',fontSize:'36px',animationDelay:'1s'}}>⭐</span>
-        <span style={{top:'40%',left:'5%',fontSize:'32px',animationDelay:'2s'}}>💖</span>
-        <span style={{top:'55%',right:'8%',fontSize:'44px',animationDelay:'0.5s'}}>🌈</span>
-        <span style={{top:'72%',left:'12%',fontSize:'38px',animationDelay:'1.5s'}}>🌸</span>
-        <span style={{top:'85%',right:'15%',fontSize:'42px',animationDelay:'2.5s'}}>🦋</span>
-        <span style={{top:'25%',left:'45%',fontSize:'30px',animationDelay:'3s'}}>🎀</span>
-        <span style={{top:'62%',right:'42%',fontSize:'34px',animationDelay:'3.5s'}}>💫</span>
+        <span style={{top:'5%',left:'8%',fontSize:'42px',animationDelay:'0s'}}>✨</span>
+        <span style={{top:'15%',right:'10%',fontSize:'38px',animationDelay:'1s'}}>⭐</span>
+        <span style={{top:'40%',left:'5%',fontSize:'34px',animationDelay:'2s'}}>💖</span>
+        <span style={{top:'55%',right:'8%',fontSize:'46px',animationDelay:'0.5s'}}>🌈</span>
+        <span style={{top:'72%',left:'12%',fontSize:'40px',animationDelay:'1.5s'}}>🌸</span>
+        <span style={{top:'85%',right:'15%',fontSize:'44px',animationDelay:'2.5s'}}>🦋</span>
+        <span style={{top:'25%',left:'45%',fontSize:'32px',animationDelay:'3s'}}>🎀</span>
+        <span style={{top:'62%',right:'42%',fontSize:'36px',animationDelay:'3.5s'}}>💫</span>
       </div>
       
       {/* 상단 바: 스피커 + 도움말 */}
@@ -819,21 +834,21 @@ function App() {
         {(step === 'login' || step === 'intro') && (
           <button onClick={() => { setShowTutorial(true); setTutorialStep(0); }}
             className="p-3 bg-white rounded-full shadow-md border-2 border-slate-200">
-            <HelpCircle size={24} className="text-purple-500"/>
+            <HelpCircle size={26} className="text-purple-500"/>
           </button>
         )}
         <button onClick={toggleSpeaker}
           className={`p-3 bg-white rounded-full shadow-md border-2 ${isSpeakerOn?'border-blue-400':'border-slate-200'}`}>
-          {isSpeakerOn ? <Volume2 size={24} className="text-blue-500"/> : <VolumeX size={24} className="text-slate-400"/>}
+          {isSpeakerOn ? <Volume2 size={26} className="text-blue-500"/> : <VolumeX size={26} className="text-slate-400"/>}
         </button>
       </div>
 
-      {/* 좌상단 정보 (학생 이름 + 별) */}
+      {/* 좌상단 정보 */}
       {step !== 'login' && step !== 'result' && (
         <div className="absolute top-3 left-3 z-50 flex gap-2 items-center">
-          <div className="bg-white px-3 py-2 rounded-full shadow font-bold text-sm">🙋 {studentName}</div>
-          <div className="bg-yellow-100 px-3 py-2 rounded-full shadow font-bold text-sm">⭐ {totalStars}</div>
-          {streak >= 2 && <div className="bg-orange-100 px-3 py-2 rounded-full shadow font-bold text-sm">🔥 {streak}연속</div>}
+          <div className="bg-white px-3 py-2 rounded-full shadow font-bold text-base">🙋 {studentName}</div>
+          <div className="bg-yellow-100 px-3 py-2 rounded-full shadow font-bold text-base">⭐ {totalStars}</div>
+          {streak >= 2 && <div className="bg-orange-100 px-3 py-2 rounded-full shadow font-bold text-base">🔥 {streak}</div>}
         </div>
       )}
 
@@ -841,14 +856,14 @@ function App() {
       <AnimatePresence>
         {showTutorial && (
           <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-            <motion.div initial={{scale:0.8}} animate={{scale:1}} className="bg-white rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl">
-              <div className="min-h-[260px] flex flex-col items-center justify-center gap-3">
-                <div className="text-7xl">{TUTORIAL_PAGES[tutorialStep].em}</div>
-                <div className="text-3xl font-black bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent">
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+            <motion.div initial={{scale:0.8}} animate={{scale:1}} className="bg-white rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl">
+              <div className="min-h-[280px] flex flex-col items-center justify-center gap-3">
+                <div className="text-8xl">{TUTORIAL_PAGES[tutorialStep].em}</div>
+                <div className="text-4xl font-black bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent">
                   {TUTORIAL_PAGES[tutorialStep].title}
                 </div>
-                <div className="text-xl font-bold whitespace-pre-wrap">{TUTORIAL_PAGES[tutorialStep].desc}</div>
+                <div className="text-2xl font-bold whitespace-pre-wrap">{TUTORIAL_PAGES[tutorialStep].desc}</div>
               </div>
               <div className="flex gap-2 justify-center my-4">
                 {TUTORIAL_PAGES.map((_,i) => (
@@ -858,14 +873,14 @@ function App() {
               <div className="flex gap-2 justify-center">
                 {tutorialStep > 0 && (
                   <button onClick={() => setTutorialStep(s => s-1)}
-                    className="px-4 py-2 bg-slate-200 rounded-full font-bold">← 이전</button>
+                    className="px-5 py-3 bg-slate-200 rounded-full font-black text-lg">← 이전</button>
                 )}
                 {tutorialStep < TUTORIAL_PAGES.length - 1 ? (
                   <button onClick={() => setTutorialStep(s => s+1)}
-                    className="px-6 py-2 bg-gradient-to-r from-pink-500 to-orange-400 text-white rounded-full font-bold shadow">다음 →</button>
+                    className="px-6 py-3 bg-gradient-to-r from-pink-500 to-orange-400 text-white rounded-full font-black text-lg shadow">다음 →</button>
                 ) : (
                   <button onClick={() => setShowTutorial(false)}
-                    className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-full font-bold shadow">시작! 🚀</button>
+                    className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-full font-black text-lg shadow">시작! 🚀</button>
                 )}
               </div>
             </motion.div>
@@ -878,30 +893,30 @@ function App() {
         {/* 1. 로그인 */}
         {step === 'login' && (
           <motion.div key="login" initial={{opacity:0,scale:0.9}} animate={{opacity:1,scale:1}} exit={{opacity:0}}
-            className="bg-white p-7 rounded-[2.5rem] shadow-2xl border-[6px] border-pink-200 max-w-md w-full text-center space-y-5 relative z-10">
-            <div className="absolute -top-5 -left-5 text-5xl wiggle">🌸</div>
-            <div className="absolute -top-5 -right-5 text-5xl float-y" style={{animationDelay:'0.5s'}}>🎀</div>
-            <div className="absolute -bottom-3 -left-3 text-4xl float-y" style={{animationDelay:'1s'}}>💖</div>
-            <div className="absolute -bottom-3 -right-3 text-4xl wiggle" style={{animationDelay:'1.5s'}}>✨</div>
-            <SubjectFairy size={100}/>
+            className="bg-white p-7 rounded-[2.5rem] shadow-2xl border-[6px] border-pink-200 w-full text-center space-y-5 relative z-10">
+            <div className="absolute -top-5 -left-5 text-6xl wiggle">🌸</div>
+            <div className="absolute -top-5 -right-5 text-6xl float-y" style={{animationDelay:'0.5s'}}>🎀</div>
+            <div className="absolute -bottom-3 -left-3 text-5xl float-y" style={{animationDelay:'1s'}}>💖</div>
+            <div className="absolute -bottom-3 -right-3 text-5xl wiggle" style={{animationDelay:'1.5s'}}>✨</div>
+            <SubjectFairy size={120}/>
             <div className="space-y-2">
-              <h1 className="text-5xl font-cafe24 leading-tight">
+              <h1 className="text-6xl font-cafe24 leading-tight">
                 <span className="bg-gradient-to-r from-pink-500 via-orange-400 to-blue-500 bg-clip-text text-transparent">🛡️ 안전탐험 ✨</span>
               </h1>
-              <p className="text-xl font-gowun text-slate-600">
-                <span className="hi-yellow">🌟 안전을 배우는</span> <span className="hi-pink">신나는 모험! 🌟</span>
+              <p className="text-2xl font-gowun text-slate-600">
+                <span className="hi-yellow">🌟 안전을 배우는</span><br/><span className="hi-pink">신나는 모험! 🌟</span>
               </p>
             </div>
-            <div className="bg-gradient-to-br from-pink-50 to-yellow-50 p-4 rounded-3xl border-4 border-pink-200">
-              <p className="text-lg font-jua text-pink-700 mb-2">👋 내 이름을 골라요!</p>
+            <div className="bg-gradient-to-br from-pink-50 to-yellow-50 p-5 rounded-3xl border-4 border-pink-200">
+              <p className="text-2xl font-jua text-pink-700 mb-3">👋 내 이름을 골라요!</p>
               <select value={studentName} onChange={e => setStudentName(e.target.value)}
-                className="w-full text-2xl font-jua p-3 border-4 border-pink-300 rounded-2xl outline-none bg-white text-pink-700 focus:border-pink-500">
+                className="w-full text-3xl font-jua p-3 border-4 border-pink-300 rounded-2xl outline-none bg-white text-pink-700 focus:border-pink-500">
                 <option value="">🙋 -- 이름 선택 --</option>
                 {students.map(s => <option key={s} value={s}>{s} 친구</option>)}
               </select>
             </div>
             <button onClick={startApp}
-              className="btn-cute w-full py-5 bg-gradient-to-r from-pink-500 via-rose-500 to-orange-400 text-white text-3xl font-cafe24"
+              className="btn-cute w-full py-5 bg-gradient-to-r from-pink-500 via-rose-500 to-orange-400 text-white text-4xl font-cafe24"
               style={{boxShadow:'0 6px 0 #DB2777, 0 12px 24px rgba(0,0,0,0.15)'}}>
               🚀 시작하기 ✨
             </button>
@@ -911,16 +926,16 @@ function App() {
         {/* 2. 인트로 */}
         {step === 'intro' && (
           <motion.div key="intro" initial={{scale:0.9}} animate={{scale:1}} exit={{opacity:0}}
-            className="bg-white p-7 rounded-[2.5rem] shadow-2xl border-4 border-blue-100 max-w-md w-full text-center space-y-5">
-            <SubjectFairy size={100}/>
-            <h1 className="text-3xl font-black text-pink-600">반가워, {studentName} 대원!</h1>
+            className="bg-white p-7 rounded-[2.5rem] shadow-2xl border-4 border-blue-100 w-full text-center space-y-5">
+            <SubjectFairy size={120}/>
+            <h1 className="text-4xl font-black text-pink-600">반가워, {studentName} 대원!</h1>
             <div className="bg-gradient-to-br from-yellow-100 to-orange-100 p-5 rounded-2xl border-2 border-orange-200">
-              <p className="text-xl font-black text-orange-700 mb-1">"나를 지키는 안전 약속을 배우자!"</p>
-              <p className="text-sm font-bold text-orange-800">🧚 통합교과 요정과 함께 5가지 영역을 탐험해요.</p>
+              <p className="text-2xl font-black text-orange-700 mb-2">"나를 지키는<br/>안전 약속을 배우자!"</p>
+              <p className="text-lg font-bold text-orange-800">🧚 통합교과 요정과 함께<br/>5가지 영역을 탐험해요.</p>
             </div>
             <button onClick={() => { setStep('prerecord'); if (isSpeakerOn) speak('먼저 평소 알고 있던 안전 규칙을 자유롭게 말해 봐요.'); }}
-              className="w-full py-5 bg-gradient-to-r from-pink-500 to-orange-400 text-white rounded-3xl text-2xl font-black shadow-xl active:scale-95">
-              사전 학습 시작 <ChevronRight className="inline" size={24}/>
+              className="w-full py-5 bg-gradient-to-r from-pink-500 to-orange-400 text-white rounded-3xl text-3xl font-black shadow-xl active:scale-95">
+              사전 학습 시작 <ChevronRight className="inline" size={28}/>
             </button>
           </motion.div>
         )}
@@ -928,33 +943,33 @@ function App() {
         {/* 3. 사전 녹음 */}
         {step === 'prerecord' && (
           <motion.div key="pre" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
-            className="bg-white p-6 rounded-[2.5rem] shadow-2xl border-4 border-green-100 max-w-md w-full text-center space-y-4">
-            <h1 className="text-3xl font-black text-green-600">탐험 전 나의 생각</h1>
-            <p className="text-base font-bold text-slate-600 bg-green-50 p-3 rounded-xl">
+            className="bg-white p-6 rounded-[2.5rem] shadow-2xl border-4 border-green-100 w-full text-center space-y-4">
+            <h1 className="text-4xl font-black text-green-600">탐험 전 나의 생각</h1>
+            <p className="text-xl font-bold text-slate-600 bg-green-50 p-3 rounded-xl">
               평소 알고 있는 '안전 규칙'을<br/>자유롭게 말해 주세요!
             </p>
             {!keyboardMode ? (
               <>
                 <button onClick={() => isRecording ? stopRecording() : startRecording('pre')}
-                  className={`w-28 h-28 rounded-full flex items-center justify-center mx-auto text-white shadow-xl transition-all ${isRecording?'bg-red-500 pulse-record':'bg-green-500'}`}>
-                  {isRecording ? <Square size={44}/> : <Mic size={44}/>}
+                  className={`w-32 h-32 rounded-full flex items-center justify-center mx-auto text-white shadow-xl transition-all ${isRecording?'bg-red-500 pulse-record':'bg-green-500'}`}>
+                  {isRecording ? <Square size={52}/> : <Mic size={52}/>}
                 </button>
-                <p className="text-sm font-bold text-slate-400">
+                <p className="text-lg font-bold text-slate-500">
                   {isRecording ? '녹음 중... (네모 누르면 멈춤)' : '마이크 누르고 말해 봐요'}
                 </p>
               </>
             ) : (
-              <p className="text-sm font-bold text-blue-500">⌨️ 키보드로 직접 적어 보세요</p>
+              <p className="text-xl font-bold text-blue-500 py-8">⌨️ 키보드로 직접 적어 보세요</p>
             )}
             <textarea value={preRecordText + (isRecording?interimText:'')}
               onChange={e => setPreRecordText(e.target.value)}
               placeholder="여기에 말한 내용이 글자로 나타나요. 직접 적어도 돼요!"
-              className="w-full h-24 bg-slate-50 rounded-2xl border-2 border-slate-200 p-3 text-left text-slate-700 font-bold resize-none outline-none focus:border-green-400"/>
+              className="w-full h-24 bg-slate-50 rounded-2xl border-2 border-slate-200 p-3 text-left text-slate-700 font-bold text-lg resize-none outline-none focus:border-green-400"/>
             <button onClick={() => { if (isRecording) stopRecording(); setKeyboardMode(!keyboardMode); }}
-              className="text-sm text-blue-500 underline">{keyboardMode?'🎤 마이크로 녹음':'⌨️ 키보드로 입력'}</button>
+              className="text-base text-blue-500 underline font-bold">{keyboardMode?'🎤 마이크로 녹음':'⌨️ 키보드로 입력'}</button>
             <button onClick={() => { if (isRecording) stopRecording(); setKeyboardMode(false); setStep('map'); }}
-              className="w-full py-4 bg-slate-800 text-white rounded-2xl text-xl font-black shadow-md active:scale-95">
-              안전 지도 보기 <ChevronRight className="inline" size={24}/>
+              className="w-full py-4 bg-slate-800 text-white rounded-2xl text-2xl font-black shadow-md active:scale-95">
+              안전 지도 보기 <ChevronRight className="inline" size={26}/>
             </button>
           </motion.div>
         )}
@@ -962,8 +977,8 @@ function App() {
         {/* 4. 지도 */}
         {step === 'map' && (
           <motion.div key="map" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
-            className="relative w-full h-full max-w-3xl bg-gradient-to-br from-sky-50 to-blue-100 rounded-[2.5rem] border-[8px] border-white shadow-2xl overflow-hidden mt-12">
-            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-white px-4 py-2 rounded-full shadow font-black text-blue-600 text-lg whitespace-nowrap">
+            className="relative w-full h-full bg-gradient-to-br from-sky-50 to-blue-100 rounded-[2.5rem] border-[8px] border-white shadow-2xl overflow-hidden mt-16">
+            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-white px-5 py-2 rounded-full shadow font-black text-blue-600 text-xl whitespace-nowrap">
               🗺️ 안전 지도 ({completedAreas.size} / {groupedAreas.length})
             </div>
             <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-30 z-0" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -979,18 +994,18 @@ function App() {
                   style={{ left:`${m.pos.x}%`, top:`${m.pos.y}%` }}>
                   <motion.button whileHover={{scale:1.1}} whileTap={{scale:0.9}} onClick={() => !isDone && selectArea(m)}
                     disabled={isDone}
-                    className={`px-4 py-3 rounded-2xl shadow-xl border-4 flex flex-col items-center gap-1 transition-colors ${isDone?'bg-slate-200 border-slate-300 opacity-60':`${m.bg} border-white text-white scale-110`}`}>
-                    <m.Icon size={32}/>
-                    <span className="text-sm font-black whitespace-nowrap">{m.name}</span>
-                    {isDone && <CheckCircle2 className="absolute -top-2 -right-2 text-green-600 bg-white rounded-full p-0.5" size={22}/>}
+                    className={`px-4 py-3 rounded-2xl shadow-xl border-4 flex flex-col items-center gap-1 transition-colors relative ${isDone?'bg-slate-200 border-slate-300 opacity-60':`${m.bg} border-white text-white scale-110`}`}>
+                    <m.Icon size={36}/>
+                    <span className="text-base font-black whitespace-nowrap">{m.name}</span>
+                    {isDone && <CheckCircle2 className="absolute -top-2 -right-2 text-green-600 bg-white rounded-full p-0.5" size={24}/>}
                   </motion.button>
                 </div>
               );
             })}
             {completedAreas.size === groupedAreas.length && groupedAreas.length > 0 && (
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30">
+              <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-30">
                 <button onClick={() => { setStep('eval'); if (isSpeakerOn) speak('스스로 평가해 볼까요?'); }}
-                  className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full text-lg font-black shadow-xl">
+                  className="px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full text-2xl font-black shadow-xl">
                   최종 평가하기 ⭐
                 </button>
               </div>
@@ -998,7 +1013,7 @@ function App() {
           </motion.div>
         )}
 
-        {/* 5. 개념학습 (드래그앤드롭) */}
+        {/* 5. 개념학습 */}
         {step === 'concept' && currentArea && (
           <ConceptScreen
             data={CONCEPT_DATA[currentArea.id]}
@@ -1011,20 +1026,20 @@ function App() {
         {/* 6. 문제수 선택 */}
         {step === 'count' && currentArea && (
           <motion.div key="count" initial={{opacity:0}} animate={{opacity:1}}
-            className="bg-white p-6 rounded-[2.5rem] shadow-2xl border-4 border-blue-100 max-w-md w-full text-center space-y-5">
-            <h1 className="text-2xl font-black text-blue-600">🎯 몇 문제 풀어 볼까요?</h1>
-            <p className="text-base font-bold text-slate-600">하고 싶은 만큼 골라 봐요!</p>
+            className="bg-white p-6 rounded-[2.5rem] shadow-2xl border-4 border-blue-100 w-full text-center space-y-5">
+            <h1 className="text-3xl font-black text-blue-600">🎯 몇 문제 풀어 볼까요?</h1>
+            <p className="text-xl font-bold text-slate-600">하고 싶은 만큼 골라 봐요!</p>
             <div className="grid grid-cols-3 gap-3">
               {[3,5,10].map(n => (
                 <button key={n} onClick={() => startQuiz(n)}
-                  className="bg-gradient-to-br from-pink-100 to-yellow-100 rounded-2xl p-4 border-4 border-transparent hover:border-pink-300 active:scale-95">
-                  <div className="text-5xl font-black bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent">{n}</div>
-                  <div className="text-base font-bold">문제</div>
-                  <div className="text-xs text-slate-500">{n===3?'짧게':n===5?'알맞게':'더 해볼래!'}</div>
+                  className="bg-gradient-to-br from-pink-100 to-yellow-100 rounded-2xl p-5 border-4 border-transparent hover:border-pink-300 active:scale-95">
+                  <div className="text-6xl font-black bg-gradient-to-r from-pink-500 to-orange-400 bg-clip-text text-transparent">{n}</div>
+                  <div className="text-xl font-bold mt-1">문제</div>
+                  <div className="text-sm text-slate-500 mt-1">{n===3?'짧게':n===5?'알맞게':'더 해볼래!'}</div>
                 </button>
               ))}
             </div>
-            <button onClick={() => setStep('map')} className="text-sm text-slate-500 underline">← 영역 다시 고르기</button>
+            <button onClick={() => setStep('map')} className="text-base text-slate-500 underline font-bold">← 영역 다시 고르기</button>
           </motion.div>
         )}
 
@@ -1054,7 +1069,7 @@ function App() {
           />
         )}
 
-        {/* 8. 중간/최종 녹음 (영역별) */}
+        {/* 8. 중간/최종 녹음 */}
         {step === 'midrec' && midRecording && (
           <RecordReviewScreen
             recording={midRecording}
@@ -1077,36 +1092,36 @@ function App() {
         {/* 9. 성찰 */}
         {step === 'reflect' && (
           <motion.div key="reflect" initial={{opacity:0}} animate={{opacity:1}}
-            className="bg-white p-6 rounded-[2.5rem] shadow-2xl border-4 border-yellow-100 max-w-md w-full space-y-4">
-            <h1 className="text-2xl font-black text-yellow-600 text-center">💭 잠깐, 생각해 봐요</h1>
+            className="bg-white p-6 rounded-[2.5rem] shadow-2xl border-4 border-yellow-100 w-full space-y-4">
+            <h1 className="text-3xl font-black text-yellow-600 text-center">💭 잠깐, 생각해 봐요</h1>
             <div>
-              <p className="text-base font-bold mb-1">🌟 가장 기억에 남는 건?</p>
+              <p className="text-xl font-bold mb-2">🌟 가장 기억에 남는 건?</p>
               <textarea value={reflectA1} onChange={e=>setReflectA1(e.target.value)}
                 placeholder="자유롭게 적어 봐요..."
-                className="w-full h-16 bg-yellow-50 border-2 border-yellow-200 rounded-xl p-2 text-base font-bold resize-none outline-none focus:border-yellow-400"/>
+                className="w-full h-16 bg-yellow-50 border-2 border-yellow-200 rounded-xl p-2 text-lg font-bold resize-none outline-none focus:border-yellow-400"/>
             </div>
             <div>
-              <p className="text-base font-bold mb-1">🌈 어떤 약속을 지키고 싶나요?</p>
+              <p className="text-xl font-bold mb-2">🌈 어떤 약속을 지키고 싶나요?</p>
               <textarea value={reflectA2} onChange={e=>setReflectA2(e.target.value)}
                 placeholder="다짐을 적어 봐요..."
-                className="w-full h-16 bg-pink-50 border-2 border-pink-200 rounded-xl p-2 text-base font-bold resize-none outline-none focus:border-pink-400"/>
+                className="w-full h-16 bg-pink-50 border-2 border-pink-200 rounded-xl p-2 text-lg font-bold resize-none outline-none focus:border-pink-400"/>
             </div>
             <div className="text-center">
-              <p className="text-sm font-bold text-slate-500 mb-1">⭐ 다짐을 별로 평가해요</p>
+              <p className="text-base font-bold text-slate-500 mb-1">⭐ 다짐을 별로 평가해요</p>
               <div className="flex justify-center gap-1">
                 {[1,2,3,4,5].map(n => (
                   <button key={n} onClick={() => setReflectStars(n)}>
-                    <Star size={38} className={n<=reflectStars?'fill-yellow-400 text-yellow-500':'text-slate-200'}/>
+                    <Star size={44} className={n<=reflectStars?'fill-yellow-400 text-yellow-500':'text-slate-200'}/>
                   </button>
                 ))}
               </div>
             </div>
             {reflectStars > 0 && reflectStars <= 3 && (
-              <p className="text-center text-sm text-orange-500 font-bold">⚠️ 다짐이 약해요. 다시 적어 봐요!</p>
+              <p className="text-center text-base text-orange-500 font-bold">⚠️ 다짐이 약해요. 다시 적어 봐요!</p>
             )}
             <button onClick={finishReflect}
               disabled={reflectStars === 0}
-              className="w-full py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-2xl text-lg font-black shadow disabled:opacity-50">
+              className="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-2xl text-2xl font-black shadow disabled:opacity-50">
               다음으로 ➡️
             </button>
           </motion.div>
@@ -1115,25 +1130,25 @@ function App() {
         {/* 10. 자기평가 */}
         {step === 'eval' && (
           <motion.div key="eval" initial={{scale:0.9}} animate={{scale:1}}
-            className="bg-white p-7 rounded-[2.5rem] shadow-2xl border-4 border-yellow-200 max-w-md w-full text-center space-y-5">
-            <h1 className="text-2xl font-black text-yellow-600">⭐ 나의 안전탐험 점수는?</h1>
-            <p className="text-base font-bold text-slate-600">스스로 얼마나 잘 배웠는지<br/>별을 눌러 평가해 봐요!</p>
+            className="bg-white p-7 rounded-[2.5rem] shadow-2xl border-4 border-yellow-200 w-full text-center space-y-5">
+            <h1 className="text-3xl font-black text-yellow-600">⭐ 나의 안전탐험 점수는?</h1>
+            <p className="text-xl font-bold text-slate-600">스스로 얼마나 잘 배웠는지<br/>별을 눌러 평가해 봐요!</p>
             <div className="flex justify-center gap-2">
               {[1,2,3,4,5].map(n => (
                 <button key={n} onClick={() => setSelfStars(n)} className="transition-transform hover:scale-125">
-                  <Star size={52} className={n<=selfStars?'fill-yellow-400 text-yellow-500':'text-slate-200'} strokeWidth={1}/>
+                  <Star size={60} className={n<=selfStars?'fill-yellow-400 text-yellow-500':'text-slate-200'} strokeWidth={1}/>
                 </button>
               ))}
             </div>
             {selfStars > 0 && selfStars <= 3 && (
               <button onClick={restartEval}
-                className="w-full py-3 bg-orange-100 text-orange-700 border-2 border-orange-300 rounded-2xl text-base font-black">
-                <RotateCcw className="inline mr-1" size={20}/> 조금 더 다시 해볼래요
+                className="w-full py-3 bg-orange-100 text-orange-700 border-2 border-orange-300 rounded-2xl text-lg font-black">
+                <RotateCcw className="inline mr-1" size={22}/> 조금 더 다시 해볼래요
               </button>
             )}
             {selfStars > 0 && (
               <button onClick={finishEval}
-                className="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-2xl text-xl font-black shadow active:scale-95">
+                className="w-full py-4 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-2xl text-2xl font-black shadow active:scale-95">
                 다음 단계로 ➡️
               </button>
             )}
@@ -1143,33 +1158,33 @@ function App() {
         {/* 11. 사후 녹음 */}
         {step === 'postrecord' && (
           <motion.div key="post" initial={{opacity:0}} animate={{opacity:1}}
-            className="bg-white p-6 rounded-[2.5rem] shadow-2xl border-4 border-purple-100 max-w-md w-full text-center space-y-4">
-            <h1 className="text-3xl font-black text-purple-600">탐험 후 나의 다짐</h1>
-            <p className="text-base font-bold text-slate-600 bg-purple-50 p-3 rounded-xl">
+            className="bg-white p-6 rounded-[2.5rem] shadow-2xl border-4 border-purple-100 w-full text-center space-y-4">
+            <h1 className="text-4xl font-black text-purple-600">탐험 후 나의 다짐</h1>
+            <p className="text-xl font-bold text-slate-600 bg-purple-50 p-3 rounded-xl">
               새롭게 알게 된 점이나<br/>앞으로의 다짐을 말해 주세요!
             </p>
             {!keyboardMode ? (
               <>
                 <button onClick={() => isRecording ? stopRecording() : startRecording('post')}
-                  className={`w-28 h-28 rounded-full flex items-center justify-center mx-auto text-white shadow-xl transition-all ${isRecording?'bg-red-500 pulse-record':'bg-purple-500'}`}>
-                  {isRecording ? <Square size={44}/> : <Mic size={44}/>}
+                  className={`w-32 h-32 rounded-full flex items-center justify-center mx-auto text-white shadow-xl transition-all ${isRecording?'bg-red-500 pulse-record':'bg-purple-500'}`}>
+                  {isRecording ? <Square size={52}/> : <Mic size={52}/>}
                 </button>
-                <p className="text-sm font-bold text-slate-400">
+                <p className="text-lg font-bold text-slate-500">
                   {isRecording ? '녹음 중...' : '마이크를 누르고 말해 봐요'}
                 </p>
               </>
             ) : (
-              <p className="text-sm font-bold text-blue-500">⌨️ 키보드로 직접 적어 보세요</p>
+              <p className="text-xl font-bold text-blue-500 py-8">⌨️ 키보드로 직접 적어 보세요</p>
             )}
             <textarea value={postRecordText + (isRecording?interimText:'')}
               onChange={e => setPostRecordText(e.target.value)}
               placeholder="여기에 말한 내용이 글자로 나타나요"
-              className="w-full h-24 bg-slate-50 rounded-2xl border-2 border-slate-200 p-3 text-left text-slate-700 font-bold resize-none outline-none focus:border-purple-400"/>
+              className="w-full h-20 bg-slate-50 rounded-2xl border-2 border-slate-200 p-3 text-left text-slate-700 font-bold text-lg resize-none outline-none focus:border-purple-400"/>
             <button onClick={() => { if (isRecording) stopRecording(); setKeyboardMode(!keyboardMode); }}
-              className="text-sm text-blue-500 underline">{keyboardMode?'🎤 마이크로':'⌨️ 키보드로'}</button>
+              className="text-base text-blue-500 underline font-bold">{keyboardMode?'🎤 마이크로':'⌨️ 키보드로'}</button>
             <button disabled={isSubmitting} onClick={submitAll}
-              className="w-full flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl text-lg font-black shadow disabled:opacity-50">
-              {isSubmitting ? <><Loader2 className="animate-spin"/> 저장 중...</> : <>최종 제출하기 <ChevronRight/></>}
+              className="w-full flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl text-2xl font-black shadow disabled:opacity-50">
+              {isSubmitting ? <><Loader2 className="animate-spin"/> 저장 중...</> : <>최종 제출하기 <ChevronRight size={28}/></>}
             </button>
           </motion.div>
         )}
@@ -1177,36 +1192,36 @@ function App() {
         {/* 12. 수료증 */}
         {step === 'result' && (
           <motion.div key="result" initial={{scale:0.8,opacity:0}} animate={{scale:1,opacity:1}}
-            className="bg-white p-6 rounded-[2.5rem] shadow-2xl border-[8px] border-orange-300 max-w-md w-full text-center space-y-4 relative z-10">
+            className="bg-white p-5 rounded-[2.5rem] shadow-2xl border-[8px] border-orange-300 w-full text-center space-y-3 relative z-10">
             <div className="absolute -top-6 -left-6 text-6xl wiggle glow-gold">🏆</div>
             <div className="absolute -top-6 -right-6 text-5xl float-y glow-gold" style={{animationDelay:'0.5s'}}>🎉</div>
-            <div className="absolute -bottom-4 -left-4 text-4xl wiggle" style={{animationDelay:'1s'}}>🎊</div>
-            <div className="absolute -bottom-4 -right-4 text-4xl float-y" style={{animationDelay:'1.5s'}}>✨</div>
-            <SubjectFairy size={90}/>
+            <div className="absolute -bottom-4 -left-4 text-5xl wiggle" style={{animationDelay:'1s'}}>🎊</div>
+            <div className="absolute -bottom-4 -right-4 text-5xl float-y" style={{animationDelay:'1.5s'}}>✨</div>
+            <SubjectFairy size={100}/>
             <h1 className="text-4xl font-cafe24">
               <span className="bg-gradient-to-r from-orange-500 via-pink-500 to-purple-500 bg-clip-text text-transparent">🏆 안전탐험 완료! 🎉</span>
             </h1>
-            <div className="bg-gradient-to-br from-orange-50 via-yellow-50 to-pink-50 p-5 rounded-3xl border-4 border-dashed border-orange-300 space-y-3 relative">
+            <div className="bg-gradient-to-br from-orange-50 via-yellow-50 to-pink-50 p-4 rounded-3xl border-4 border-dashed border-orange-300 space-y-2 relative">
               <ShieldCheck size={56} className="text-orange-500 mx-auto float-y"/>
               <p className="text-2xl font-cafe24 text-orange-700">안전 지킴이 수료증</p>
               <p className="text-3xl font-jua text-pink-600 txt-shadow-pink">{studentName}</p>
-              <p className="text-sm font-gowun text-slate-700">
+              <p className="text-base font-gowun text-slate-700">
                 위 대원은 <span className="hi-yellow">모든 안전 미션</span>을<br/>
                 <span className="hi-pink">훌륭히 마쳤음</span>을 증명합니다 ✨
               </p>
-              <div className="bg-white p-3 rounded-2xl border-2 border-orange-200 text-left text-sm space-y-2 font-gowun">
+              <div className="bg-white p-3 rounded-2xl border-2 border-orange-200 text-left text-base space-y-1.5 font-gowun">
                 <div className="flex justify-between"><span>🎯 정답률</span><b className="font-jua text-xl text-orange-600">{totalAnswered?Math.round(correctCount/totalAnswered*100):0}%</b></div>
                 <div className="flex justify-between"><span>⭐ 받은 별</span><b className="font-jua text-xl text-yellow-600">{totalStars}</b></div>
                 <div className="flex justify-between"><span>🔥 최고 연속</span><b className="font-jua text-xl text-red-500">{bestStreak}</b></div>
                 <div className="flex justify-between"><span>🗺️ 완료 영역</span><b className="font-jua text-xl text-blue-600">{completedAreas.size} / {groupedAreas.length}</b></div>
               </div>
-              <p className="text-xs font-gaegu text-orange-500">{new Date().toLocaleDateString('ko-KR')}</p>
+              <p className="text-sm font-gaegu text-orange-500">{new Date().toLocaleDateString('ko-KR')}</p>
               <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-red-500 text-white rounded-full flex items-center justify-center border-[5px] border-double border-white shadow-xl rotate-12">
                 <span className="font-cafe24 text-lg leading-tight">참!<br/>잘했어요</span>
               </div>
             </div>
             <button onClick={() => window.location.reload()}
-              className="btn-cute w-full py-4 bg-gradient-to-r from-slate-400 to-slate-500 text-white text-xl font-cafe24"
+              className="btn-cute w-full py-3 bg-gradient-to-r from-slate-400 to-slate-500 text-white text-2xl font-cafe24"
               style={{boxShadow:'0 5px 0 #475569'}}>
               🔄 다시 시작
             </button>
@@ -1219,10 +1234,10 @@ function App() {
 }
 
 // ============================================================
-// 개념학습 컴포넌트 (드래그앤드롭 + 클릭 둘 다 지원)
+// 개념학습 컴포넌트
 // ============================================================
 function ConceptScreen({ data, areaName, isSpeakerOn, onDone }) {
-  const [placed, setPlaced] = useState({}); // targetId -> itemId
+  const [placed, setPlaced] = useState({});
   const [selectedItem, setSelectedItem] = useState(null);
   const [wrongs, setWrongs] = useState({});
 
@@ -1245,16 +1260,8 @@ function ConceptScreen({ data, areaName, isSpeakerOn, onDone }) {
   };
 
   const unplace = (targetId) => {
-    setPlaced(prev => {
-      const c = {...prev};
-      delete c[targetId];
-      return c;
-    });
-    setWrongs(prev => {
-      const c = {...prev};
-      delete c[targetId];
-      return c;
-    });
+    setPlaced(prev => { const c = {...prev}; delete c[targetId]; return c; });
+    setWrongs(prev => { const c = {...prev}; delete c[targetId]; return c; });
   };
 
   const allDone = data.targets.every(t => placed[t.id] && !wrongs[t.id]);
@@ -1269,10 +1276,10 @@ function ConceptScreen({ data, areaName, isSpeakerOn, onDone }) {
 
   return (
     <motion.div key="concept" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
-      className="w-full max-w-2xl flex flex-col items-center gap-3 pt-12 px-3">
-      <h1 className="text-2xl font-black text-purple-600 text-center">🧩 {areaName} 개념 익히기</h1>
-      <p className="text-sm font-bold text-slate-600 text-center">{data.sub}</p>
-      <p className="text-xs text-slate-500 text-center">💡 아래 카드를 골라 → 위 칸에 옮겨 봐요!<br/>틀린 카드는 다시 누르면 돌아와요</p>
+      className="w-full h-full flex flex-col items-center gap-3 pt-16 px-3">
+      <h1 className="text-3xl font-black text-purple-600 text-center">🧩 {areaName} 익히기</h1>
+      <p className="text-lg font-bold text-slate-600 text-center">{data.sub}</p>
+      <p className="text-sm text-slate-500 text-center">💡 아래 카드를 골라 → 위 칸에 옮겨 봐요!<br/>틀린 카드는 다시 누르면 돌아와요</p>
 
       <div className="w-full space-y-2">
         {data.targets.map(t => {
@@ -1283,8 +1290,8 @@ function ConceptScreen({ data, areaName, isSpeakerOn, onDone }) {
             <div key={t.id}
               onClick={() => itemId ? unplace(t.id) : placeOn(t.id)}
               className={`bg-gradient-to-r from-blue-50 to-pink-50 border-4 border-dashed rounded-2xl p-3 flex items-center gap-3 cursor-pointer transition-all ${selectedItem && !itemId?'border-yellow-400 scale-[1.02]':'border-pink-300'}`}>
-              <div className="font-black text-base flex-shrink-0 w-32">{t.label}</div>
-              <div className={`flex-1 min-h-[44px] rounded-xl flex items-center justify-center font-black text-base ${item?(isWrong?'bg-red-200 text-red-800':'bg-green-200 text-green-800'):'bg-white/50 text-slate-400'}`}>
+              <div className="font-black text-lg flex-shrink-0 w-36">{t.label}</div>
+              <div className={`flex-1 min-h-[52px] rounded-xl flex items-center justify-center font-black text-lg ${item?(isWrong?'bg-red-200 text-red-800':'bg-green-200 text-green-800'):'bg-white/50 text-slate-400'}`}>
                 {item ? item.label : '여기로 옮겨요'}
               </div>
             </div>
@@ -1292,13 +1299,13 @@ function ConceptScreen({ data, areaName, isSpeakerOn, onDone }) {
         })}
       </div>
 
-      <div className="w-full grid grid-cols-3 gap-2 mt-2">
+      <div className="w-full grid grid-cols-3 gap-2 mt-1">
         {data.items.map(i => {
           const isPlaced = placedItems.has(i.id);
           if (isPlaced) return <div key={i.id}/>;
           return (
             <button key={i.id} onClick={() => handleItemClick(i.id)}
-              className={`bg-gradient-to-br from-yellow-300 to-orange-400 text-white rounded-2xl p-3 font-black text-sm shadow-md transition-all ${selectedItem===i.id?'ring-4 ring-pink-400 scale-105':''}`}>
+              className={`bg-gradient-to-br from-yellow-300 to-orange-400 text-white rounded-2xl p-3 font-black text-base shadow-md transition-all ${selectedItem===i.id?'ring-4 ring-pink-400 scale-105':''}`}>
               {i.label}
             </button>
           );
@@ -1306,7 +1313,7 @@ function ConceptScreen({ data, areaName, isSpeakerOn, onDone }) {
       </div>
 
       <button onClick={onDone} disabled={!allDone}
-        className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-black text-base shadow disabled:opacity-40 mt-2">
+        className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-black text-xl shadow disabled:opacity-40 mt-2">
         다음으로 ➡️
       </button>
     </motion.div>
@@ -1319,42 +1326,42 @@ function ConceptScreen({ data, areaName, isSpeakerOn, onDone }) {
 function PlayScreen({ area, question, qIdx, totalQ, feedback, voiceAnswerText, setVoiceAnswerText, interimText, isRecording, isSpeakerOn, keyboardMode, setKeyboardMode, helpUsedThisQ, onChoice, onVoiceCheck, onToggleRec, onHelp, onNext, onRetry, onStopRec }) {
   return (
     <motion.div key="play" initial={{y:30,opacity:0}} animate={{y:0,opacity:1}}
-      className="w-full max-w-xl flex flex-col items-center gap-2 pt-12 px-3">
+      className="w-full flex flex-col items-center gap-2 pt-16 px-2">
       <div className="flex items-center gap-2 mb-1">
-        <span className={`${area.bg} text-white px-3 py-1 rounded-full text-sm font-black flex items-center gap-1`}>
-          <area.Icon size={16}/>{area.name}
+        <span className={`${area.bg} text-white px-4 py-1.5 rounded-full text-base font-black flex items-center gap-1`}>
+          <area.Icon size={18}/>{area.name}
         </span>
-        <span className="text-sm font-bold text-slate-500">{qIdx+1} / {totalQ}</span>
+        <span className="text-base font-bold text-slate-500">{qIdx+1} / {totalQ}</span>
       </div>
 
-      <div className={`bg-white p-5 rounded-3xl shadow-2xl border-4 border-blue-50 w-full transition-all ${feedback?'scale-95 opacity-80':''}`}>
-        <h2 className="text-xl font-black leading-tight flex items-start gap-2 mb-4">
-          <span className="bg-blue-500 text-white w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-base">Q</span>
+      <div className={`bg-white p-4 rounded-3xl shadow-2xl border-4 border-blue-50 w-full transition-all ${feedback?'scale-95 opacity-80':''}`}>
+        <h2 className="text-xl font-black leading-tight flex items-start gap-2 mb-3">
+          <span className="bg-blue-500 text-white w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-lg">Q</span>
           <span>{question.text}</span>
         </h2>
 
         {question.type === '음성' ? (
-          <div className="flex flex-col items-center gap-3">
+          <div className="flex flex-col items-center gap-2">
             {!keyboardMode && (
               <button disabled={feedback!==null} onClick={onToggleRec}
                 className={`w-24 h-24 rounded-full flex items-center justify-center text-white shadow-xl transition-all ${isRecording?'bg-red-500 pulse-record':'bg-blue-500'} ${feedback?'opacity-50':''}`}>
                 {isRecording ? <Square size={40}/> : <Mic size={40}/>}
               </button>
             )}
-            <p className="text-sm font-bold text-slate-500 text-center">
-              {keyboardMode ? '⌨️ 아래에 직접 적어요' : (isRecording ? '듣고 있어요... (네모 누르면 멈춤)' : '🎤 누르고 정답을 말해 봐요')}
+            <p className="text-base font-bold text-slate-500 text-center">
+              {keyboardMode ? '⌨️ 아래에 직접 적어요' : (isRecording ? '듣고 있어요...' : '🎤 누르고 정답을 말해 봐요')}
             </p>
             <textarea
               value={voiceAnswerText + (isRecording?interimText:'')}
               onChange={e => setVoiceAnswerText(e.target.value)}
               placeholder="여기에 글로 적어도 돼요!"
               disabled={feedback!==null}
-              className="w-full h-16 bg-slate-50 rounded-xl border-2 border-slate-200 p-2 text-base font-bold resize-none outline-none focus:border-blue-400"/>
+              className="w-full h-14 bg-slate-50 rounded-xl border-2 border-slate-200 p-2 text-base font-bold resize-none outline-none focus:border-blue-400"/>
             <button onClick={() => { if (isRecording) onStopRec(); setKeyboardMode(!keyboardMode); }}
-              className="text-xs text-blue-500 underline">{keyboardMode?'🎤 마이크로':'⌨️ 키보드로'}</button>
+              className="text-sm text-blue-500 underline font-bold">{keyboardMode?'🎤 마이크로':'⌨️ 키보드로'}</button>
             {!feedback && voiceAnswerText && !isRecording && (
               <button onClick={onVoiceCheck}
-                className="px-5 py-3 bg-green-500 text-white rounded-2xl text-base font-black shadow active:scale-95">
+                className="px-5 py-3 bg-green-500 text-white rounded-2xl text-lg font-black shadow active:scale-95">
                 ✅ 정답 확인하기
               </button>
             )}
@@ -1363,8 +1370,8 @@ function PlayScreen({ area, question, qIdx, totalQ, feedback, voiceAnswerText, s
           <div className="space-y-2">
             {question.options.map((opt, idx) => (
               <button key={idx} disabled={feedback!==null} onClick={() => onChoice(idx)}
-                className={`w-full p-3 rounded-2xl border-4 text-left text-base font-bold transition-all ${feedback?((idx+1)===Number(question.answer)?'border-green-500 bg-green-50 text-green-700':'opacity-30 border-slate-100'):'border-slate-100 hover:border-blue-300 hover:bg-blue-50'}`}>
-                <span className="inline-block w-7 h-7 bg-blue-100 text-blue-700 rounded-full text-center mr-2 font-black">{idx+1}</span>
+                className={`w-full p-3 rounded-2xl border-4 text-left text-lg font-bold transition-all ${feedback?((idx+1)===Number(question.answer)?'border-green-500 bg-green-50 text-green-700':'opacity-30 border-slate-100'):'border-slate-100 hover:border-blue-300 hover:bg-blue-50'}`}>
+                <span className="inline-block w-8 h-8 bg-blue-100 text-blue-700 rounded-full text-center mr-2 font-black leading-8">{idx+1}</span>
                 {opt}
               </button>
             ))}
@@ -1373,7 +1380,7 @@ function PlayScreen({ area, question, qIdx, totalQ, feedback, voiceAnswerText, s
 
         <div className="flex justify-between items-center mt-3">
           <button onClick={onHelp} disabled={helpUsedThisQ}
-            className="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-full text-sm font-black flex items-center gap-1 disabled:opacity-50">
+            className="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-full text-base font-black flex items-center gap-1 disabled:opacity-50">
             💜 도움받기 {helpUsedThisQ && '✓'}
           </button>
         </div>
@@ -1382,17 +1389,17 @@ function PlayScreen({ area, question, qIdx, totalQ, feedback, voiceAnswerText, s
       <AnimatePresence>
         {feedback && (
           <motion.div initial={{y:20,opacity:0}} animate={{y:0,opacity:1}}
-            className={`p-4 rounded-3xl border-4 shadow-xl w-full ${feedback.correct?'bg-green-50 border-green-200':'bg-red-50 border-red-200'}`}>
+            className={`p-3 rounded-3xl border-4 shadow-xl w-full ${feedback.correct?'bg-green-50 border-green-200':'bg-red-50 border-red-200'}`}>
             <div className="flex items-start gap-2 mb-2">
               <div className="text-3xl">{feedback.correct?'🌟':'💡'}</div>
               <div className="flex-1">
                 <p className={`text-lg font-black ${feedback.correct?'text-green-800':'text-red-800'}`}>{feedback.main}</p>
-                <p className="text-sm font-bold whitespace-pre-wrap mt-1">{feedback.sub}</p>
+                <p className="text-base font-bold whitespace-pre-wrap mt-1">{feedback.sub}</p>
               </div>
             </div>
             <button onClick={feedback.correct?onNext:onRetry}
-              className={`w-full py-2 rounded-xl text-white font-black ${feedback.correct?'bg-green-600':'bg-red-500'}`}>
-              {feedback.correct ? <>다음으로 ➡️</> : <><RotateCcw className="inline mr-1" size={18}/> 다시 풀기</>}
+              className={`w-full py-2 rounded-xl text-white font-black text-lg ${feedback.correct?'bg-green-600':'bg-red-500'}`}>
+              {feedback.correct ? <>다음으로 ➡️</> : <><RotateCcw className="inline mr-1" size={20}/> 다시 풀기</>}
             </button>
           </motion.div>
         )}
@@ -1438,33 +1445,33 @@ function RecordReviewScreen({ recording, setRecording, phase, setPhase, isRecord
 
   return (
     <motion.div key="midrec" initial={{opacity:0}} animate={{opacity:1}}
-      className="bg-white p-5 rounded-[2.5rem] shadow-2xl border-4 border-pink-100 max-w-md w-full space-y-3">
-      <h1 className="text-xl font-black text-pink-600 text-center">{title}</h1>
+      className="bg-white p-5 rounded-[2.5rem] shadow-2xl border-4 border-pink-100 w-full space-y-3">
+      <h1 className="text-2xl font-black text-pink-600 text-center">{title}</h1>
       <div className="bg-gradient-to-r from-pink-50 to-yellow-50 p-3 rounded-xl flex items-center gap-2">
-        <span className="text-3xl">{recording.em || '🎙️'}</span>
-        <p className="text-base font-bold">{recording.prompt}</p>
+        <span className="text-4xl">{recording.em || '🎙️'}</span>
+        <p className="text-lg font-bold">{recording.prompt}</p>
       </div>
 
       {phase === 'record' ? (
         <>
           {!keyboardMode ? (
             <button onClick={isRecording ? onStopRec : onStartRec}
-              className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center text-white shadow-xl ${isRecording?'bg-red-500 pulse-record':'bg-pink-500'}`}>
-              {isRecording ? <Square size={40}/> : <Mic size={40}/>}
+              className={`w-28 h-28 mx-auto rounded-full flex items-center justify-center text-white shadow-xl ${isRecording?'bg-red-500 pulse-record':'bg-pink-500'}`}>
+              {isRecording ? <Square size={46}/> : <Mic size={46}/>}
             </button>
           ) : null}
-          <p className="text-sm font-bold text-slate-500 text-center">
+          <p className="text-base font-bold text-slate-500 text-center">
             {keyboardMode ? '⌨️ 글로 적어 봐요' : (isRecording ? '듣고 있어요... (네모 누르면 멈춤)' : '🎤 누르고 또박또박 말해요')}
           </p>
           <textarea value={(recording.text||'') + (isRecording?interimText:'')}
             onChange={e => setRecording(r => ({...r, text: e.target.value}))}
             placeholder="여기에 글로 적어도 돼요"
-            className="w-full h-20 bg-slate-50 rounded-xl border-2 border-slate-200 p-2 text-base font-bold resize-none outline-none focus:border-pink-400"/>
-          <div className="flex justify-between">
+            className="w-full h-20 bg-slate-50 rounded-xl border-2 border-slate-200 p-2 text-lg font-bold resize-none outline-none focus:border-pink-400"/>
+          <div className="flex justify-between items-center">
             <button onClick={() => { if (isRecording) onStopRec(); setKeyboardMode(!keyboardMode); }}
-              className="text-xs text-blue-500 underline">{keyboardMode?'🎤 마이크로':'⌨️ 키보드로'}</button>
+              className="text-sm text-blue-500 underline font-bold">{keyboardMode?'🎤 마이크로':'⌨️ 키보드로'}</button>
             <button onClick={goReview} disabled={!(recording.text || recording.audio || keyboardMode)}
-              className="px-4 py-2 bg-pink-500 text-white rounded-full text-sm font-black disabled:opacity-50">
+              className="px-5 py-2.5 bg-pink-500 text-white rounded-full text-lg font-black disabled:opacity-50">
               📝 다 했어요!
             </button>
           </div>
@@ -1472,49 +1479,49 @@ function RecordReviewScreen({ recording, setRecording, phase, setPhase, isRecord
       ) : (
         <>
           <div className="bg-yellow-50 p-3 rounded-xl text-center">
-            <p className="text-base font-bold">🎧 들어 보고 별점을 줘 봐요</p>
+            <p className="text-lg font-bold">🎧 들어 보고 별점을 줘 봐요</p>
             <div className="flex justify-center gap-2 mt-2">
               <button onClick={playAudio}
-                className="px-3 py-2 bg-emerald-500 text-white rounded-full text-sm font-black">
+                className="px-4 py-2 bg-emerald-500 text-white rounded-full text-base font-black">
                 ▶️ 내 {recording.audio?'녹음':'글'} 듣기
               </button>
               <button onClick={playPrompt}
-                className="px-3 py-2 bg-blue-500 text-white rounded-full text-sm font-black">
+                className="px-4 py-2 bg-blue-500 text-white rounded-full text-base font-black">
                 📖 문장 듣기
               </button>
             </div>
           </div>
           {recording.text && (
-            <div className="bg-slate-50 p-2 rounded-xl text-sm font-bold">"{recording.text}"</div>
+            <div className="bg-slate-50 p-2 rounded-xl text-base font-bold">"{recording.text}"</div>
           )}
           <div className="flex justify-center gap-1">
             {[1,2,3,4,5].map(n => (
               <button key={n} onClick={() => setRecording(r => ({...r, stars: n}))}>
-                <Star size={36} className={n<=stars?'fill-yellow-400 text-yellow-500':'text-slate-200'}/>
+                <Star size={42} className={n<=stars?'fill-yellow-400 text-yellow-500':'text-slate-200'}/>
               </button>
             ))}
           </div>
           {stars > 0 && stars <= 3 && (
-            <p className="text-center text-sm text-orange-500 font-bold">⚠️ 다시 해 봐요!</p>
+            <p className="text-center text-base text-orange-500 font-bold">⚠️ 다시 해 봐요!</p>
           )}
           {stars >= 4 && (
             <>
-              <p className="text-center text-sm font-bold">🎁 칭찬 스티커를 골라 봐요</p>
+              <p className="text-center text-base font-bold">🎁 칭찬 스티커를 골라 봐요</p>
               <div className="flex justify-center gap-2">
                 {['🌟','💖','🌸','🦋','🌈','🎉'].map(s => (
                   <button key={s} onClick={() => { setRecording(r => ({...r, sticker:s})); if (isSpeakerOn) playSfx('pop'); }}
-                    className={`text-3xl p-2 rounded-full transition-all ${sticker===s?'bg-yellow-200 scale-125':''}`}>{s}</button>
+                    className={`text-4xl p-2 rounded-full transition-all ${sticker===s?'bg-yellow-200 scale-125':''}`}>{s}</button>
                 ))}
               </div>
             </>
           )}
           <div className="flex gap-2">
             <button onClick={onRetry}
-              className="flex-1 py-3 bg-orange-100 text-orange-700 border-2 border-orange-300 rounded-2xl font-black text-sm">
+              className="flex-1 py-3 bg-orange-100 text-orange-700 border-2 border-orange-300 rounded-2xl font-black text-base">
               🔁 다시 녹음
             </button>
             <button onClick={onDone} disabled={stars < 4}
-              className="flex-1 py-3 bg-gradient-to-r from-pink-500 to-orange-400 text-white rounded-2xl font-black disabled:opacity-50 text-sm">
+              className="flex-1 py-3 bg-gradient-to-r from-pink-500 to-orange-400 text-white rounded-2xl font-black disabled:opacity-50 text-base">
               ➡️ 다음으로
             </button>
           </div>
