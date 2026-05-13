@@ -992,17 +992,13 @@ function RecordBlock({ prompt, helpText, onSubmit, askStars=false }) {
 function MapScreen({ name, cleared, onPickArea, onAllClear }) {
   const allDone = AREAS.every(a => cleared[a.id]);
   useEffect(()=> { if (allDone) speak(`${name} 친구, 모든 영역을 탐험했어요! 마지막 다짐을 녹음해요!`); }, [allDone]);
-  const gridAreas = {
-    traffic: "1 / 1 / 2 / 2",
-    fire:    "1 / 3 / 2 / 4",
-    disaster:"2 / 2 / 3 / 3",
-    life:    "3 / 1 / 4 / 2",
-    int:     "3 / 3 / 4 / 4"
-  };
+
   return (
-    <div className="absolute inset-0 pt-14 px-4 pb-4 flex flex-col">
+    <div className="absolute inset-0 pt-14 px-4 pb-4"
+      style={{display:'grid', gridTemplateRows:'auto 1fr auto', gap:'0.6rem'}}>
       <FloatingDeco/>
-      <div className="text-center flex-none mb-2">
+      {/* 헤더 */}
+      <div className="text-center">
         <h2 className="font-cafe24 t-2xl">
           🗺️ <span className="hi-yellow">{name}</span> 친구의 안전 지도
         </h2>
@@ -1010,29 +1006,29 @@ function MapScreen({ name, cleared, onPickArea, onAllClear }) {
           {allDone ? "✨ 모든 영역을 다 탐험했어요!" : "영역을 골라서 탐험해 봐요"}
         </p>
       </div>
-      <div className="flex-1 relative min-h-0">
-        <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
-          <path d="M16 18 Q35 32 50 50" className="map-path"/>
-          <path d="M84 18 Q65 32 50 50" className="map-path"/>
-          <path d="M50 50 Q35 68 16 82" className="map-path"/>
-          <path d="M50 50 Q65 68 84 82" className="map-path"/>
+
+      {/* 카드 한 줄 배치 + 점선 길 */}
+      <div className="relative min-h-0">
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="none" viewBox="0 0 100 100">
+          <path d="M8 50 Q23 30 38 50 T68 50 T92 50" className="map-path"/>
         </svg>
-        <div className="relative w-full h-full max-w-3xl mx-auto"
-          style={{display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gridTemplateRows:"1fr 1fr 1fr", gap:"0.5rem"}}>
-          {AREAS.map((a,idx) => {
+        <div className="relative h-full flex gap-2 justify-center items-center px-2">
+          {AREAS.map((a, idx) => {
             const done = cleared[a.id];
+            const yOff = idx % 2 === 0 ? -8 : 8;
             return (
               <motion.button key={a.id}
-                style={{ gridArea: gridAreas[a.id] }}
-                initial={{scale:0, rotate:-15}} animate={{scale:1, rotate:0}} transition={{delay: idx*0.1, type:"spring", stiffness:200}}
-                whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.95 }}
+                initial={{scale:0, rotate:-15, opacity:0}} animate={{scale:1, rotate:0, opacity:1, y:yOff}}
+                transition={{delay: idx*0.12, type:"spring", stiffness:180}}
+                whileHover={{ scale: 1.08, y: yOff - 6 }} whileTap={{ scale: 0.95 }}
                 onClick={() => { popSound(); onPickArea(a.id); }}
-                className={`relative rounded-[28px] shadow-xl bg-white card-hover ring-4 ${a.ring} flex flex-col items-center justify-center p-2 ${done?"opacity-85":""}`}>
+                style={{flex:'1 1 0', aspectRatio:'1/1', maxHeight:'100%', maxWidth:'19%'}}
+                className={`relative rounded-[28px] shadow-xl bg-white ring-4 ${a.ring} flex flex-col items-center justify-center p-3 ${done?"opacity-85":""} transition-transform`}>
                 <div className={`absolute inset-0 rounded-[28px] bg-gradient-to-br ${a.color} opacity-15`}/>
-                <div className="relative wiggle" style={{width:"70%", aspectRatio:"1/1"}}>
+                <div className="relative wiggle" style={{width:"68%", aspectRatio:"1/1"}}>
                   {SVG["area_"+a.id]?.()}
                 </div>
-                <div className="font-cafe24 t-md text-gray-800 mt-1 relative">{a.name}</div>
+                <div className="font-cafe24 t-md text-gray-800 mt-2 relative">{a.name}</div>
                 {done && (
                   <motion.div initial={{scale:0}} animate={{scale:1}}
                     className="absolute -top-2 -right-2 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-lg"
@@ -1041,7 +1037,7 @@ function MapScreen({ name, cleared, onPickArea, onAllClear }) {
                   </motion.div>
                 )}
                 {!done && (
-                  <div className={`absolute -bottom-1 px-2 py-0.5 rounded-full text-white font-cafe24 t-xs bg-gradient-to-r ${a.color} shadow`}>
+                  <div className={`absolute -bottom-2 px-3 py-0.5 rounded-full text-white font-cafe24 t-xs bg-gradient-to-r ${a.color} shadow whitespace-nowrap`}>
                     탐험 시작
                   </div>
                 )}
@@ -1050,15 +1046,17 @@ function MapScreen({ name, cleared, onPickArea, onAllClear }) {
           })}
         </div>
       </div>
-      {allDone && (
-        <motion.div initial={{y:30, opacity:0}} animate={{y:0, opacity:1}}
-          className="flex-none mt-2 flex justify-center">
-          <button onClick={onAllClear}
+
+      {/* 하단 버튼 */}
+      <div className="flex justify-center min-h-[2.5rem]">
+        {allDone && (
+          <motion.button initial={{y:30, opacity:0}} animate={{y:0, opacity:1}}
+            onClick={onAllClear}
             className="px-7 py-3 rounded-2xl bg-gradient-to-r from-pink-400 via-yellow-400 to-emerald-400 text-white font-cafe24 t-lg shadow-2xl card-hover pulse-grow">
             🎤 마지막 다짐 녹음하러 가기 →
-          </button>
-        </motion.div>
-      )}
+          </motion.button>
+        )}
+      </div>
     </div>
   );
 }
