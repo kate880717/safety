@@ -19,165 +19,139 @@
 </script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Do+Hyeon&family=Gowun+Dodum&family=Hi+Melody&family=Yeon+Sung&family=Black+Han+Sans&display=swap');
-@font-face {
-  font-family: 'Cafe24Ssurround';
-  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/Cafe24Ssurround.woff') format('woff');
-  font-display: swap;
-}
+@import url('https://fonts.googleapis.com/css2?family=Jua&family=Gaegu:wght@400;700&family=Do+Hyeon&family=Gowun+Dodum&family=Black+Han+Sans&display=swap');
+@font-face { font-family:'Cafe24Ssurround'; src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/Cafe24Ssurround.woff') format('woff'); font-display: swap; }
 * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
 html, body, #root { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; }
+
+/* ★ 화면 크기에 안정적인 폰트 시스템 (vmin 기반 - 모든 기기에서 비율 유지) */
+html { font-size: clamp(14px, 2.3vmin, 28px); }
+/* 작은 화면(가로 모바일 등) 대응 */
+@media (max-height: 500px) {
+  html { font-size: clamp(11px, 1.9vmin, 18px); }
+}
+/* 매우 큰 화면(전자칠판) 대응 */
+@media (min-width: 1920px) and (min-height: 1000px) {
+  html { font-size: clamp(20px, 2vmin, 36px); }
+}
+
 body {
-  font-family: 'Cafe24Ssurround', 'Gowun Dodum', 'Jua', 'Gaegu', sans-serif;
+  font-family: 'Cafe24Ssurround', 'Gowun Dodum', 'Jua', sans-serif;
   -webkit-font-smoothing: antialiased;
   background:
-    radial-gradient(circle at 15% 25%, rgba(255,192,203,0.45) 0%, transparent 45%),
-    radial-gradient(circle at 85% 70%, rgba(255,217,61,0.4) 0%, transparent 45%),
-    radial-gradient(circle at 50% 90%, rgba(176,224,230,0.35) 0%, transparent 45%),
+    radial-gradient(circle at 12% 20%, rgba(255,182,193,0.6) 0%, transparent 50%),
+    radial-gradient(circle at 88% 75%, rgba(255,217,61,0.5) 0%, transparent 50%),
+    radial-gradient(circle at 50% 95%, rgba(176,224,230,0.5) 0%, transparent 50%),
     linear-gradient(135deg, #FFE5F1 0%, #FFF9E5 50%, #E5F4FF 100%);
 }
 
-/* 동적 폰트 사이즈 (vmin 기반 - 가로/세로 둘 다 반응) */
-:root {
-  --fs-tiny: clamp(11px, 1.4vmin, 16px);
-  --fs-sm:   clamp(13px, 1.7vmin, 19px);
-  --fs-base: clamp(15px, 2.0vmin, 23px);
-  --fs-md:   clamp(18px, 2.5vmin, 28px);
-  --fs-lg:   clamp(22px, 3.0vmin, 34px);
-  --fs-xl:   clamp(26px, 3.8vmin, 44px);
-  --fs-2xl:  clamp(32px, 5.0vmin, 60px);
-  --fs-huge: clamp(40px, 7.0vmin, 88px);
-  --emoji-md: clamp(36px, 5.5vmin, 70px);
-  --emoji-lg: clamp(50px, 8vmin, 100px);
-  --emoji-huge: clamp(70px, 12vmin, 150px);
-}
-.fs-tiny{font-size:var(--fs-tiny)}
-.fs-sm{font-size:var(--fs-sm)}
-.fs-base{font-size:var(--fs-base)}
-.fs-md{font-size:var(--fs-md)}
-.fs-lg{font-size:var(--fs-lg)}
-.fs-xl{font-size:var(--fs-xl)}
-.fs-2xl{font-size:var(--fs-2xl)}
-.fs-huge{font-size:var(--fs-huge)}
-.em-md{font-size:var(--emoji-md);line-height:1}
-.em-lg{font-size:var(--emoji-lg);line-height:1}
-.em-huge{font-size:var(--emoji-huge);line-height:1}
+/* 폰트 크기 클래스 */
+.t-xs   { font-size: 0.72rem; }
+.t-sm   { font-size: 0.88rem; }
+.t-base { font-size: 1.05rem; }
+.t-md   { font-size: 1.32rem; }
+.t-lg   { font-size: 1.7rem; }
+.t-xl   { font-size: 2.1rem; }
+.t-2xl  { font-size: 2.7rem; }
+.t-3xl  { font-size: 3.5rem; }
+.t-huge { font-size: 4.5rem; }
 
 .font-cafe24 { font-family: 'Cafe24Ssurround', 'Jua', sans-serif; }
-.font-jua    { font-family: 'Jua', 'Cafe24Ssurround', sans-serif; }
 
 /* 형광펜 */
-.hi-yellow { background: linear-gradient(180deg, transparent 55%, #FFE066 55%); padding: 0 4px; }
-.hi-pink   { background: linear-gradient(180deg, transparent 55%, #FFB7C5 55%); padding: 0 4px; }
-.hi-blue   { background: linear-gradient(180deg, transparent 55%, #B5E2FA 55%); padding: 0 4px; }
-.hi-green  { background: linear-gradient(180deg, transparent 55%, #B7E4C7 55%); padding: 0 4px; }
+.hi-yellow { background: linear-gradient(180deg, transparent 55%, #FFE066 55%); padding: 0 6px; }
+.hi-pink   { background: linear-gradient(180deg, transparent 55%, #FFB7C5 55%); padding: 0 6px; }
+.hi-blue   { background: linear-gradient(180deg, transparent 55%, #B5E2FA 55%); padding: 0 6px; }
+.hi-green  { background: linear-gradient(180deg, transparent 55%, #B7E4C7 55%); padding: 0 6px; }
 
 /* 떠다니는 데코 */
-@keyframes float-1 { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-15px) rotate(8deg)} }
-@keyframes float-2 { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-20px) rotate(-10deg)} }
-@keyframes float-3 { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-12px) rotate(5deg)} }
+@keyframes float-1 { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-18px) rotate(10deg)} }
+@keyframes float-2 { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-22px) rotate(-12deg)} }
+@keyframes float-3 { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-14px) rotate(6deg)} }
 .deco-1 { animation: float-1 4s ease-in-out infinite; }
 .deco-2 { animation: float-2 5s ease-in-out infinite; }
 .deco-3 { animation: float-3 3.5s ease-in-out infinite; }
 
-/* 폭죽 파티클 */
-@keyframes burst {
-  0% { transform: translate(0,0) scale(1); opacity: 1; }
-  100% { transform: translate(var(--bx), var(--by)) scale(0.3); opacity: 0; }
-}
+@keyframes burst { 0% { transform: translate(0,0) scale(1); opacity:1; } 100% { transform: translate(var(--bx), var(--by)) scale(0.3); opacity:0; } }
 .burst-particle { position: absolute; pointer-events: none; animation: burst 1s ease-out forwards; }
 
-@keyframes shake-x {
-  0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-10px)} 40%,80%{transform:translateX(10px)}
-}
+@keyframes shake-x { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-12px)} 40%,80%{transform:translateX(12px)} }
 .shake { animation: shake-x 0.4s; }
 
-@keyframes bounce-soft {
-  0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)}
-}
+@keyframes bounce-soft { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
 .bounce-soft { animation: bounce-soft 1.6s ease-in-out infinite; }
 
-@keyframes wiggle {
-  0%,100%{transform:rotate(0)} 25%{transform:rotate(-5deg)} 75%{transform:rotate(5deg)}
-}
-.wiggle { animation: wiggle 2s ease-in-out infinite; }
+@keyframes wiggle { 0%,100%{transform:rotate(0)} 25%{transform:rotate(-4deg)} 75%{transform:rotate(4deg)} }
+.wiggle { animation: wiggle 2.5s ease-in-out infinite; }
 
-@keyframes pulse-grow {
-  0%,100%{transform:scale(1)} 50%{transform:scale(1.06)}
-}
+@keyframes pulse-grow { 0%,100%{transform:scale(1)} 50%{transform:scale(1.06)} }
 .pulse-grow { animation: pulse-grow 1.8s ease-in-out infinite; }
 
-@keyframes pop-in {
-  0% { transform: scale(0) rotate(-15deg); opacity: 0; }
-  60% { transform: scale(1.2) rotate(5deg); opacity: 1; }
-  100% { transform: scale(1) rotate(0); opacity: 1; }
-}
+@keyframes spin-slow { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+.spin-slow { animation: spin-slow 8s linear infinite; }
+
+@keyframes pop-in { 0% { transform: scale(0) rotate(-15deg); opacity:0; } 60% { transform: scale(1.2) rotate(5deg); opacity:1; } 100% { transform: scale(1) rotate(0); opacity:1; } }
 .pop-letter { display: inline-block; animation: pop-in 0.5s backwards; }
+
+@keyframes flicker { 0%,100%{opacity:1; transform:scale(1)} 50%{opacity:0.85; transform:scale(0.97)} }
+.flicker { animation: flicker 0.6s ease-in-out infinite; }
+
+@keyframes drift-up { 0%{transform:translateY(0); opacity:0.6} 100%{transform:translateY(-30px); opacity:0} }
 
 .card-hover { transition: all 0.2s; }
 .card-hover:hover { transform: translateY(-4px) scale(1.02); }
-.card-hover:active { transform: scale(0.98); }
+.card-hover:active { transform: scale(0.97); }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { scrollbar-width: none; }
 
-.dot { width: 10px; height: 10px; border-radius: 50%; background: #E5E7EB; transition: all 0.3s; }
-.dot.active { background: #FF6B9D; transform: scale(1.4); }
+.dot { width: 12px; height: 12px; border-radius: 50%; background: #E5E7EB; transition: all 0.3s; }
+.dot.active { background: #FF6B9D; transform: scale(1.5); }
 
 .star-btn { transition: transform 0.15s; cursor: pointer; }
-.star-btn:hover { transform: scale(1.15); }
+.star-btn:hover { transform: scale(1.18); }
 .star-btn:active { transform: scale(0.9); }
 
-@keyframes pulse-red {
-  0%,100% { box-shadow: 0 0 0 0 rgba(255,107,107,0.7); }
-  50% { box-shadow: 0 0 0 20px rgba(255,107,107,0); }
-}
+@keyframes pulse-red { 0%,100%{box-shadow:0 0 0 0 rgba(255,107,107,0.7)} 50%{box-shadow:0 0 0 22px rgba(255,107,107,0)} }
 .recording-pulse { animation: pulse-red 1.2s infinite; }
 
-/* 점선 길 (지도용) */
-.map-path {
-  stroke: #FFB7C5;
-  stroke-width: 4;
-  stroke-dasharray: 10 10;
-  fill: none;
-  animation: dash 30s linear infinite;
-}
 @keyframes dash { to { stroke-dashoffset: -1000; } }
+.map-path { stroke: #FFB7C5; stroke-width: 3; stroke-dasharray: 8 8; fill: none; animation: dash 30s linear infinite; }
 
+/* 카드 등장 */
+@keyframes card-in { 0%{transform:translateY(30px) scale(0.8); opacity:0} 100%{transform:translateY(0) scale(1); opacity:1} }
+.card-in { animation: card-in 0.5s ease-out backwards; }
+
+/* 그라데이션 텍스트 */
+.text-gradient {
+  background: linear-gradient(135deg, #FF6B9D, #FFD93D, #54A0FF);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 </style>
 </head>
 <body>
 <div id="root"></div>
 
 <script type="text/babel" data-type="module">
-import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { createRoot } from "react-dom/client";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Volume2, VolumeX, Mic, MicOff, Play, Pause, RotateCcw, Star,
-  Heart, Sparkles, ChevronRight, ChevronLeft, Home, Award, Check, X,
-  HelpCircle, Send, Square, Trash2, MapPin
-} from "lucide-react";
+import { Volume2, VolumeX, Mic, Star, Home, Check, X, HelpCircle, Square, Trash2 } from "lucide-react";
 
-/* =========================================================
-   설정값
-========================================================= */
 const GAS_URL = "https://script.google.com/macros/s/AKfycbzuI75nXwyIpIlMPdvWlCcm3OHuOnSnv86DUDcfmUEaS87ln_Pl3Jw0KksFOHSqP5pJ/exec";
 
-/* =========================================================
-   스피커 상태 (모듈 스코프 - 끄면 모든 소리 차단)
-========================================================= */
+/* ===== 스피커 OFF면 모든 소리 차단 ===== */
 let SPK = false;
-const setSPK = (v) => { SPK = v; };
-
+const setSPK = (v) => { SPK = v; if (!v) window.speechSynthesis?.cancel(); };
 const beep = (freq=800, dur=0.12, type="sine", vol=0.15) => {
   if (!SPK) return;
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const o = ctx.createOscillator(); const g = ctx.createGain();
-    o.type = type; o.frequency.value = freq;
-    g.gain.value = vol; o.connect(g); g.connect(ctx.destination);
-    o.start();
+    o.type = type; o.frequency.value = freq; g.gain.value = vol;
+    o.connect(g); g.connect(ctx.destination); o.start();
     g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
     o.stop(ctx.currentTime + dur);
   } catch(e){}
@@ -185,213 +159,546 @@ const beep = (freq=800, dur=0.12, type="sine", vol=0.15) => {
 const happySound = () => { beep(660,0.1); setTimeout(()=>beep(880,0.12),120); setTimeout(()=>beep(1100,0.16),250); };
 const sadSound   = () => { beep(330,0.15,"triangle"); setTimeout(()=>beep(220,0.2,"triangle"),160); };
 const popSound   = () => beep(1000,0.08,"square",0.1);
-
 const pickKoreanVoice = () => {
   const all = window.speechSynthesis?.getVoices() || [];
   const kor = all.filter(v => /ko/i.test(v.lang));
-  return (
-    kor.find(v => /Google/i.test(v.name)) ||
-    kor.find(v => /Wavenet|Neural/i.test(v.name)) ||
-    kor.find(v => /female|여/i.test(v.name)) ||
-    kor[0]
-  );
+  return kor.find(v => /Google/i.test(v.name)) || kor.find(v => /Wavenet|Neural/i.test(v.name)) || kor[0];
 };
 const speak = (text, opts={}) => {
   if (!SPK) return;
   try {
     window.speechSynthesis?.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = "ko-KR";
-    u.rate = opts.rate ?? 0.95;
-    u.pitch = opts.pitch ?? 1.05;
-    u.volume = 1.0;
-    const v = pickKoreanVoice();
-    if (v) u.voice = v;
+    u.lang = "ko-KR"; u.rate = opts.rate ?? 0.95; u.pitch = opts.pitch ?? 1.05; u.volume = 1.0;
+    const v = pickKoreanVoice(); if (v) u.voice = v;
     window.speechSynthesis.speak(u);
   } catch(e){}
 };
-
 const saveToGAS = (action, payload) => {
-  if (!GAS_URL) return Promise.resolve({ok:false, reason:"no GAS_URL"});
-  return fetch(GAS_URL, {
-    method:"POST",
-    body: JSON.stringify({ action, payload }),
-    headers:{"Content-Type":"text/plain;charset=utf-8"}
-  }).then(r=>r.json()).catch(e=>({ok:false, error:String(e)}));
+  if (!GAS_URL) return Promise.resolve({ok:false});
+  return fetch(GAS_URL, { method:"POST", body: JSON.stringify({ action, payload }), headers:{"Content-Type":"text/plain;charset=utf-8"} })
+    .then(r=>r.json()).catch(e=>({ok:false, error:String(e)}));
 };
 
 /* =========================================================
-   데이터: 영역 / 영역별 SVG / 문제 / 개념카드
+   SVG 일러스트 라이브러리 (모두 직접 그림)
 ========================================================= */
-const AREAS = [
-  { id: "traffic",  name: "교통안전", emoji: "🚦", color: "from-rose-400 to-pink-500",   bg: "bg-rose-50",   ring: "ring-rose-300",   c1:"#FF6B6B", c2:"#FF8FAB" },
-  { id: "fire",     name: "화재안전", emoji: "🧯", color: "from-orange-400 to-amber-500", bg: "bg-orange-50", ring: "ring-orange-300", c1:"#FF9F43", c2:"#FFB37A" },
-  { id: "disaster", name: "재난안전", emoji: "🌪️", color: "from-sky-400 to-blue-500",    bg: "bg-sky-50",    ring: "ring-sky-300",    c1:"#54A0FF", c2:"#80B6FF" },
-  { id: "life",     name: "생활안전", emoji: "🏠", color: "from-emerald-400 to-green-500",bg: "bg-emerald-50",ring: "ring-emerald-300",c1:"#5ED9A6", c2:"#7FE0B5" },
-  { id: "int",      name: "통합탐험", emoji: "🧚", color: "from-purple-400 to-fuchsia-500",bg: "bg-purple-50",ring: "ring-purple-300", c1:"#C56CF0", c2:"#D58FF5" }
-];
-
-const AreaArt = {
-  traffic: (size=80) => (
-    <svg viewBox="0 0 100 100" width={size} height={size}>
+const SVG = {
+  // 영역 큰 일러스트
+  area_traffic: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
       <rect x="38" y="8" width="24" height="58" rx="6" fill="#2D3436"/>
-      <circle cx="50" cy="20" r="6" fill="#FF6B6B"/>
-      <circle cx="50" cy="36" r="6" fill="#FFD93D"/>
-      <circle cx="50" cy="52" r="6" fill="#6BCB77"/>
+      <circle cx="50" cy="20" r="6" fill="#FF6B6B" className="flicker"/>
+      <circle cx="50" cy="36" r="6" fill="#FFD93D" opacity="0.3"/>
+      <circle cx="50" cy="52" r="6" fill="#6BCB77" opacity="0.3"/>
       <rect x="46" y="66" width="8" height="14" fill="#2D3436"/>
       <rect x="5" y="86" width="90" height="3" fill="#FFD93D"/>
-      <rect x="8"  y="91" width="9" height="6" fill="#fff"/>
-      <rect x="22" y="91" width="9" height="6" fill="#fff"/>
-      <rect x="36" y="91" width="9" height="6" fill="#fff"/>
-      <rect x="50" y="91" width="9" height="6" fill="#fff"/>
-      <rect x="64" y="91" width="9" height="6" fill="#fff"/>
-      <rect x="78" y="91" width="9" height="6" fill="#fff"/>
+      {[8,22,36,50,64,78].map(x=><rect key={x} x={x} y="91" width="9" height="6" fill="#fff"/>)}
     </svg>
   ),
-  fire: (size=80) => (
-    <svg viewBox="0 0 100 100" width={size} height={size}>
-      <path d="M30 70 Q22 55 30 38 Q35 50 38 45 Q35 28 50 18 Q48 35 55 38 Q60 32 62 40 Q72 55 65 72 Q60 85 45 85 Q32 82 30 70 Z" fill="#FF6B35"/>
-      <path d="M38 70 Q34 60 40 50 Q42 58 45 55 Q43 45 52 38 Q50 50 55 52 Q60 60 56 72 Q50 80 42 78 Q38 75 38 70 Z" fill="#FFD93D"/>
+  area_fire: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <g className="flicker">
+        <path d="M30 70 Q22 55 30 38 Q35 50 38 45 Q35 28 50 18 Q48 35 55 38 Q60 32 62 40 Q72 55 65 72 Q60 85 45 85 Q32 82 30 70 Z" fill="#FF6B35"/>
+        <path d="M38 70 Q34 60 40 50 Q42 58 45 55 Q43 45 52 38 Q50 50 55 52 Q60 60 56 72 Q50 80 42 78 Q38 75 38 70 Z" fill="#FFD93D"/>
+      </g>
       <rect x="65" y="55" width="22" height="38" rx="5" fill="#E74C3C"/>
       <rect x="69" y="48" width="14" height="9" rx="2" fill="#2D3436"/>
       <rect x="74" y="42" width="4" height="8" fill="#2D3436"/>
       <circle cx="76" cy="73" r="5" fill="#FFD93D"/>
+      <text x="76" y="78" textAnchor="middle" fontSize="8" fill="#fff" fontWeight="bold">F</text>
     </svg>
   ),
-  disaster: (size=80) => (
-    <svg viewBox="0 0 100 100" width={size} height={size}>
-      <ellipse cx="50" cy="20" rx="35" ry="11" fill="#888"/>
-      <ellipse cx="35" cy="25" rx="20" ry="9" fill="#666"/>
-      <ellipse cx="70" cy="25" rx="22" ry="10" fill="#666"/>
-      <path d="M50 32 L42 55 L52 55 L42 78 L62 50 L52 50 L60 32 Z" fill="#FFD93D" stroke="#FF9F43" strokeWidth="1"/>
-      <path d="M5 95 L25 60 L45 95 Z" fill="#54A0FF" opacity="0.7"/>
-      <path d="M55 95 L75 65 L95 95 Z" fill="#3D7CC4" opacity="0.8"/>
-      <line x1="20" y1="38" x2="22" y2="48" stroke="#54A0FF" strokeWidth="1.5"/>
-      <line x1="75" y1="38" x2="77" y2="48" stroke="#54A0FF" strokeWidth="1.5"/>
-      <line x1="30" y1="42" x2="32" y2="52" stroke="#54A0FF" strokeWidth="1.5"/>
+  area_disaster: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <ellipse cx="50" cy="20" rx="35" ry="11" fill="#666"/>
+      <ellipse cx="35" cy="25" rx="20" ry="9" fill="#555"/>
+      <ellipse cx="70" cy="25" rx="22" ry="10" fill="#555"/>
+      <path d="M50 32 L42 55 L52 55 L42 78 L62 50 L52 50 L60 32 Z" fill="#FFD93D" stroke="#FF9F43" strokeWidth="1.5" className="flicker"/>
+      <path d="M5 95 L25 60 L45 95 Z" fill="#54A0FF" opacity="0.8"/>
+      <path d="M55 95 L75 65 L95 95 Z" fill="#3D7CC4"/>
+      <line x1="20" y1="38" x2="22" y2="48" stroke="#54A0FF" strokeWidth="2"/>
+      <line x1="75" y1="38" x2="77" y2="48" stroke="#54A0FF" strokeWidth="2"/>
     </svg>
   ),
-  life: (size=80) => (
-    <svg viewBox="0 0 100 100" width={size} height={size}>
+  area_life: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
       <rect x="18" y="48" width="64" height="42" fill="#FFE5B4"/>
       <polygon points="13,50 50,15 87,50" fill="#E74C3C"/>
       <rect x="42" y="63" width="16" height="27" fill="#8B4513"/>
-      <circle cx="54" cy="78" r="1.5" fill="#FFD93D"/>
+      <circle cx="54" cy="78" r="2" fill="#FFD93D"/>
       <rect x="25" y="58" width="11" height="11" fill="#87CEEB" stroke="#fff" strokeWidth="1"/>
-      <line x1="30.5" y1="58" x2="30.5" y2="69" stroke="#fff" strokeWidth="1"/>
-      <line x1="25" y1="63.5" x2="36" y2="63.5" stroke="#fff" strokeWidth="1"/>
+      <line x1="30.5" y1="58" x2="30.5" y2="69" stroke="#fff"/>
+      <line x1="25" y1="63.5" x2="36" y2="63.5" stroke="#fff"/>
       <rect x="64" y="58" width="11" height="11" fill="#87CEEB" stroke="#fff" strokeWidth="1"/>
-      <line x1="69.5" y1="58" x2="69.5" y2="69" stroke="#fff" strokeWidth="1"/>
-      <line x1="64" y1="63.5" x2="75" y2="63.5" stroke="#fff" strokeWidth="1"/>
+      <line x1="69.5" y1="58" x2="69.5" y2="69" stroke="#fff"/>
+      <line x1="64" y1="63.5" x2="75" y2="63.5" stroke="#fff"/>
       <rect x="35" y="22" width="6" height="11" fill="#A0522D"/>
+      <circle cx="20" cy="20" r="6" fill="#FFD93D" className="flicker"/>
     </svg>
   ),
-  int: (size=80) => (
-    <svg viewBox="0 0 100 100" width={size} height={size}>
-      <path d="M8 82 Q50 18 92 82" stroke="#FF6B6B" strokeWidth="5" fill="none"/>
-      <path d="M14 82 Q50 26 86 82" stroke="#FF9F43" strokeWidth="5" fill="none"/>
-      <path d="M20 82 Q50 34 80 82" stroke="#FFD93D" strokeWidth="5" fill="none"/>
-      <path d="M26 82 Q50 42 74 82" stroke="#6BCB77" strokeWidth="5" fill="none"/>
-      <path d="M32 82 Q50 50 68 82" stroke="#54A0FF" strokeWidth="5" fill="none"/>
-      <path d="M38 82 Q50 58 62 82" stroke="#C56CF0" strokeWidth="5" fill="none"/>
+  area_int: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      {['#FF6B6B','#FF9F43','#FFD93D','#6BCB77','#54A0FF','#C56CF0'].map((c,i)=>(
+        <path key={i} d={`M${8+i*6} 82 Q50 ${18+i*8} ${92-i*6} 82`} stroke={c} strokeWidth="5" fill="none"/>
+      ))}
       <ellipse cx="14" cy="85" rx="10" ry="4" fill="#fff" opacity="0.9"/>
       <ellipse cx="86" cy="85" rx="10" ry="4" fill="#fff" opacity="0.9"/>
-      <text x="20" y="20" fontSize="13">⭐</text>
-      <text x="72" y="18" fontSize="11">✨</text>
+      <g className="wiggle" style={{transformOrigin:'50px 30px'}}>
+        <circle cx="50" cy="30" r="8" fill="#FFD93D"/>
+        <path d="M50 22 L52 28 L58 28 L53 32 L55 38 L50 34 L45 38 L47 32 L42 28 L48 28 Z" fill="#FF9F43"/>
+      </g>
+    </svg>
+  ),
+
+  // ========== 개념카드 SVG (20개) ==========
+  // 교통
+  running: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <circle cx="50" cy="22" r="11" fill="#FED7AA"/>
+      <circle cx="46" cy="22" r="1.6" fill="#333"/>
+      <circle cx="55" cy="22" r="1.6" fill="#333"/>
+      <path d="M46 27 Q50 30 54 27" stroke="#333" strokeWidth="1.2" fill="none"/>
+      <path d="M50 33 Q53 50 58 60 Q63 70 55 80" stroke="#FF6B9D" strokeWidth="12" strokeLinecap="round" fill="none"/>
+      <path d="M55 45 Q35 50 25 38" stroke="#FED7AA" strokeWidth="7" strokeLinecap="round" fill="none"/>
+      <path d="M58 50 Q72 45 80 32" stroke="#FED7AA" strokeWidth="7" strokeLinecap="round" fill="none"/>
+      <path d="M58 80 L48 95 M58 80 L70 92" stroke="#5B4A8F" strokeWidth="8" strokeLinecap="round"/>
+      <path d="M5 95 L95 95" stroke="#888" strokeWidth="2" strokeDasharray="5 4"/>
+      <text x="22" y="20" fontSize="10">💨</text>
+    </svg>
+  ),
+  looking: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <circle cx="50" cy="28" r="13" fill="#FED7AA"/>
+      <circle cx="44" cy="28" r="2" fill="#333"/>
+      <circle cx="56" cy="28" r="2" fill="#333"/>
+      <path d="M44 35 Q50 38 56 35" stroke="#333" strokeWidth="1.5" fill="none"/>
+      <path d="M50 41 L50 75" stroke="#54A0FF" strokeWidth="14" strokeLinecap="round"/>
+      <path d="M50 50 L28 55 M50 50 L72 55" stroke="#FED7AA" strokeWidth="7" strokeLinecap="round"/>
+      <path d="M50 75 L40 95 M50 75 L60 95" stroke="#5B4A8F" strokeWidth="8" strokeLinecap="round"/>
+      <path d="M16 50 L8 55 L16 60" stroke="#FFD93D" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
+      <path d="M84 50 L92 55 L84 60" stroke="#FFD93D" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
+      <text x="7" y="20" fontSize="9">👀</text>
+    </svg>
+  ),
+  phone_walk: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <circle cx="48" cy="25" r="12" fill="#FED7AA"/>
+      <path d="M40 37 L60 37 L62 75 L38 75 Z" fill="#FF6B9D"/>
+      <path d="M38 75 L34 92 M62 75 L66 92" stroke="#5B4A8F" strokeWidth="8" strokeLinecap="round"/>
+      <rect x="55" y="45" width="20" height="32" rx="3" fill="#2D3436"/>
+      <rect x="58" y="48" width="14" height="22" rx="2" fill="#54A0FF"/>
+      <circle cx="65" cy="80" r="2" fill="#2D3436"/>
+      <path d="M40 47 L55 55" stroke="#FED7AA" strokeWidth="7" strokeLinecap="round"/>
+      <circle cx="44" cy="22" r="1.5" fill="#333"/>
+      <circle cx="52" cy="22" r="1.5" fill="#333"/>
+      <path d="M44 31 L52 31" stroke="#333" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  ),
+  signal_keep: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <rect x="18" y="12" width="22" height="62" rx="4" fill="#2D3436"/>
+      <circle cx="29" cy="25" r="6" fill="#FF6B6B" opacity="0.3"/>
+      <circle cx="29" cy="43" r="6" fill="#FFD93D" opacity="0.3"/>
+      <circle cx="29" cy="61" r="7" fill="#6BCB77" className="flicker"/>
+      <rect x="26" y="74" width="6" height="14" fill="#2D3436"/>
+      <circle cx="68" cy="32" r="11" fill="#FED7AA"/>
+      <path d="M68 43 L68 70" stroke="#FF6B9D" strokeWidth="12" strokeLinecap="round"/>
+      <path d="M68 50 L55 58 M68 50 L80 56" stroke="#FED7AA" strokeWidth="6" strokeLinecap="round"/>
+      <path d="M68 70 L62 90 M68 70 L74 90" stroke="#5B4A8F" strokeWidth="8" strokeLinecap="round"/>
+      <circle cx="64" cy="30" r="1.5" fill="#333"/>
+      <circle cx="72" cy="30" r="1.5" fill="#333"/>
+      <path d="M64 36 Q68 38 72 36" stroke="#333" strokeWidth="1.5" fill="none"/>
+      <text x="86" y="15" fontSize="14">✓</text>
+    </svg>
+  ),
+  // 화재
+  hiding_corner: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <rect x="0" y="40" width="100" height="55" fill="#FFE5B4"/>
+      <rect x="22" y="40" width="56" height="55" rx="6" fill="#A0522D"/>
+      <rect x="22" y="40" width="56" height="8" fill="#8B4513"/>
+      <circle cx="50" cy="68" r="11" fill="#FED7AA"/>
+      <rect x="42" y="78" width="16" height="14" rx="2" fill="#FF6B9D"/>
+      <rect x="48" y="63" width="2" height="3" fill="#333"/>
+      <rect x="52" y="63" width="2" height="3" fill="#333"/>
+      <path d="M47 73 Q50 74 53 73" stroke="#333" strokeWidth="1" fill="none"/>
+      <g className="flicker">
+        <path d="M8 25 Q5 18 12 12 Q18 18 14 25 Z" fill="#FF6B35"/>
+        <path d="M88 25 Q85 18 92 12 Q98 18 94 25 Z" fill="#FF6B35"/>
+        <path d="M50 12 Q47 6 53 3 Q58 7 55 12 Z" fill="#FF6B35"/>
+      </g>
+    </svg>
+  ),
+  shouting_fire: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <circle cx="42" cy="32" r="14" fill="#FED7AA"/>
+      <path d="M42 46 L42 75" stroke="#FF6B9D" strokeWidth="14" strokeLinecap="round"/>
+      <path d="M42 55 L25 50 M42 55 L60 50" stroke="#FED7AA" strokeWidth="7" strokeLinecap="round"/>
+      <path d="M42 75 L34 95 M42 75 L50 95" stroke="#5B4A8F" strokeWidth="8" strokeLinecap="round"/>
+      <ellipse cx="42" cy="40" rx="7" ry="9" fill="#fff"/>
+      <ellipse cx="42" cy="40" rx="3.5" ry="5.5" fill="#EF4444"/>
+      <circle cx="36" cy="30" r="1.5" fill="#333"/>
+      <circle cx="48" cy="30" r="1.5" fill="#333"/>
+      <g stroke="#FFD93D" strokeWidth="3" strokeLinecap="round" fill="none">
+        <path d="M62 30 Q68 35 62 40"/>
+        <path d="M68 24 Q78 32 68 42"/>
+        <path d="M74 18 Q88 30 74 45"/>
+      </g>
+      <text x="82" y="62" fontSize="10" fill="#EF4444" fontWeight="bold">불!</text>
+    </svg>
+  ),
+  crouch_smoke: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <g opacity="0.7">
+        <ellipse cx="30" cy="18" rx="15" ry="6" fill="#666"/>
+        <ellipse cx="55" cy="14" rx="18" ry="7" fill="#555"/>
+        <ellipse cx="78" cy="20" rx="14" ry="5" fill="#777"/>
+        <ellipse cx="20" cy="32" rx="12" ry="5" fill="#888"/>
+        <ellipse cx="70" cy="35" rx="15" ry="5" fill="#888"/>
+      </g>
+      <circle cx="50" cy="60" r="13" fill="#FED7AA"/>
+      <ellipse cx="50" cy="82" rx="28" ry="11" fill="#FF6B9D"/>
+      <circle cx="46" cy="58" r="1.8" fill="#333"/>
+      <circle cx="54" cy="58" r="1.8" fill="#333"/>
+      <path d="M46 67 Q50 69 54 67" stroke="#333" strokeWidth="1.2" fill="none"/>
+      <path d="M14 70 L20 78 L26 70" stroke="#6BCB77" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
+      <path d="M74 70 L80 78 L86 70" stroke="#6BCB77" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
+    </svg>
+  ),
+  elevator_no: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <rect x="22" y="15" width="56" height="78" rx="4" fill="#777"/>
+      <rect x="28" y="22" width="20" height="65" fill="#444"/>
+      <rect x="52" y="22" width="20" height="65" fill="#444"/>
+      <line x1="50" y1="22" x2="50" y2="87" stroke="#222" strokeWidth="2"/>
+      <path d="M40 40 L40 30 L36 33 M40 30 L44 33" stroke="#FFD93D" strokeWidth="2" fill="none"/>
+      <path d="M60 50 L60 60 L56 57 M60 60 L64 57" stroke="#FFD93D" strokeWidth="2" fill="none"/>
+      <circle cx="50" cy="50" r="22" fill="none" stroke="#EF4444" strokeWidth="5" opacity="0.9"/>
+      <path d="M35 35 L65 65" stroke="#EF4444" strokeWidth="5" strokeLinecap="round"/>
+    </svg>
+  ),
+  // 재난
+  window_warn: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <rect x="12" y="12" width="76" height="76" rx="3" fill="#87CEEB" stroke="#3D7CC4" strokeWidth="4"/>
+      <line x1="50" y1="12" x2="50" y2="88" stroke="#3D7CC4" strokeWidth="4"/>
+      <line x1="12" y1="50" x2="88" y2="50" stroke="#3D7CC4" strokeWidth="4"/>
+      <g opacity="0.6">
+        <path d="M18 22 Q28 18 38 22" stroke="#fff" strokeWidth="2" fill="none"/>
+        <path d="M58 60 Q68 56 78 60" stroke="#fff" strokeWidth="2" fill="none"/>
+      </g>
+      <path d="M50 50 L70 30 M50 50 L35 25 M50 50 L75 65 M50 50 L25 70" stroke="#EF4444" strokeWidth="2.5" strokeDasharray="3 2"/>
+      <circle cx="50" cy="50" r="3" fill="#EF4444"/>
+    </svg>
+  ),
+  desk_under: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <rect x="8" y="38" width="84" height="9" fill="#A0522D"/>
+      <rect x="12" y="47" width="6" height="48" fill="#8B4513"/>
+      <rect x="82" y="47" width="6" height="48" fill="#8B4513"/>
+      <circle cx="50" cy="72" r="13" fill="#FED7AA"/>
+      <ellipse cx="50" cy="90" rx="18" ry="6" fill="#6BCB77"/>
+      <circle cx="45" cy="70" r="1.8" fill="#333"/>
+      <circle cx="55" cy="70" r="1.8" fill="#333"/>
+      <path d="M45 78 Q50 80 55 78" stroke="#333" strokeWidth="1.2" fill="none"/>
+      <path d="M37 65 Q50 60 63 65" stroke="#FED7AA" strokeWidth="4" strokeLinecap="round" fill="none"/>
+      <text x="20" y="32" fontSize="8" fill="#6BCB77">✓ 안전</text>
+    </svg>
+  ),
+  hallway_run: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <rect x="0" y="30" width="100" height="55" fill="#E5E7EB"/>
+      <rect x="0" y="30" width="100" height="4" fill="#888"/>
+      <rect x="0" y="81" width="100" height="4" fill="#888"/>
+      <circle cx="50" cy="50" r="10" fill="#FED7AA"/>
+      <path d="M50 60 Q47 70 38 78 M50 60 Q55 70 65 78" stroke="#FF6B9D" strokeWidth="7" strokeLinecap="round" fill="none"/>
+      <path d="M48 65 L32 60 M53 65 L68 60" stroke="#FED7AA" strokeWidth="5" strokeLinecap="round"/>
+      <circle cx="20" cy="20" r="12" fill="#EF4444"/>
+      <text x="20" y="26" textAnchor="middle" fontSize="16" fill="#fff" fontWeight="bold">!</text>
+      <path d="M76 58 L86 53 L82 56 L88 58" stroke="#888" strokeWidth="2" fill="none"/>
+    </svg>
+  ),
+  head_protect: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <ellipse cx="50" cy="60" rx="22" ry="24" fill="#FED7AA"/>
+      <path d="M28 60 Q28 35 50 28 Q72 35 72 60" fill="#5B4A8F"/>
+      <circle cx="43" cy="60" r="2" fill="#333"/>
+      <circle cx="57" cy="60" r="2" fill="#333"/>
+      <path d="M43 70 Q50 73 57 70" stroke="#333" strokeWidth="1.5" fill="none"/>
+      <path d="M28 60 Q12 42 22 22" stroke="#FED7AA" strokeWidth="10" strokeLinecap="round" fill="none"/>
+      <path d="M72 60 Q88 42 78 22" stroke="#FED7AA" strokeWidth="10" strokeLinecap="round" fill="none"/>
+      <circle cx="22" cy="22" r="7" fill="#FED7AA"/>
+      <circle cx="78" cy="22" r="7" fill="#FED7AA"/>
+      <ellipse cx="50" cy="93" rx="18" ry="5" fill="#FF6B9D"/>
+    </svg>
+  ),
+  // 생활
+  wet_outlet: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <rect x="32" y="32" width="36" height="52" rx="5" fill="#fff" stroke="#888" strokeWidth="3"/>
+      <ellipse cx="45" cy="50" rx="3" ry="6" fill="#333"/>
+      <ellipse cx="55" cy="50" rx="3" ry="6" fill="#333"/>
+      <ellipse cx="45" cy="70" rx="3" ry="6" fill="#333"/>
+      <ellipse cx="55" cy="70" rx="3" ry="6" fill="#333"/>
+      <g fill="#54A0FF">
+        <path d="M18 14 Q12 22 14 32 Q20 35 24 30 Q24 22 18 14 Z"/>
+        <path d="M14 38 Q9 46 12 54 Q18 56 21 51 Q20 44 14 38 Z"/>
+        <path d="M22 62 Q17 70 20 78 Q26 80 28 74 Q27 67 22 62 Z"/>
+      </g>
+      <g className="flicker">
+        <path d="M82 22 L74 42 L82 42 L74 65 L86 50 L80 50 L86 32 Z" fill="#FFD93D" stroke="#FF9F43" strokeWidth="1.5"/>
+      </g>
+    </svg>
+  ),
+  scissors_handle: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <circle cx="32" cy="35" r="12" fill="none" stroke="#FF6B9D" strokeWidth="6"/>
+      <circle cx="32" cy="65" r="12" fill="none" stroke="#FF6B9D" strokeWidth="6"/>
+      <path d="M44 35 L88 50 L44 65 L56 50 Z" fill="#C0C0C0" stroke="#888" strokeWidth="2"/>
+      <line x1="56" y1="50" x2="80" y2="50" stroke="#888" strokeWidth="1"/>
+      <path d="M14 50 L6 55 L14 60" stroke="#6BCB77" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
+      <text x="20" y="92" fontSize="10" fill="#6BCB77" fontWeight="bold">손잡이</text>
+    </svg>
+  ),
+  hot_pot: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <path d="M25 50 L75 50 L72 88 L28 88 Z" fill="#666"/>
+      <ellipse cx="50" cy="50" rx="25" ry="6" fill="#333"/>
+      <rect x="14" y="58" width="15" height="6" fill="#444"/>
+      <rect x="71" y="58" width="15" height="6" fill="#444"/>
+      <ellipse cx="50" cy="48" rx="22" ry="4" fill="#FFD93D"/>
+      <g className="flicker" stroke="#fff" strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.85">
+        <path d="M35 38 Q33 28 36 18"/>
+        <path d="M50 38 Q48 26 52 14"/>
+        <path d="M65 38 Q67 28 64 18"/>
+      </g>
+      <circle cx="85" cy="22" r="13" fill="#EF4444"/>
+      <path d="M79 16 L91 28 M91 16 L79 28" stroke="#fff" strokeWidth="3.5"/>
+    </svg>
+  ),
+  door_gentle: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <rect x="20" y="10" width="56" height="80" rx="3" fill="#A0522D" stroke="#8B4513" strokeWidth="2"/>
+      <circle cx="66" cy="50" r="3" fill="#FFD93D"/>
+      <rect x="28" y="18" width="40" height="24" rx="2" fill="#FFE5B4"/>
+      <rect x="28" y="48" width="40" height="24" rx="2" fill="#FFE5B4"/>
+      <line x1="48" y1="18" x2="48" y2="42" stroke="#A0522D"/>
+      <line x1="48" y1="48" x2="48" y2="72" stroke="#A0522D"/>
+      <path d="M85 45 Q92 50 85 55" stroke="#6BCB77" strokeWidth="4" fill="none" strokeLinecap="round"/>
+      <path d="M85 60 Q92 65 85 70" stroke="#6BCB77" strokeWidth="4" fill="none" strokeLinecap="round" opacity="0.6"/>
+    </svg>
+  ),
+  // 통합
+  stranger_follow: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <circle cx="28" cy="35" r="10" fill="#FED7AA"/>
+      <rect x="20" y="42" width="16" height="32" rx="3" fill="#FF6B9D"/>
+      <path d="M22 74 L18 92 M34 74 L38 92" stroke="#5B4A8F" strokeWidth="6" strokeLinecap="round"/>
+      <circle cx="26" cy="33" r="1.5" fill="#333"/>
+      <circle cx="30" cy="33" r="1.5" fill="#333"/>
+      <path d="M25 38 Q28 40 31 38" stroke="#333" strokeWidth="1"/>
+      <circle cx="72" cy="30" r="14" fill="#444"/>
+      <rect x="60" y="42" width="24" height="42" rx="4" fill="#222"/>
+      <path d="M62 84 L58 94 M82 84 L86 94" stroke="#000" strokeWidth="6" strokeLinecap="round"/>
+      <ellipse cx="68" cy="28" rx="2" ry="3" fill="#FFD93D"/>
+      <ellipse cx="76" cy="28" rx="2" ry="3" fill="#FFD93D"/>
+      <path d="M40 55 L56 55 L52 50 M56 55 L52 60" stroke="#EF4444" strokeWidth="3" fill="none" strokeLinecap="round"/>
+    </svg>
+  ),
+  shout_no: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <circle cx="50" cy="32" r="14" fill="#FED7AA"/>
+      <path d="M50 46 L50 75" stroke="#FF6B9D" strokeWidth="14" strokeLinecap="round"/>
+      <path d="M50 75 L42 95 M50 75 L58 95" stroke="#5B4A8F" strokeWidth="8" strokeLinecap="round"/>
+      <ellipse cx="50" cy="40" rx="7" ry="9" fill="#fff"/>
+      <text x="50" y="46" textAnchor="middle" fontSize="14" fill="#EF4444" fontWeight="bold">!</text>
+      <circle cx="44" cy="30" r="1.5" fill="#333"/>
+      <circle cx="56" cy="30" r="1.5" fill="#333"/>
+      <path d="M50 53 Q35 48 22 50" stroke="#FED7AA" strokeWidth="6.5" strokeLinecap="round" fill="none"/>
+      <path d="M50 53 Q65 48 78 50" stroke="#FED7AA" strokeWidth="6.5" strokeLinecap="round" fill="none"/>
+      <circle cx="22" cy="50" r="7" fill="#FED7AA"/>
+      <circle cx="78" cy="50" r="7" fill="#FED7AA"/>
+      <text x="22" y="54" textAnchor="middle" fontSize="10" fill="#EF4444" fontWeight="bold">✋</text>
+      <text x="78" y="54" textAnchor="middle" fontSize="10" fill="#EF4444" fontWeight="bold">✋</text>
+    </svg>
+  ),
+  alone_secret: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <circle cx="50" cy="38" r="14" fill="#FED7AA"/>
+      <path d="M50 52 L50 80" stroke="#888" strokeWidth="13" strokeLinecap="round"/>
+      <path d="M50 80 L42 95 M50 80 L58 95" stroke="#5B4A8F" strokeWidth="8" strokeLinecap="round"/>
+      <path d="M50 60 L38 65 M50 60 L62 65" stroke="#FED7AA" strokeWidth="6" strokeLinecap="round"/>
+      <circle cx="44" cy="36" r="1.5" fill="#333"/>
+      <circle cx="56" cy="36" r="1.5" fill="#333"/>
+      <rect x="40" y="42" width="20" height="7" rx="2" fill="#FED7AA"/>
+      <line x1="42" y1="45.5" x2="58" y2="45.5" stroke="#888"/>
+      <rect x="76" y="22" width="14" height="14" rx="2" fill="#888"/>
+      <path d="M79 22 L79 16 Q83 12 87 16 L87 22" stroke="#888" strokeWidth="2.5" fill="none"/>
+      <circle cx="83" cy="29" r="1.5" fill="#FFD93D"/>
+    </svg>
+  ),
+  tell_adult: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <circle cx="28" cy="52" r="9" fill="#FED7AA"/>
+      <rect x="20" y="60" width="16" height="24" rx="3" fill="#FF6B9D"/>
+      <path d="M22 84 L18 94 M34 84 L38 94" stroke="#5B4A8F" strokeWidth="5" strokeLinecap="round"/>
+      <circle cx="26" cy="50" r="1.5" fill="#333"/>
+      <circle cx="30" cy="50" r="1.5" fill="#333"/>
+      <path d="M26 56 Q28 57 30 56" stroke="#333" strokeWidth="1"/>
+      <path d="M28 62 Q20 50 18 36" stroke="#FED7AA" strokeWidth="6" strokeLinecap="round" fill="none"/>
+      <circle cx="18" cy="33" r="5" fill="#FED7AA"/>
+      <circle cx="72" cy="32" r="13" fill="#FED7AA"/>
+      <rect x="58" y="44" width="28" height="42" rx="4" fill="#54A0FF"/>
+      <path d="M60 86 L56 95 M84 86 L88 95" stroke="#222" strokeWidth="6" strokeLinecap="round"/>
+      <circle cx="67" cy="30" r="1.7" fill="#333"/>
+      <circle cx="77" cy="30" r="1.7" fill="#333"/>
+      <path d="M67 37 Q72 40 77 37" stroke="#333" strokeWidth="1.5" fill="none"/>
+      <path d="M45 36 Q42 30 47 27 Q53 30 49 36 L47 39 Z" fill="#FF6B9D" className="bounce-soft"/>
+    </svg>
+  ),
+
+  // ========== Quiz용 큰 키워드 SVG ==========
+  crosswalk: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <rect x="0" y="20" width="100" height="60" fill="#444"/>
+      {[10,28,46,64,82].map(y => <rect key={y} x="10" y={y} width="80" height="10" fill="#fff"/>)}
+      <circle cx="20" cy="92" r="3" fill="#FFD93D"/>
+      <circle cx="80" cy="92" r="3" fill="#FFD93D"/>
+    </svg>
+  ),
+  signal_red: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <rect x="35" y="5" width="30" height="80" rx="6" fill="#2D3436"/>
+      <circle cx="50" cy="22" r="9" fill="#FF6B6B" className="flicker"/>
+      <circle cx="50" cy="45" r="9" fill="#FFD93D" opacity="0.25"/>
+      <circle cx="50" cy="68" r="9" fill="#6BCB77" opacity="0.25"/>
+      <rect x="46" y="85" width="8" height="13" fill="#2D3436"/>
+    </svg>
+  ),
+  seatbelt: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <rect x="20" y="60" width="60" height="35" rx="6" fill="#6BCB77"/>
+      <rect x="25" y="30" width="50" height="35" rx="8" fill="#5BBB67"/>
+      <path d="M30 65 L70 90" stroke="#FFD93D" strokeWidth="6" strokeLinecap="round"/>
+      <path d="M70 65 L30 90" stroke="#FFD93D" strokeWidth="6" strokeLinecap="round"/>
+      <circle cx="50" cy="78" r="6" fill="#888" stroke="#fff" strokeWidth="2"/>
+      <rect x="44" y="76" width="12" height="4" fill="#fff"/>
+    </svg>
+  ),
+  phone_119: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <rect x="25" y="15" width="50" height="75" rx="10" fill="#2D3436"/>
+      <rect x="30" y="22" width="40" height="55" rx="3" fill="#EF4444"/>
+      <text x="50" y="55" textAnchor="middle" fontSize="22" fill="#fff" fontWeight="bold">119</text>
+      <circle cx="50" cy="84" r="3" fill="#fff"/>
+    </svg>
+  ),
+  typhoon: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <g className="spin-slow" style={{transformOrigin:'50px 50px'}}>
+        <path d="M50 15 Q70 30 70 50 Q70 70 50 85 Q30 70 30 50 Q30 30 50 15 Z" fill="none" stroke="#54A0FF" strokeWidth="4"/>
+        <path d="M50 25 Q62 35 62 50 Q62 65 50 75 Q38 65 38 50 Q38 35 50 25 Z" fill="none" stroke="#3D7CC4" strokeWidth="3"/>
+        <circle cx="50" cy="50" r="6" fill="#54A0FF"/>
+      </g>
+      <text x="10" y="20" fontSize="12">💧</text>
+      <text x="78" y="80" fontSize="12">💧</text>
+    </svg>
+  ),
+  flood: () => (
+    <svg viewBox="0 0 100 100" style={{width:'100%',height:'100%'}}>
+      <rect x="0" y="55" width="100" height="45" fill="#54A0FF"/>
+      <path d="M0 55 Q15 50 30 55 T60 55 T100 55 L100 70 L0 70 Z" fill="#3D7CC4" opacity="0.7"/>
+      <path d="M0 65 Q15 60 30 65 T60 65 T100 65 L100 80 L0 80 Z" fill="#54A0FF" opacity="0.8"/>
+      <rect x="30" y="20" width="40" height="40" fill="#FFE5B4"/>
+      <polygon points="25,22 50,5 75,22" fill="#E74C3C"/>
+      <rect x="42" y="35" width="16" height="20" fill="#8B4513"/>
+      <rect x="35" y="25" width="10" height="10" fill="#87CEEB"/>
     </svg>
   )
 };
 
+/* =========================================================
+   데이터
+========================================================= */
+const AREAS = [
+  { id: "traffic",  name: "교통안전", emoji: "🚦", color: "from-rose-400 to-pink-500",   ring: "ring-rose-300",   bg:"#FFE5F1" },
+  { id: "fire",     name: "화재안전", emoji: "🧯", color: "from-orange-400 to-amber-500", ring: "ring-orange-300", bg:"#FFEFD9" },
+  { id: "disaster", name: "재난안전", emoji: "🌪️", color: "from-sky-400 to-blue-500",    ring: "ring-sky-300",    bg:"#E5F4FF" },
+  { id: "life",     name: "생활안전", emoji: "🏠", color: "from-emerald-400 to-green-500",ring: "ring-emerald-300",bg:"#E5FFEF" },
+  { id: "int",      name: "통합탐험", emoji: "🧚", color: "from-purple-400 to-fuchsia-500",ring: "ring-purple-300",bg:"#F0E5FF" }
+];
+
 const QUESTIONS = [
-  { area:"traffic", key:"🚸", q:"횡단보도를 건널 때 가장 먼저 할 일은?", opts:["그냥 뛰기","좌우를 살펴보기","휴대폰 보기"], ans:1, tip:"좌우를 살펴보고 차가 멈춘 걸 확인해요." },
-  { area:"traffic", key:"🚦", q:"빨간 신호등이 켜졌을 때는?", opts:["빨리 건너기","잠깐 멈춰 기다리기","뒤로 뛰기"], ans:1, tip:"빨간 불은 멈춤! 초록 불이 될 때까지 기다려요." },
-  { area:"traffic", key:"🚗", q:"차에 탔을 때 꼭 해야 하는 것은?", opts:["창문 열기","안전벨트 매기","노래 부르기"], ans:1, tip:"안전벨트는 내 몸을 지켜 줘요." },
-  { area:"fire", key:"🔥", q:"불이 났을 때 가장 먼저 해야 할 일은?", opts:["숨기","'불이야!' 외치기","짐 챙기기"], ans:1, tip:"큰 소리로 알리고 어른께 도움을 요청해요." },
-  { area:"fire", key:"🚨", q:"연기가 가득할 때는 어떻게?", opts:["똑바로 서서 뛰기","자세를 낮추고 천천히","눈 감고 뛰기"], ans:1, tip:"연기는 위로 올라가요. 자세를 낮춰요." },
-  { area:"fire", key:"📞", q:"불이 났을 때 거는 번호는?", opts:["112","119","114"], ans:1, tip:"불이 나면 119, 도움이 필요하면 112." },
-  { area:"disaster", key:"🏚️", q:"지진이 났을 때 교실에서는?", opts:["창문 열기","책상 아래로 숨기","복도로 뛰기"], ans:1, tip:"머리를 보호하고 책상 아래로!" },
-  { area:"disaster", key:"🌧️", q:"태풍이 올 때는?", opts:["밖에서 놀기","집 안에 머물기","우산 들고 나가기"], ans:1, tip:"강한 바람과 비를 피해 집 안에 있어요." },
-  { area:"disaster", key:"🌊", q:"홍수가 났을 때 안전한 곳은?", opts:["낮은 곳","높은 곳","다리 아래"], ans:1, tip:"물이 차오르면 더 높은 곳으로 올라가요." },
-  { area:"life", key:"✂️", q:"가위를 친구에게 줄 때는?", opts:["뾰족한 쪽 주기","손잡이 쪽 주기","던지기"], ans:1, tip:"손잡이 쪽을 잡아 줘야 친구가 다치지 않아요." },
-  { area:"life", key:"🔌", q:"젖은 손으로 콘센트를 만지면?", opts:["괜찮아요","감전될 수 있어요","시원해져요"], ans:1, tip:"전기는 물과 만나면 위험해요." },
-  { area:"life", key:"🍲", q:"뜨거운 냄비 가까이에서는?", opts:["만져 보기","멀리 떨어지기","뚜껑 열기"], ans:1, tip:"화상을 입을 수 있으니 어른께 부탁해요." },
-  { area:"int", key:"🧚", q:"낯선 사람이 따라오라고 하면?", opts:["따라가기","'싫어요!' 외치고 도망","조용히 따라가기"], ans:1, tip:"안 돼요! 큰 소리로 외치고 어른께 알려요." },
-  { area:"int", key:"💜", q:"안전한 곳을 찾기 어려울 때는?", opts:["혼자 해결","어른께 도움 요청","숨어 있기"], ans:1, tip:"믿을 수 있는 어른께 꼭 알려요." }
+  { area:"traffic", art:"crosswalk",  q:"횡단보도를 건널 때 가장 먼저 할 일은?", opts:["그냥 뛰기","좌우를 살펴보기","휴대폰 보기"], ans:1, tip:"좌우를 살펴보고 차가 멈춘 걸 확인해요." },
+  { area:"traffic", art:"signal_red", q:"빨간 신호등이 켜졌을 때는?", opts:["빨리 건너기","잠깐 멈춰 기다리기","뒤로 뛰기"], ans:1, tip:"빨간 불은 멈춤! 초록 불이 될 때까지 기다려요." },
+  { area:"traffic", art:"seatbelt",   q:"차에 탔을 때 꼭 해야 하는 것은?", opts:["창문 열기","안전벨트 매기","노래 부르기"], ans:1, tip:"안전벨트는 내 몸을 지켜 줘요." },
+  { area:"fire", art:"shouting_fire",q:"불이 났을 때 가장 먼저 해야 할 일은?", opts:["숨기","'불이야!' 외치기","짐 챙기기"], ans:1, tip:"큰 소리로 알리고 어른께 도움을 요청해요." },
+  { area:"fire", art:"crouch_smoke", q:"연기가 가득할 때는 어떻게?", opts:["똑바로 서서 뛰기","자세를 낮추고 천천히","눈 감고 뛰기"], ans:1, tip:"연기는 위로 올라가요. 자세를 낮춰요." },
+  { area:"fire", art:"phone_119",    q:"불이 났을 때 거는 번호는?", opts:["112","119","114"], ans:1, tip:"불이 나면 119, 도움이 필요하면 112." },
+  { area:"disaster", art:"desk_under", q:"지진이 났을 때 교실에서는?", opts:["창문 열기","책상 아래로 숨기","복도로 뛰기"], ans:1, tip:"머리를 보호하고 책상 아래로!" },
+  { area:"disaster", art:"typhoon",    q:"태풍이 올 때는?", opts:["밖에서 놀기","집 안에 머물기","우산 들고 나가기"], ans:1, tip:"강한 바람과 비를 피해 집 안에 있어요." },
+  { area:"disaster", art:"flood",      q:"홍수가 났을 때 안전한 곳은?", opts:["낮은 곳","높은 곳","다리 아래"], ans:1, tip:"물이 차오르면 더 높은 곳으로 올라가요." },
+  { area:"life", art:"scissors_handle",q:"가위를 친구에게 줄 때는?", opts:["뾰족한 쪽 주기","손잡이 쪽 주기","던지기"], ans:1, tip:"손잡이 쪽을 잡아 줘야 친구가 다치지 않아요." },
+  { area:"life", art:"wet_outlet",     q:"젖은 손으로 콘센트를 만지면?", opts:["괜찮아요","감전될 수 있어요","시원해져요"], ans:1, tip:"전기는 물과 만나면 위험해요." },
+  { area:"life", art:"hot_pot",        q:"뜨거운 냄비 가까이에서는?", opts:["만져 보기","멀리 떨어지기","뚜껑 열기"], ans:1, tip:"화상을 입을 수 있으니 어른께 부탁해요." },
+  { area:"int", art:"stranger_follow", q:"낯선 사람이 따라오라고 하면?", opts:["따라가기","'싫어요!' 외치고 도망","조용히 따라가기"], ans:1, tip:"안 돼요! 큰 소리로 외치고 어른께 알려요." },
+  { area:"int", art:"tell_adult",      q:"안전한 곳을 찾기 어려울 때는?", opts:["혼자 해결","어른께 도움 요청","숨어 있기"], ans:1, tip:"믿을 수 있는 어른께 꼭 알려요." }
 ];
 
 const CONCEPTS = {
-  traffic: {
-    title: "안전한 행동을 골라요",
-    intro: "카드를 끌어서 알맞은 상자에 넣어요",
-    leftBox:  { label:"위험해요", emoji:"🚫", from:"#FCA5A5", to:"#EF4444" },
-    rightBox: { label:"안전해요", emoji:"✅", from:"#86EFAC", to:"#10B981" },
-    cards: [
-      { id:"t1", emoji:"🏃", text:"뛰어서 건너요", correct:"left" },
-      { id:"t2", emoji:"👀", text:"좌우 살펴봐요", correct:"right" },
-      { id:"t3", emoji:"📱", text:"휴대폰 보면서", correct:"left" },
-      { id:"t4", emoji:"🚦", text:"신호 지켜요", correct:"right" }
-    ]
-  },
-  fire: {
-    title: "불이 났을 때!",
-    intro: "어떻게 해야 안전할까요?",
-    leftBox:  { label:"위험해요", emoji:"🚫", from:"#FCA5A5", to:"#EF4444" },
-    rightBox: { label:"안전해요", emoji:"✅", from:"#86EFAC", to:"#10B981" },
-    cards: [
-      { id:"f1", emoji:"🙈", text:"숨어 있어요", correct:"left" },
-      { id:"f2", emoji:"📣", text:"불이야 외쳐요", correct:"right" },
-      { id:"f3", emoji:"🧎", text:"자세 낮춰요", correct:"right" },
-      { id:"f4", emoji:"🛗", text:"엘리베이터로", correct:"left" }
-    ]
-  },
-  disaster: {
-    title: "지진이 났어요!",
-    intro: "안전한 행동을 골라봐요",
-    leftBox:  { label:"위험해요", emoji:"🚫", from:"#FCA5A5", to:"#EF4444" },
-    rightBox: { label:"안전해요", emoji:"✅", from:"#86EFAC", to:"#10B981" },
-    cards: [
-      { id:"d1", emoji:"🪟", text:"창문 옆에", correct:"left" },
-      { id:"d2", emoji:"🪑", text:"책상 아래로", correct:"right" },
-      { id:"d3", emoji:"🏃", text:"복도로 뛰기", correct:"left" },
-      { id:"d4", emoji:"🙇", text:"머리 보호해요", correct:"right" }
-    ]
-  },
-  life: {
-    title: "생활 속 안전",
-    intro: "위험한 행동을 알아봐요",
-    leftBox:  { label:"위험해요", emoji:"🚫", from:"#FCA5A5", to:"#EF4444" },
-    rightBox: { label:"안전해요", emoji:"✅", from:"#86EFAC", to:"#10B981" },
-    cards: [
-      { id:"l1", emoji:"💧", text:"젖은 손 콘센트", correct:"left" },
-      { id:"l2", emoji:"✂️", text:"손잡이로 주기", correct:"right" },
-      { id:"l3", emoji:"🍲", text:"뜨거운 냄비 만지기", correct:"left" },
-      { id:"l4", emoji:"🚪", text:"문 천천히 닫기", correct:"right" }
-    ]
-  },
-  int: {
-    title: "우리의 안전 약속",
-    intro: "지켜야 할 약속을 골라요",
-    leftBox:  { label:"위험해요", emoji:"🚫", from:"#FCA5A5", to:"#EF4444" },
-    rightBox: { label:"안전해요", emoji:"✅", from:"#86EFAC", to:"#10B981" },
-    cards: [
-      { id:"i1", emoji:"🚶", text:"낯선 사람 따라가기", correct:"left" },
-      { id:"i2", emoji:"📢", text:"싫어요 외치기", correct:"right" },
-      { id:"i3", emoji:"🤫", text:"혼자만 알기", correct:"left" },
-      { id:"i4", emoji:"🧑‍🏫", text:"어른께 알리기", correct:"right" }
-    ]
-  }
+  traffic: { title:"안전한 행동을 골라요", intro:"카드를 끌어서 알맞은 상자에 넣어요",
+    leftBox:{label:"위험해요",emoji:"🚫",from:"#FCA5A5",to:"#EF4444"}, rightBox:{label:"안전해요",emoji:"✅",from:"#86EFAC",to:"#10B981"},
+    cards:[
+      {id:"t1", art:"running",     text:"뛰어서 건너요",  correct:"left"},
+      {id:"t2", art:"looking",     text:"좌우 살펴봐요",  correct:"right"},
+      {id:"t3", art:"phone_walk",  text:"휴대폰 보면서",  correct:"left"},
+      {id:"t4", art:"signal_keep", text:"신호 지켜요",    correct:"right"}
+    ]},
+  fire: { title:"불이 났을 때!", intro:"어떻게 해야 안전할까요?",
+    leftBox:{label:"위험해요",emoji:"🚫",from:"#FCA5A5",to:"#EF4444"}, rightBox:{label:"안전해요",emoji:"✅",from:"#86EFAC",to:"#10B981"},
+    cards:[
+      {id:"f1", art:"hiding_corner", text:"숨어 있어요",     correct:"left"},
+      {id:"f2", art:"shouting_fire", text:"불이야 외쳐요",   correct:"right"},
+      {id:"f3", art:"crouch_smoke",  text:"자세 낮춰요",     correct:"right"},
+      {id:"f4", art:"elevator_no",   text:"엘리베이터로",    correct:"left"}
+    ]},
+  disaster: { title:"지진이 났어요!", intro:"안전한 행동을 골라봐요",
+    leftBox:{label:"위험해요",emoji:"🚫",from:"#FCA5A5",to:"#EF4444"}, rightBox:{label:"안전해요",emoji:"✅",from:"#86EFAC",to:"#10B981"},
+    cards:[
+      {id:"d1", art:"window_warn",  text:"창문 옆에",      correct:"left"},
+      {id:"d2", art:"desk_under",   text:"책상 아래로",    correct:"right"},
+      {id:"d3", art:"hallway_run",  text:"복도로 뛰기",    correct:"left"},
+      {id:"d4", art:"head_protect", text:"머리 보호해요",  correct:"right"}
+    ]},
+  life: { title:"생활 속 안전", intro:"위험한 행동을 알아봐요",
+    leftBox:{label:"위험해요",emoji:"🚫",from:"#FCA5A5",to:"#EF4444"}, rightBox:{label:"안전해요",emoji:"✅",from:"#86EFAC",to:"#10B981"},
+    cards:[
+      {id:"l1", art:"wet_outlet",       text:"젖은 손 콘센트",   correct:"left"},
+      {id:"l2", art:"scissors_handle",  text:"손잡이로 주기",    correct:"right"},
+      {id:"l3", art:"hot_pot",          text:"뜨거운 냄비 만지기",correct:"left"},
+      {id:"l4", art:"door_gentle",      text:"문 천천히 닫기",   correct:"right"}
+    ]},
+  int: { title:"우리의 안전 약속", intro:"지켜야 할 약속을 골라요",
+    leftBox:{label:"위험해요",emoji:"🚫",from:"#FCA5A5",to:"#EF4444"}, rightBox:{label:"안전해요",emoji:"✅",from:"#86EFAC",to:"#10B981"},
+    cards:[
+      {id:"i1", art:"stranger_follow", text:"낯선 사람 따라가기", correct:"left"},
+      {id:"i2", art:"shout_no",        text:"싫어요 외치기",      correct:"right"},
+      {id:"i3", art:"alone_secret",    text:"혼자만 알기",        correct:"left"},
+      {id:"i4", art:"tell_adult",      text:"어른께 알리기",      correct:"right"}
+    ]}
 };
 
 const STICKERS = ["⭐","🌟","💖","🌈","🦄","🎉","🌸","🍀","🎀","🦋"];
 
 /* =========================================================
-   재사용 컴포넌트
+   공용
 ========================================================= */
 function Burst({ x, y, onDone }) {
   const colors = ["#FF6B9D","#FFD93D","#6BCB77","#54A0FF","#C56CF0","#FF9F43"];
-  const particles = Array.from({length: 18}, (_,i)=> {
-    const a = (Math.PI * 2 * i) / 18;
-    const d = 80 + Math.random()*60;
+  const particles = Array.from({length: 20}, (_,i)=> {
+    const a = (Math.PI * 2 * i) / 20;
+    const d = 90 + Math.random()*70;
     return { bx: Math.cos(a)*d, by: Math.sin(a)*d, c: colors[i % colors.length] };
   });
   useEffect(() => { const t = setTimeout(onDone, 1000); return ()=>clearTimeout(t); }, []);
@@ -408,23 +715,23 @@ function Burst({ x, y, onDone }) {
 function FloatingDeco() {
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      <div className="absolute em-md opacity-30 deco-1" style={{top:"8%", left:"6%"}}>☁️</div>
-      <div className="absolute em-md opacity-30 deco-2" style={{top:"15%", right:"8%"}}>⭐</div>
-      <div className="absolute em-md opacity-25 deco-3" style={{bottom:"12%", left:"10%"}}>🌈</div>
-      <div className="absolute em-md opacity-30 deco-1" style={{bottom:"18%", right:"12%"}}>💖</div>
-      <div className="absolute fs-2xl opacity-25 deco-2" style={{top:"45%", left:"4%"}}>✨</div>
-      <div className="absolute fs-2xl opacity-25 deco-3" style={{top:"50%", right:"5%"}}>🎈</div>
+      <div className="absolute t-2xl opacity-30 deco-1" style={{top:"6%", left:"5%"}}>☁️</div>
+      <div className="absolute t-xl opacity-30 deco-2" style={{top:"12%", right:"6%"}}>⭐</div>
+      <div className="absolute t-2xl opacity-25 deco-3" style={{bottom:"10%", left:"8%"}}>🌈</div>
+      <div className="absolute t-xl opacity-30 deco-1" style={{bottom:"15%", right:"10%"}}>💖</div>
+      <div className="absolute t-lg opacity-25 deco-2" style={{top:"42%", left:"3%"}}>✨</div>
+      <div className="absolute t-lg opacity-25 deco-3" style={{top:"48%", right:"4%"}}>🎈</div>
     </div>
   );
 }
 
 function TopBar({ name, speakerOn, setSpeakerOn, onHome, progress }) {
   return (
-    <div className="absolute top-0 left-0 right-0 px-4 flex items-center justify-between z-30 bg-white/60 backdrop-blur-md border-b border-white/40"
-      style={{height: "clamp(48px, 7vh, 64px)"}}>
+    <div className="absolute top-0 left-0 right-0 px-4 flex items-center justify-between z-30 bg-white/70 backdrop-blur-md border-b border-white/40"
+      style={{height: "3.5rem"}}>
       <button onClick={onHome} className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-white/80 hover:bg-white shadow-sm card-hover">
-        <Home size={18} className="text-pink-500"/>
-        <span className="font-cafe24 fs-sm">처음</span>
+        <Home size={20} className="text-pink-500"/>
+        <span className="font-cafe24 t-base">처음</span>
       </button>
       <div className="flex-1 mx-4">
         {progress != null && (
@@ -435,9 +742,9 @@ function TopBar({ name, speakerOn, setSpeakerOn, onHome, progress }) {
         )}
       </div>
       <div className="flex items-center gap-2">
-        {name && <div className="px-3 py-1 rounded-2xl bg-yellow-200/80 font-cafe24 fs-sm">{name} 친구</div>}
+        {name && <div className="px-3 py-1 rounded-2xl bg-yellow-200/80 font-cafe24 t-base">{name} 친구</div>}
         <button onClick={()=>setSpeakerOn(v=>!v)} className={`p-2 rounded-2xl shadow-sm card-hover ${speakerOn?"bg-emerald-400 text-white":"bg-white/80 text-gray-500"}`}>
-          {speakerOn ? <Volume2 size={18}/> : <VolumeX size={18}/>}
+          {speakerOn ? <Volume2 size={20}/> : <VolumeX size={20}/>}
         </button>
       </div>
     </div>
@@ -448,12 +755,12 @@ function TopBar({ name, speakerOn, setSpeakerOn, onHome, progress }) {
    튜토리얼
 ========================================================= */
 const TUTORIAL_PAGES = [
-  { emoji:"👋", title:"안녕!", text:"우리 이름을 골라 보자.", tts:"안녕 친구! 우리 이름을 골라 볼까요?" },
-  { emoji:"🎤", title:"녹음하기", text:"먼저 오늘 알고 있는 것을 말해 봐요.", tts:"먼저 오늘 알고 있는 것을 녹음해요." },
-  { emoji:"🗺️", title:"지도 탐험", text:"다섯 영역을 모두 탐험해요!", tts:"지도에서 다섯 영역을 골라 탐험해요." },
-  { emoji:"💜", title:"도움받기", text:"모르면 💜 버튼을 눌러요.", tts:"문제를 모르면 도움받기 버튼을 눌러요." },
-  { emoji:"⭐", title:"별점 주기", text:"끝나면 내 녹음 듣고 별점 줘요.", tts:"끝나면 내 녹음을 듣고 별점을 매겨요." },
-  { emoji:"🏆", title:"수료증!", text:"다 마치면 수료증을 받아요!", tts:"끝까지 잘하면 수료증을 받아요!" }
+  { emoji:"👋", title:"안녕!", text:"우리 이름을 골라 보자.", tts:"안녕! 이름을 골라 볼까요?" },
+  { emoji:"🎤", title:"녹음하기", text:"먼저 알고 있는 것을 말해 봐요.", tts:"먼저 알고 있는 것을 녹음해요." },
+  { emoji:"🗺️", title:"지도 탐험", text:"다섯 영역을 모두 탐험해요!", tts:"지도에서 다섯 영역을 모두 탐험해요." },
+  { emoji:"💜", title:"도움받기", text:"모르면 💜 버튼을 눌러요.", tts:"모르면 도움받기 버튼을 눌러요." },
+  { emoji:"⭐", title:"별점 주기", text:"내 녹음 듣고 별점 줘요.", tts:"내 녹음 듣고 별점 매겨요." },
+  { emoji:"🏆", title:"수료증!", text:"다 마치면 수료증을 받아요!", tts:"수료증을 받아요!" }
 ];
 
 function Tutorial({ onClose }) {
@@ -461,16 +768,16 @@ function Tutorial({ onClose }) {
   const p = TUTORIAL_PAGES[page];
   useEffect(()=>{ speak(p.tts); }, [page]);
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       <motion.div initial={{scale:0.7, opacity:0}} animate={{scale:1, opacity:1}}
-        className="bg-white rounded-[36px] shadow-2xl w-full max-w-md p-6 relative">
+        className="bg-white rounded-[36px] shadow-2xl w-full max-w-lg p-6 relative">
         <AnimatePresence mode="wait">
           <motion.div key={page}
-            initial={{x:50, opacity:0}} animate={{x:0, opacity:1}} exit={{x:-50, opacity:0}}
+            initial={{x:60, opacity:0}} animate={{x:0, opacity:1}} exit={{x:-60, opacity:0}}
             className="text-center py-4">
-            <div className="em-huge mb-3 bounce-soft">{p.emoji}</div>
-            <h2 className="font-cafe24 fs-xl text-pink-500 mb-2">{p.title}</h2>
-            <p className="font-cafe24 fs-md text-gray-700">{p.text}</p>
+            <div className="t-huge mb-3 bounce-soft" style={{lineHeight:1}}>{p.emoji}</div>
+            <h2 className="font-cafe24 t-2xl text-pink-500 mb-2">{p.title}</h2>
+            <p className="font-cafe24 t-lg text-gray-700">{p.text}</p>
           </motion.div>
         </AnimatePresence>
         <div className="flex justify-center gap-2 my-3">
@@ -478,19 +785,15 @@ function Tutorial({ onClose }) {
         </div>
         <div className="flex justify-between gap-3 mt-2">
           <button onClick={()=>setPage(p=>Math.max(0,p-1))}
-            className={`flex-1 py-3 rounded-2xl font-cafe24 fs-md bg-gray-100 hover:bg-gray-200 ${page===0?"invisible":""}`}>
+            className={`flex-1 py-3 rounded-2xl font-cafe24 t-md bg-gray-100 hover:bg-gray-200 ${page===0?"invisible":""}`}>
             ← 이전
           </button>
           {page < TUTORIAL_PAGES.length-1 ? (
             <button onClick={()=>setPage(p=>p+1)}
-              className="flex-1 py-3 rounded-2xl font-cafe24 fs-md bg-gradient-to-r from-pink-400 to-rose-500 text-white shadow-lg card-hover">
-              다음 →
-            </button>
+              className="flex-1 py-3 rounded-2xl font-cafe24 t-md bg-gradient-to-r from-pink-400 to-rose-500 text-white shadow-lg card-hover">다음 →</button>
           ) : (
             <button onClick={onClose}
-              className="flex-1 py-3 rounded-2xl font-cafe24 fs-md bg-gradient-to-r from-emerald-400 to-green-500 text-white shadow-lg card-hover">
-              시작! 🚀
-            </button>
+              className="flex-1 py-3 rounded-2xl font-cafe24 t-md bg-gradient-to-r from-emerald-400 to-green-500 text-white shadow-lg card-hover">시작! 🚀</button>
           )}
         </div>
       </motion.div>
@@ -505,36 +808,32 @@ function StartScreen({ onStart, onShowTutorial }) {
   const [name, setName] = useState("");
   const [customName, setCustomName] = useState("");
   const students = ["김민준","이서연","박지호","최예린","정도윤","장하은","윤시우","강유나","직접 입력"];
-
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
       <FloatingDeco/>
-      <motion.h1 initial={{y:-30,opacity:0}} animate={{y:0,opacity:1}}
-        className="font-cafe24 fs-2xl mb-1 text-center">
+      <motion.h1 initial={{y:-40,opacity:0}} animate={{y:0,opacity:1}}
+        className="font-cafe24 t-3xl mb-1 text-center">
         <span className="hi-yellow text-rose-500">안전탐험</span> <span className="bounce-soft inline-block">🛡️</span>
       </motion.h1>
-      <p className="font-cafe24 fs-md text-gray-600 mb-5">우리 함께 안전하게! ✨</p>
-
-      <div className="bg-white/85 rounded-[32px] shadow-xl p-6 w-full max-w-md backdrop-blur">
-        <label className="font-cafe24 fs-md text-pink-500 block mb-2">내 이름을 골라요</label>
+      <p className="font-cafe24 t-lg text-gray-600 mb-6">우리 함께 안전하게! ✨</p>
+      <div className="bg-white/90 rounded-[32px] shadow-2xl p-7 w-full max-w-lg backdrop-blur">
+        <label className="font-cafe24 t-lg text-pink-500 block mb-3">내 이름을 골라요</label>
         <select value={name} onChange={e=>setName(e.target.value)}
-          className="w-full p-3 rounded-2xl border-4 border-pink-200 font-cafe24 fs-md bg-white">
+          className="w-full p-3 rounded-2xl border-4 border-pink-200 font-cafe24 t-md bg-white">
           <option value="">— 이름을 골라주세요 —</option>
           {students.map(s=> <option key={s} value={s}>{s}</option>)}
         </select>
         {name === "직접 입력" && (
           <input value={customName} onChange={e=>setCustomName(e.target.value)} placeholder="이름을 적어주세요"
-            className="w-full mt-3 p-3 rounded-2xl border-4 border-yellow-200 font-cafe24 fs-md"/>
+            className="w-full mt-3 p-3 rounded-2xl border-4 border-yellow-200 font-cafe24 t-md"/>
         )}
         <div className="flex gap-3 mt-5">
           <button onClick={onShowTutorial}
-            className="flex-1 py-3 rounded-2xl font-cafe24 fs-md bg-purple-100 text-purple-700 hover:bg-purple-200 card-hover">
-            📖 사용법
-          </button>
+            className="flex-1 py-3 rounded-2xl font-cafe24 t-md bg-purple-100 text-purple-700 hover:bg-purple-200 card-hover">📖 사용법</button>
           <button
             disabled={!name || (name==="직접 입력" && !customName.trim())}
             onClick={()=> onStart(name==="직접 입력" ? customName.trim() : name)}
-            className="flex-[2] py-3 rounded-2xl font-cafe24 fs-lg text-white shadow-lg bg-gradient-to-r from-pink-400 via-rose-400 to-orange-400 hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
+            className="flex-[2] py-3 rounded-2xl font-cafe24 t-lg text-white shadow-lg bg-gradient-to-r from-pink-400 via-rose-400 to-orange-400 hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
             시작하기 🚀
           </button>
         </div>
@@ -544,7 +843,7 @@ function StartScreen({ onStart, onShowTutorial }) {
 }
 
 /* =========================================================
-   녹음 컴포넌트 (사전/사후 공용)
+   녹음
 ========================================================= */
 function RecordBlock({ prompt, helpText, onSubmit, askStars=false }) {
   const [recording, setRecording] = useState(false);
@@ -571,8 +870,7 @@ function RecordBlock({ prompt, helpText, onSubmit, askStars=false }) {
         setAudioURL(URL.createObjectURL(blob));
         stream.getTracks().forEach(t=>t.stop());
       };
-      mr.start();
-      setRecording(true);
+      mr.start(); setRecording(true);
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (SR) {
         const r = new SR();
@@ -582,137 +880,118 @@ function RecordBlock({ prompt, helpText, onSubmit, askStars=false }) {
           for (let i=ev.resultIndex; i<ev.results.length; i++) s += ev.results[i][0].transcript;
           setStt(s);
         };
-        r.start();
-        recogRef.current = r;
+        r.start(); recogRef.current = r;
       }
-    } catch(e) {
-      alert("마이크를 사용할 수 없어요. 글로 적어 주세요.");
-    }
+    } catch(e) { alert("마이크를 사용할 수 없어요. 글로 적어 주세요."); }
   };
-  const stopRec = () => {
-    recRef.current?.stop();
-    recogRef.current?.stop();
-    setRecording(false);
-  };
+  const stopRec = () => { recRef.current?.stop(); recogRef.current?.stop(); setRecording(false); };
 
   const finalText = (stt || textInput).trim();
   const needRetry = askStars && stars >= 1 && stars <= 3;
-  const canSubmit = askStars
-    ? (stars > 0 && (stars <= 3 || stickerPicked))
-    : (finalText.length > 0 || audioURL);
+  const canSubmit = askStars ? (stars > 0 && (stars <= 3 || stickerPicked)) : (finalText.length > 0 || audioURL);
 
   const handleSubmit = () => {
-    if (needRetry) {
-      setStars(0); setAudioURL(null); setStt(""); setTextInput("");
-      return;
-    }
+    if (needRetry) { setStars(0); setAudioURL(null); setStt(""); setTextInput(""); return; }
     onSubmit({ text: finalText, audioURL, stars, sticker: stickerPicked });
   };
 
   return (
-    <div className="absolute inset-0 pt-16 px-6 pb-4 overflow-auto no-scrollbar">
+    <div className="absolute inset-0 pt-14 px-4 pb-3"
+      style={{display:'grid', gridTemplateRows: askStars ? 'auto 1.2fr 1fr auto' : 'auto 1fr auto', gap:'0.6rem'}}>
       <FloatingDeco/>
-      <div className="max-w-2xl mx-auto">
-        <h2 className="font-cafe24 fs-xl text-center mb-1">
+      {/* 헤더 */}
+      <div className="text-center">
+        <h2 className="font-cafe24 t-2xl">
           🎤 <span className="hi-blue">{prompt}</span>
         </h2>
-        {helpText && <p className="font-cafe24 fs-sm text-center text-gray-600 mb-3">{helpText}</p>}
+        {helpText && <p className="font-cafe24 t-base text-gray-600">{helpText}</p>}
+      </div>
 
-        <div className="bg-white/90 rounded-3xl p-4 shadow-xl mb-3">
-          <div className="flex justify-center mb-2">
-            {!recording ? (
-              <button onClick={startRec}
-                style={{width:"clamp(72px,14vh,110px)", height:"clamp(72px,14vh,110px)"}}
-                className="rounded-full bg-gradient-to-br from-pink-400 to-rose-500 text-white shadow-2xl flex items-center justify-center card-hover pulse-grow">
-                <Mic size={36}/>
-              </button>
-            ) : (
-              <button onClick={stopRec}
-                style={{width:"clamp(72px,14vh,110px)", height:"clamp(72px,14vh,110px)"}}
-                className="rounded-full bg-rose-500 text-white shadow-2xl flex items-center justify-center recording-pulse">
-                <Square size={32}/>
-              </button>
-            )}
-          </div>
-          <p className="text-center font-cafe24 fs-sm text-gray-500">
-            {recording ? "🎙️ 듣고 있어요…" : audioURL ? "✅ 녹음 완료!" : "마이크를 눌러서 말해 봐요"}
-          </p>
-
-          {(stt || textInput || audioURL) && (
-            <div className="mt-3">
-              <div className="font-cafe24 fs-sm text-gray-500 mb-1">📝 내가 말한 내용</div>
-              <textarea value={stt || textInput} onChange={e=>setTextInput(e.target.value)} rows={2}
-                placeholder="여기에 직접 적어도 돼요!"
-                className="w-full p-2 rounded-2xl border-4 border-yellow-100 font-cafe24 fs-base"/>
-            </div>
-          )}
-
-          {audioURL && (
-            <div className="mt-2 flex gap-2">
-              <audio src={audioURL} controls className="w-full"/>
-              <button onClick={()=>{ setAudioURL(null); setStt(""); }} className="p-2 bg-gray-100 rounded-2xl card-hover">
-                <Trash2 size={18}/>
-              </button>
-            </div>
+      {/* 녹음 영역 - 화면 꽉 채움 */}
+      <div className="bg-white/90 rounded-3xl shadow-xl p-4 flex flex-col items-center justify-center gap-3 min-h-0 max-w-4xl w-full mx-auto">
+        <div className="flex items-center justify-center">
+          {!recording ? (
+            <button onClick={startRec}
+              style={{width:"clamp(6rem,16vmin,11rem)", height:"clamp(6rem,16vmin,11rem)"}}
+              className="rounded-full bg-gradient-to-br from-pink-400 to-rose-500 text-white shadow-2xl flex items-center justify-center card-hover pulse-grow">
+              <Mic style={{width:"40%", height:"40%"}}/>
+            </button>
+          ) : (
+            <button onClick={stopRec}
+              style={{width:"clamp(6rem,16vmin,11rem)", height:"clamp(6rem,16vmin,11rem)"}}
+              className="rounded-full bg-rose-500 text-white shadow-2xl flex items-center justify-center recording-pulse">
+              <Square style={{width:"35%", height:"35%"}}/>
+            </button>
           )}
         </div>
-
-        {askStars && (
-          <div className="bg-white/90 rounded-3xl p-4 shadow-xl mb-3">
-            <p className="font-cafe24 fs-md text-center text-gray-700 mb-2">
-              내 녹음을 들어보고 ⭐ 점수를 줘요
-            </p>
-            <div className="flex justify-center gap-2">
-              {[1,2,3,4,5].map(n=>(
-                <button key={n} onClick={()=>{ setStars(n); popSound(); }}
-                  className="star-btn">
-                  <Star size={42} fill={n<=stars?"#FBBF24":"none"} stroke={n<=stars?"#F59E0B":"#D1D5DB"} strokeWidth={2}/>
-                </button>
-              ))}
-            </div>
-            {stars > 0 && stars <= 3 && (
-              <p className="text-center mt-2 font-cafe24 fs-sm text-rose-500">
-                💪 한 번 더 녹음해 볼까요?
-              </p>
-            )}
-            {stars >= 4 && (
-              <div className="mt-3">
-                <p className="text-center font-cafe24 fs-sm text-emerald-600 mb-2">
-                  와! 정말 잘했어요. 스티커를 골라 주세요! 🎁
-                </p>
-                <div className="flex justify-center flex-wrap gap-2">
-                  {STICKERS.map(s=>(
-                    <button key={s} onClick={()=>{ setStickerPicked(s); popSound(); }}
-                      className={`em-md p-1 rounded-2xl card-hover ${stickerPicked===s?"bg-yellow-200 scale-110":"bg-white"}`}>
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+        <p className="text-center font-cafe24 t-md text-gray-500">
+          {recording ? "🎙️ 듣고 있어요…" : audioURL ? "✅ 녹음 완료!" : "마이크를 눌러서 말해 봐요"}
+        </p>
+        {(stt || textInput || audioURL) && (
+          <div className="w-full">
+            <div className="font-cafe24 t-sm text-gray-500 mb-1">📝 내가 말한 내용</div>
+            <textarea value={stt || textInput} onChange={e=>setTextInput(e.target.value)} rows={2}
+              placeholder="여기에 직접 적어도 돼요!"
+              className="w-full p-2 rounded-2xl border-4 border-yellow-100 font-cafe24 t-base resize-none"/>
           </div>
         )}
+        {audioURL && (
+          <div className="w-full flex gap-2">
+            <audio src={audioURL} controls className="w-full"/>
+            <button onClick={()=>{ setAudioURL(null); setStt(""); }} className="p-2 bg-gray-100 rounded-2xl card-hover">
+              <Trash2 size={20}/>
+            </button>
+          </div>
+        )}
+      </div>
 
-        <div className="flex justify-center">
-          <button onClick={handleSubmit} disabled={!canSubmit}
-            className="px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-400 to-green-500 text-white font-cafe24 fs-md shadow-lg card-hover disabled:opacity-40 disabled:cursor-not-allowed">
-            {needRetry ? "다시 녹음하기 🔄" : "다음으로 🚀"}
-          </button>
+      {/* 별점 + 스티커 (사후만) */}
+      {askStars && (
+        <div className="bg-white/90 rounded-3xl shadow-xl p-4 flex flex-col justify-center min-h-0 max-w-4xl w-full mx-auto">
+          <p className="font-cafe24 t-md text-center text-gray-700 mb-2 flex-none">내 녹음을 들어보고 ⭐ 점수를 줘요</p>
+          <div className="flex justify-center gap-2 flex-none">
+            {[1,2,3,4,5].map(n=>(
+              <button key={n} onClick={()=>{ setStars(n); popSound(); }} className="star-btn">
+                <Star size={48} fill={n<=stars?"#FBBF24":"none"} stroke={n<=stars?"#F59E0B":"#D1D5DB"} strokeWidth={2}/>
+              </button>
+            ))}
+          </div>
+          {stars > 0 && stars <= 3 && (
+            <p className="text-center mt-2 font-cafe24 t-base text-rose-500 flex-none">💪 한 번 더 녹음해 볼까요?</p>
+          )}
+          {stars >= 4 && (
+            <div className="mt-2 flex-1 flex flex-col justify-center min-h-0">
+              <p className="text-center font-cafe24 t-base text-emerald-600 mb-2 flex-none">와! 정말 잘했어요. 스티커를 골라 주세요! 🎁</p>
+              <div className="flex justify-center flex-wrap gap-2">
+                {STICKERS.map(s=>(
+                  <button key={s} onClick={()=>{ setStickerPicked(s); popSound(); }}
+                    className={`t-2xl p-1 rounded-2xl card-hover ${stickerPicked===s?"bg-yellow-200 scale-110":"bg-white"}`}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
+      )}
+
+      {/* 버튼 - 고정 */}
+      <div className="flex justify-center">
+        <button onClick={handleSubmit} disabled={!canSubmit}
+          className="px-7 py-3 rounded-2xl bg-gradient-to-r from-emerald-400 to-green-500 text-white font-cafe24 t-lg shadow-lg card-hover disabled:opacity-40 disabled:cursor-not-allowed">
+          {needRetry ? "다시 녹음하기 🔄" : "다음으로 🚀"}
+        </button>
       </div>
     </div>
   );
 }
 
 /* =========================================================
-   지도 화면 (5개 영역)
+   지도 (5개 영역)
 ========================================================= */
 function MapScreen({ name, cleared, onPickArea, onAllClear }) {
   const allDone = AREAS.every(a => cleared[a.id]);
-  useEffect(()=> {
-    if (allDone) speak(`${name} 친구, 모든 영역을 탐험했어요! 마지막 다짐을 녹음해요!`);
-  }, [allDone]);
-
+  useEffect(()=> { if (allDone) speak(`${name} 친구, 모든 영역을 탐험했어요! 마지막 다짐을 녹음해요!`); }, [allDone]);
   const gridAreas = {
     traffic: "1 / 1 / 2 / 2",
     fire:    "1 / 3 / 2 / 4",
@@ -720,52 +999,49 @@ function MapScreen({ name, cleared, onPickArea, onAllClear }) {
     life:    "3 / 1 / 4 / 2",
     int:     "3 / 3 / 4 / 4"
   };
-
   return (
     <div className="absolute inset-0 pt-14 px-4 pb-4 flex flex-col">
       <FloatingDeco/>
-      <div className="text-center mb-2 flex-none">
-        <h2 className="font-cafe24 fs-xl">
+      <div className="text-center flex-none mb-2">
+        <h2 className="font-cafe24 t-2xl">
           🗺️ <span className="hi-yellow">{name}</span> 친구의 안전 지도
         </h2>
-        <p className="font-cafe24 fs-base text-gray-600">
+        <p className="font-cafe24 t-md text-gray-600">
           {allDone ? "✨ 모든 영역을 다 탐험했어요!" : "영역을 골라서 탐험해 봐요"}
         </p>
       </div>
-
       <div className="flex-1 relative min-h-0">
-        {/* 점선 길 SVG */}
         <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
-          <path d="M15 18 Q35 35 50 50" className="map-path" pathLength="100"/>
-          <path d="M85 18 Q65 35 50 50" className="map-path" pathLength="100"/>
-          <path d="M50 50 Q35 70 15 82" className="map-path" pathLength="100"/>
-          <path d="M50 50 Q65 70 85 82" className="map-path" pathLength="100"/>
+          <path d="M16 18 Q35 32 50 50" className="map-path"/>
+          <path d="M84 18 Q65 32 50 50" className="map-path"/>
+          <path d="M50 50 Q35 68 16 82" className="map-path"/>
+          <path d="M50 50 Q65 68 84 82" className="map-path"/>
         </svg>
-
         <div className="relative w-full h-full max-w-3xl mx-auto"
           style={{display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gridTemplateRows:"1fr 1fr 1fr", gap:"0.5rem"}}>
-          {AREAS.map(a => {
+          {AREAS.map((a,idx) => {
             const done = cleared[a.id];
             return (
               <motion.button key={a.id}
                 style={{ gridArea: gridAreas[a.id] }}
-                whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                initial={{scale:0, rotate:-15}} animate={{scale:1, rotate:0}} transition={{delay: idx*0.1, type:"spring", stiffness:200}}
+                whileHover={{ scale: 1.06 }} whileTap={{ scale: 0.95 }}
                 onClick={() => { popSound(); onPickArea(a.id); }}
-                className={`relative rounded-[28px] shadow-xl bg-white card-hover ring-4 ${a.ring} flex flex-col items-center justify-center p-2 ${done?"opacity-80":""}`}>
-                <div className={`absolute inset-0 rounded-[28px] bg-gradient-to-br ${a.color} opacity-10`}/>
-                <div className="relative wiggle">
-                  {AreaArt[a.id]?.("60%")}
+                className={`relative rounded-[28px] shadow-xl bg-white card-hover ring-4 ${a.ring} flex flex-col items-center justify-center p-2 ${done?"opacity-85":""}`}>
+                <div className={`absolute inset-0 rounded-[28px] bg-gradient-to-br ${a.color} opacity-15`}/>
+                <div className="relative wiggle" style={{width:"70%", aspectRatio:"1/1"}}>
+                  {SVG["area_"+a.id]?.()}
                 </div>
-                <div className="font-cafe24 fs-base text-gray-800 mt-1 relative">{a.name}</div>
+                <div className="font-cafe24 t-md text-gray-800 mt-1 relative">{a.name}</div>
                 {done && (
                   <motion.div initial={{scale:0}} animate={{scale:1}}
                     className="absolute -top-2 -right-2 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-lg"
-                    style={{width:"clamp(28px,4vmin,40px)", height:"clamp(28px,4vmin,40px)"}}>
+                    style={{width:"2.2rem", height:"2.2rem"}}>
                     <Check size={22}/>
                   </motion.div>
                 )}
                 {!done && (
-                  <div className={`absolute -bottom-1 px-2 py-0.5 rounded-full text-white font-cafe24 fs-tiny bg-gradient-to-r ${a.color} shadow`}>
+                  <div className={`absolute -bottom-1 px-2 py-0.5 rounded-full text-white font-cafe24 t-xs bg-gradient-to-r ${a.color} shadow`}>
                     탐험 시작
                   </div>
                 )}
@@ -774,12 +1050,11 @@ function MapScreen({ name, cleared, onPickArea, onAllClear }) {
           })}
         </div>
       </div>
-
       {allDone && (
         <motion.div initial={{y:30, opacity:0}} animate={{y:0, opacity:1}}
           className="flex-none mt-2 flex justify-center">
           <button onClick={onAllClear}
-            className="px-6 py-3 rounded-2xl bg-gradient-to-r from-pink-400 via-yellow-400 to-emerald-400 text-white font-cafe24 fs-md shadow-2xl card-hover pulse-grow">
+            className="px-7 py-3 rounded-2xl bg-gradient-to-r from-pink-400 via-yellow-400 to-emerald-400 text-white font-cafe24 t-lg shadow-2xl card-hover pulse-grow">
             🎤 마지막 다짐 녹음하러 가기 →
           </button>
         </motion.div>
@@ -798,16 +1073,13 @@ function ConceptLearn({ area, onDone }) {
   const [bursts, setBursts] = useState([]);
   const leftRef = useRef(null);
   const rightRef = useRef(null);
-
   useEffect(()=>{ speak(`${data.title}. ${data.intro}.`); }, []);
 
   const remaining = data.cards.filter(c => !placed[c.id]);
   const allDone = remaining.length === 0;
-
   useEffect(()=>{
     if (allDone) {
-      happySound();
-      setTimeout(()=> happySound(), 350);
+      happySound(); setTimeout(()=> happySound(), 350);
       setTimeout(()=> speak("정말 잘했어요! 다음으로 가요!"), 200);
     }
   }, [allDone]);
@@ -827,23 +1099,26 @@ function ConceptLearn({ area, onDone }) {
   };
 
   return (
-    <div className="absolute inset-0 pt-14 px-4 pb-3 flex flex-col">
+    <div className="absolute inset-0 pt-14 px-4 pb-3"
+      style={{display:'grid', gridTemplateRows:'auto 1fr 1fr auto', gap:'0.5rem'}}>
       <FloatingDeco/>
-      <div className="text-center mb-1 flex-none">
-        <h2 className="font-cafe24 fs-xl">
+      {/* 헤더 */}
+      <div className="text-center">
+        <h2 className="font-cafe24 t-xl">
           🧩 <span className="hi-green">{data.title}</span>
         </h2>
-        <p className="font-cafe24 fs-sm text-gray-600">{data.intro}</p>
+        <p className="font-cafe24 t-base text-gray-600">{data.intro}</p>
       </div>
 
-      {/* 카드 영역 */}
-      <div className="flex-1 flex flex-wrap items-start justify-center gap-2 content-start min-h-0 py-2">
+      {/* 카드 영역 - 화면 비율 50% 차지 */}
+      <div className="flex flex-wrap items-center justify-center gap-3 min-h-0">
         <AnimatePresence>
-          {remaining.map((card)=>(
+          {remaining.map((card, idx)=>(
             <motion.div key={card.id}
-              drag dragSnapToOrigin
-              dragElastic={1}
-              whileDrag={{ scale: 1.15, zIndex: 50, rotate: 4 }}
+              drag dragSnapToOrigin dragElastic={1}
+              whileDrag={{ scale: 1.18, zIndex: 50, rotate: 4 }}
+              initial={{scale:0, y:30}} animate={{scale:1, y:0}}
+              transition={{delay: idx*0.1, type:"spring", stiffness:200}}
               onDragEnd={(e, info)=>{
                 const lb = leftRef.current?.getBoundingClientRect();
                 const rb = rightRef.current?.getBoundingClientRect();
@@ -851,60 +1126,64 @@ function ConceptLearn({ area, onDone }) {
                 if (lb && x>=lb.left && x<=lb.right && y>=lb.top && y<=lb.bottom) handleDrop(card, "left", {x, y});
                 else if (rb && x>=rb.left && x<=rb.right && y>=rb.top && y<=rb.bottom) handleDrop(card, "right", {x, y});
               }}
-              animate={wrongCard === card.id ? { x: [0,-12,12,-12,12,0] } : { x: 0 }}
-              transition={wrongCard === card.id ? { duration: 0.4 } : undefined}
-              exit={{ scale: 0, opacity: 0 }}
-              style={{width:"clamp(110px,18vmin,150px)"}}
-              className="bg-white rounded-3xl shadow-xl p-2 text-center cursor-grab select-none active:cursor-grabbing border-4 border-yellow-200">
-              <div className="em-lg mb-1 pointer-events-none">{card.emoji}</div>
-              <div className="font-cafe24 fs-sm text-gray-700 leading-tight pointer-events-none">{card.text}</div>
+              animate={wrongCard === card.id ? { x: [0,-14,14,-14,14,0] } : { x: 0, scale:1, y:0 }}
+              transition={wrongCard === card.id ? { duration: 0.4 } : {type:"spring"}}
+              exit={{ scale: 0, opacity: 0, rotate: 360 }}
+              style={{width:"19%", minWidth:"7rem", maxWidth:"11rem", aspectRatio:"3/4"}}
+              className="bg-white rounded-3xl shadow-2xl p-2 text-center cursor-grab select-none active:cursor-grabbing border-4 border-yellow-300 flex flex-col">
+              <div className="flex-1 flex items-center justify-center pointer-events-none">
+                {SVG[card.art]?.()}
+              </div>
+              <div className="font-cafe24 t-base text-gray-700 pointer-events-none mt-1">{card.text}</div>
             </motion.div>
           ))}
         </AnimatePresence>
       </div>
 
-      {/* 두 박스 */}
-      <div className="grid grid-cols-2 gap-3 flex-none" style={{minHeight:"32vh"}}>
+      {/* 두 박스 - 화면 비율 50% */}
+      <div className="grid grid-cols-2 gap-3 min-h-0">
         <div ref={leftRef}
           style={{background: `linear-gradient(135deg, ${data.leftBox.from}, ${data.leftBox.to})`}}
-          className="rounded-3xl p-3 border-4 border-dashed border-white/60 text-white shadow-lg overflow-auto no-scrollbar">
-          <div className="text-center font-cafe24 fs-md mb-1">{data.leftBox.emoji} {data.leftBox.label}</div>
-          <div className="flex flex-wrap justify-center gap-1">
+          className="rounded-3xl p-3 border-4 border-dashed border-white/70 text-white shadow-xl overflow-auto no-scrollbar flex flex-col">
+          <div className="text-center font-cafe24 t-lg mb-1 flex-none">{data.leftBox.emoji} {data.leftBox.label}</div>
+          <div className="flex flex-wrap justify-center gap-2 flex-1 items-center">
             {data.cards.filter(c=>placed[c.id]==="left").map(c=>(
               <motion.div key={c.id} initial={{scale:0.3, rotate:-15}} animate={{scale:1, rotate:0}}
-                className="bg-white/95 text-gray-800 rounded-2xl px-2 py-1 font-cafe24 fs-sm shadow flex items-center gap-1">
-                <span className="em-md">{c.emoji}</span>{c.text}
+                style={{width:"24%", minWidth:"4rem", aspectRatio:"3/4"}}
+                className="bg-white/95 text-gray-800 rounded-2xl p-1 shadow flex flex-col items-center justify-between">
+                <div style={{width:"80%", aspectRatio:"1/1"}}>{SVG[c.art]?.()}</div>
+                <div className="font-cafe24 t-xs text-center leading-tight">{c.text}</div>
               </motion.div>
             ))}
           </div>
         </div>
         <div ref={rightRef}
           style={{background: `linear-gradient(135deg, ${data.rightBox.from}, ${data.rightBox.to})`}}
-          className="rounded-3xl p-3 border-4 border-dashed border-white/60 text-white shadow-lg overflow-auto no-scrollbar">
-          <div className="text-center font-cafe24 fs-md mb-1">{data.rightBox.emoji} {data.rightBox.label}</div>
-          <div className="flex flex-wrap justify-center gap-1">
+          className="rounded-3xl p-3 border-4 border-dashed border-white/70 text-white shadow-xl overflow-auto no-scrollbar flex flex-col">
+          <div className="text-center font-cafe24 t-lg mb-1 flex-none">{data.rightBox.emoji} {data.rightBox.label}</div>
+          <div className="flex flex-wrap justify-center gap-2 flex-1 items-center">
             {data.cards.filter(c=>placed[c.id]==="right").map(c=>(
               <motion.div key={c.id} initial={{scale:0.3, rotate:15}} animate={{scale:1, rotate:0}}
-                className="bg-white/95 text-gray-800 rounded-2xl px-2 py-1 font-cafe24 fs-sm shadow flex items-center gap-1">
-                <span className="em-md">{c.emoji}</span>{c.text}
+                style={{width:"24%", minWidth:"4rem", aspectRatio:"3/4"}}
+                className="bg-white/95 text-gray-800 rounded-2xl p-1 shadow flex flex-col items-center justify-between">
+                <div style={{width:"80%", aspectRatio:"1/1"}}>{SVG[c.art]?.()}</div>
+                <div className="font-cafe24 t-xs text-center leading-tight">{c.text}</div>
               </motion.div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* 하단 버튼 */}
-      <div className="flex justify-center gap-3 mt-2 flex-none">
+      {/* 하단 */}
+      <div className="flex justify-center gap-3">
         {!allDone && Object.keys(placed).length > 0 && (
           <button onClick={()=>setPlaced({})}
-            className="px-4 py-2 rounded-2xl bg-gray-100 font-cafe24 fs-sm card-hover">
-            🔄 처음부터
-          </button>
+            className="px-4 py-2 rounded-2xl bg-gray-100 font-cafe24 t-base card-hover">🔄 처음부터</button>
         )}
         {allDone && (
           <motion.button initial={{scale:0}} animate={{scale:1}}
             onClick={onDone}
-            className="px-6 py-2 rounded-2xl bg-gradient-to-r from-emerald-400 to-green-500 text-white font-cafe24 fs-md shadow-lg card-hover">
+            className="px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-400 to-green-500 text-white font-cafe24 t-lg shadow-lg card-hover pulse-grow">
             퀴즈 풀러 가기 🚀
           </motion.button>
         )}
@@ -920,7 +1199,7 @@ function ConceptLearn({ area, onDone }) {
 function Quiz({ area, name, onDone, helpUsed, setHelpUsed, addScore }) {
   const pool = useMemo(()=> {
     const list = area === "int" ? QUESTIONS : QUESTIONS.filter(q=>q.area===area);
-    return list.length ? list : QUESTIONS.filter(q=>q.area===area);
+    return list.length ? list : QUESTIONS.filter(q=>q.area==="traffic");
   }, [area]);
 
   const [idx, setIdx] = useState(0);
@@ -936,81 +1215,66 @@ function Quiz({ area, name, onDone, helpUsed, setHelpUsed, addScore }) {
 
   const choose = (i, evt) => {
     if (revealed) return;
-    setPicked(i);
-    setRevealed(true);
+    setPicked(i); setRevealed(true);
     const correct = i === q.ans;
     if (correct) {
-      setScore(s=>s+1);
-      happySound();
+      setScore(s=>s+1); happySound();
       const r = evt.currentTarget.getBoundingClientRect();
-      const id = Date.now();
-      setBursts(b=>[...b, {id, x:r.left+r.width/2, y:r.top+r.height/2}]);
+      setBursts(b=>[...b, {id:Date.now(), x:r.left+r.width/2, y:r.top+r.height/2}]);
       speak("정답이에요! 잘했어요!");
     } else {
       sadSound();
       speak("앗, 다시 생각해 볼까요? " + q.tip);
     }
   };
-
   const next = () => {
     setPicked(null); setRevealed(false);
     if (idx + 1 >= pool.length) {
       addScore({correct: score, total: pool.length});
       onDone();
-    } else {
-      setIdx(i=>i+1);
-    }
+    } else setIdx(i=>i+1);
   };
-
   const askHelp = () => {
-    setHelpUsed(h=> h+1);
-    setShowHelp(true);
+    setHelpUsed(h=> h+1); setShowHelp(true);
     speak(q.tip);
     saveToGAS("help", { name, area: q.area, q: q.q, time: new Date().toISOString() });
   };
 
   return (
-    <div className="absolute inset-0 pt-14 px-4 pb-3 flex flex-col">
+    <div className="absolute inset-0 pt-14 px-4 pb-3"
+      style={{display:'grid', gridTemplateRows:'auto auto 1fr auto', gap:'0.6rem'}}>
       <FloatingDeco/>
-      {/* 영역 뱃지 */}
-      <div className="flex items-center justify-between mb-2 flex-none">
-        <div className={`px-3 py-1 rounded-full font-cafe24 fs-sm text-white bg-gradient-to-r ${areaInfo.color} shadow flex items-center gap-1`}>
+      {/* 헤더 */}
+      <div className="flex items-center justify-between">
+        <div className={`px-3 py-1 rounded-full font-cafe24 t-base text-white bg-gradient-to-r ${areaInfo.color} shadow flex items-center gap-1`}>
           <span>{areaInfo.emoji}</span> {areaInfo.name}
         </div>
-        <div className="font-cafe24 fs-base text-gray-600">
-          {idx+1} / {pool.length} · ⭐ {score}
-        </div>
+        <div className="font-cafe24 t-md text-gray-600">{idx+1} / {pool.length} · ⭐ {score}</div>
       </div>
 
-      {/* 큰 키워드 + 영역 일러스트 */}
-      <div className="flex justify-center items-center gap-3 mb-2 flex-none">
+      {/* 큰 키워드 일러스트 + 문제 */}
+      <div className="flex items-center gap-4 px-2">
         <motion.div key={"art"+idx}
-          initial={{x:-30, opacity:0}} animate={{x:0, opacity:1}}
-          className="opacity-80">
-          {AreaArt[q.area]?.("clamp(60px,11vmin,110px)")}
-        </motion.div>
-        <motion.div key={"em"+idx}
-          initial={{scale:0.4, rotate:-15, opacity:0}}
+          initial={{scale:0.3, rotate:-20, opacity:0}}
           animate={{scale:1, rotate:0, opacity:1}}
-          transition={{type:"spring", stiffness:200, damping:15}}
-          className={`em-lg rounded-[32px] bg-gradient-to-br ${areaInfo.color} p-3 shadow-2xl`}>
-          {q.key}
+          transition={{type:"spring", stiffness:180, damping:14}}
+          className="flex-none bg-white rounded-[28px] shadow-2xl p-3 ring-4 ring-yellow-200"
+          style={{width:"clamp(80px, 22vmin, 180px)", height:"clamp(80px, 22vmin, 180px)"}}>
+          {SVG[q.art]?.()}
+        </motion.div>
+        <motion.div key={"q"+idx}
+          initial={{x:30, opacity:0}} animate={{x:0, opacity:1}}
+          className="flex-1 bg-white/95 rounded-3xl shadow-xl p-4 backdrop-blur">
+          <p className="font-cafe24 t-xl text-gray-800 leading-tight">
+            {q.q.split("").map((ch,i)=>(
+              <span key={i} className="pop-letter" style={{animationDelay:`${i*0.03}s`}}>{ch}</span>
+            ))}
+          </p>
         </motion.div>
       </div>
-
-      {/* 문제 */}
-      <motion.div key={"q"+idx}
-        initial={{y:20, opacity:0}} animate={{y:0, opacity:1}}
-        className="bg-white/90 rounded-3xl shadow-xl p-3 mb-3 backdrop-blur flex-none">
-        <p className="font-cafe24 fs-lg text-center text-gray-800 leading-tight">
-          {q.q.split("").map((ch,i)=>(
-            <span key={i} className="pop-letter" style={{animationDelay:`${i*0.03}s`}}>{ch}</span>
-          ))}
-        </p>
-      </motion.div>
 
       {/* 보기 */}
-      <div className="flex-1 min-h-0 flex flex-col justify-center gap-2 max-w-2xl mx-auto w-full overflow-auto no-scrollbar">
+      <div className="flex flex-col justify-center gap-3 max-w-2xl mx-auto w-full overflow-auto no-scrollbar">
         {q.opts.map((opt, i)=> {
           const isPicked = picked === i;
           const isAns = i === q.ans;
@@ -1019,49 +1283,49 @@ function Quiz({ area, name, onDone, helpUsed, setHelpUsed, addScore }) {
           else if (revealed && isPicked && !isAns) cls = "bg-rose-400 text-white shake";
           return (
             <motion.button key={i}
-              whileHover={{ scale: revealed?1:1.02 }} whileTap={{ scale: 0.98 }}
+              initial={{x:-30, opacity:0}} animate={{x:0, opacity:1}} transition={{delay: i*0.1}}
+              whileHover={{ scale: revealed?1:1.03 }} whileTap={{ scale: 0.97 }}
               onClick={(e)=>choose(i, e)} disabled={revealed}
-              className={`${cls} rounded-2xl p-3 shadow-md flex items-center gap-3 font-cafe24 fs-md text-left card-hover`}>
-              <div className="rounded-full bg-gradient-to-br from-yellow-200 to-pink-200 flex items-center justify-center fs-md flex-none"
-                style={{width:"clamp(32px,5vmin,46px)", height:"clamp(32px,5vmin,46px)"}}>
+              className={`${cls} rounded-2xl p-3 shadow-lg flex items-center gap-3 font-cafe24 t-lg text-left card-hover`}>
+              <div className="rounded-full bg-gradient-to-br from-yellow-200 to-pink-200 flex items-center justify-center t-md flex-none"
+                style={{width:"2.6rem", height:"2.6rem"}}>
                 {["①","②","③"][i]}
               </div>
               <span className="flex-1">{opt}</span>
-              {revealed && isAns && <Check size={24}/>}
-              {revealed && isPicked && !isAns && <X size={24}/>}
+              {revealed && isAns && <Check size={28}/>}
+              {revealed && isPicked && !isAns && <X size={28}/>}
             </motion.button>
           );
         })}
       </div>
 
-      {/* 하단 버튼 */}
-      <div className="flex justify-between items-center gap-3 mt-2 flex-none">
+      {/* 하단 */}
+      <div className="flex justify-between items-center gap-3">
         <button onClick={askHelp}
-          className="px-4 py-2 rounded-2xl bg-purple-200 text-purple-700 font-cafe24 fs-md shadow card-hover flex items-center gap-1">
+          className="px-4 py-2 rounded-2xl bg-purple-200 text-purple-700 font-cafe24 t-md shadow card-hover flex items-center gap-1">
           <HelpCircle size={20}/> 💜 도움받기
         </button>
         {revealed && (
           <motion.button initial={{scale:0}} animate={{scale:1}}
             onClick={next}
-            className="px-6 py-2 rounded-2xl bg-gradient-to-r from-emerald-400 to-green-500 text-white font-cafe24 fs-md shadow-lg card-hover">
+            className="px-7 py-2 rounded-2xl bg-gradient-to-r from-emerald-400 to-green-500 text-white font-cafe24 t-lg shadow-lg card-hover">
             {idx+1 >= pool.length ? "지도로 돌아가기 🗺️" : "다음 →"}
           </motion.button>
         )}
       </div>
 
       {bursts.map(b=> <Burst key={b.id} x={b.x} y={b.y} onDone={()=>setBursts(bs=>bs.filter(x=>x.id!==b.id))}/>)}
-
       <AnimatePresence>
         {showHelp && (
           <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
-            className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-6"
+            className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-6"
             onClick={()=>setShowHelp(false)}>
-            <motion.div initial={{scale:0.7}} animate={{scale:1}}
+            <motion.div initial={{scale:0.5}} animate={{scale:1}}
               className="bg-white rounded-3xl p-6 max-w-md shadow-2xl text-center">
-              <div className="em-huge mb-2 bounce-soft">💜</div>
-              <p className="font-cafe24 fs-md text-gray-800 mb-3">{q.tip}</p>
+              <div className="t-huge mb-2 bounce-soft">💜</div>
+              <p className="font-cafe24 t-lg text-gray-800 mb-3">{q.tip}</p>
               <button onClick={()=>setShowHelp(false)}
-                className="px-5 py-2 bg-purple-400 text-white rounded-2xl font-cafe24 fs-md">알겠어요!</button>
+                className="px-6 py-2 bg-purple-400 text-white rounded-2xl font-cafe24 t-md">알겠어요!</button>
             </motion.div>
           </motion.div>
         )}
@@ -1076,61 +1340,54 @@ function Quiz({ area, name, onDone, helpUsed, setHelpUsed, addScore }) {
 function Certificate({ name, score, total, stars, sticker, helpUsed, onHome }) {
   useEffect(()=>{
     speak(`${name} 친구, 안전탐험을 모두 마쳤어요! 정말 멋져요!`);
-    happySound();
-    setTimeout(happySound, 400);
-    setTimeout(happySound, 900);
+    happySound(); setTimeout(happySound, 400); setTimeout(happySound, 900);
   },[]);
   const today = new Date();
   const dateStr = `${today.getFullYear()}년 ${today.getMonth()+1}월 ${today.getDate()}일`;
   return (
-    <div className="absolute inset-0 pt-14 px-4 pb-4 overflow-auto no-scrollbar flex flex-col items-center justify-center">
+    <div className="absolute inset-0 pt-14 px-4 pb-3"
+      style={{display:'grid', gridTemplateRows:'1fr auto', gap:'0.6rem'}}>
       <FloatingDeco/>
       <motion.div initial={{scale:0.7, opacity:0, y:30}} animate={{scale:1, opacity:1, y:0}}
         transition={{type:"spring", stiffness:120}}
-        className="w-full max-w-2xl bg-white rounded-[40px] shadow-2xl p-6 border-8 border-double border-yellow-300 relative">
+        className="w-full max-w-3xl mx-auto bg-white rounded-[40px] shadow-2xl p-6 border-8 border-double border-yellow-300 relative flex flex-col justify-center min-h-0">
         <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-300 to-pink-300 rounded-full px-5 py-1 shadow-lg">
-          <span className="font-cafe24 fs-md">🏆 안전탐험 수료증 🏆</span>
+          <span className="font-cafe24 t-md">🏆 안전탐험 수료증 🏆</span>
         </div>
-
-        <div className="text-center mt-4">
-          <div className="em-huge mb-2 bounce-soft">{sticker || "🎉"}</div>
-          <p className="font-cafe24 fs-xl mb-1">
+        <div className="text-center">
+          <div className="t-huge mb-2 bounce-soft" style={{lineHeight:1}}>{sticker || "🎉"}</div>
+          <p className="font-cafe24 t-2xl mb-1">
             <span className="hi-yellow">{name}</span> 친구
           </p>
-          <p className="font-cafe24 fs-base text-gray-600 mb-2">위 어린이는</p>
-          <div className="inline-block px-4 py-1 rounded-full text-white font-cafe24 fs-md bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 mb-3 shadow">
+          <p className="font-cafe24 t-base text-gray-600 mb-2">위 어린이는</p>
+          <div className="inline-block px-4 py-1 rounded-full text-white font-cafe24 t-md bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 mb-3 shadow">
             🛡️ 안전탐험 모든 영역
           </div>
-          <p className="font-cafe24 fs-lg text-gray-700 leading-relaxed mb-3">
-            을 끝까지 잘 마쳤음을 칭찬합니다!
-          </p>
-
-          <div className="grid grid-cols-3 gap-2 max-w-md mx-auto mb-4">
+          <p className="font-cafe24 t-lg text-gray-700 mb-3">을 끝까지 잘 마쳤음을 칭찬합니다!</p>
+          <div className="grid grid-cols-3 gap-2 max-w-md mx-auto mb-3">
             <div className="bg-rose-50 rounded-2xl p-2">
-              <div className="em-md mb-1">📝</div>
-              <div className="font-cafe24 fs-tiny text-gray-500">맞춘 문제</div>
-              <div className="font-cafe24 fs-md text-rose-500">{score}/{total}</div>
+              <div className="t-xl mb-1">📝</div>
+              <div className="font-cafe24 t-xs text-gray-500">맞춘 문제</div>
+              <div className="font-cafe24 t-md text-rose-500">{score}/{total}</div>
             </div>
             <div className="bg-yellow-50 rounded-2xl p-2">
-              <div className="em-md mb-1">⭐</div>
-              <div className="font-cafe24 fs-tiny text-gray-500">자기 별점</div>
-              <div className="font-cafe24 fs-md text-amber-500">{stars}/5</div>
+              <div className="t-xl mb-1">⭐</div>
+              <div className="font-cafe24 t-xs text-gray-500">자기 별점</div>
+              <div className="font-cafe24 t-md text-amber-500">{stars}/5</div>
             </div>
             <div className="bg-purple-50 rounded-2xl p-2">
-              <div className="em-md mb-1">💜</div>
-              <div className="font-cafe24 fs-tiny text-gray-500">도움 횟수</div>
-              <div className="font-cafe24 fs-md text-purple-500">{helpUsed}</div>
+              <div className="t-xl mb-1">💜</div>
+              <div className="font-cafe24 t-xs text-gray-500">도움 횟수</div>
+              <div className="font-cafe24 t-md text-purple-500">{helpUsed}</div>
             </div>
           </div>
-
-          <p className="font-cafe24 fs-sm text-gray-500">{dateStr}</p>
-          <p className="font-cafe24 fs-sm text-gray-500">안전탐험 🛡️</p>
+          <p className="font-cafe24 t-sm text-gray-500">{dateStr}</p>
+          <p className="font-cafe24 t-sm text-gray-500">안전탐험 🛡️</p>
         </div>
       </motion.div>
-
-      <div className="text-center mt-4">
+      <div className="text-center">
         <button onClick={onHome}
-          className="px-6 py-2 rounded-2xl bg-gradient-to-r from-pink-400 to-rose-500 text-white font-cafe24 fs-md shadow-lg card-hover">
+          className="px-6 py-2 rounded-2xl bg-gradient-to-r from-pink-400 to-rose-500 text-white font-cafe24 t-md shadow-lg card-hover">
           🏠 처음으로
         </button>
       </div>
@@ -1142,7 +1399,7 @@ function Certificate({ name, score, total, stars, sticker, helpUsed, onHome }) {
    메인 App
 ========================================================= */
 function App() {
-  const [step, setStep] = useState("start"); // start, pre, map, concept, quiz, post, cert
+  const [step, setStep] = useState("start");
   const [name, setName] = useState("");
   const [currentArea, setCurrentArea] = useState("");
   const [cleared, setCleared] = useState({});
@@ -1154,7 +1411,6 @@ function App() {
   const [postResult, setPostResult] = useState(null);
 
   useEffect(()=>{ setSPK(speakerOn); }, [speakerOn]);
-
   useEffect(()=>{
     const asked = localStorage.getItem("mic_asked");
     if (!asked && navigator.mediaDevices) {
@@ -1170,17 +1426,14 @@ function App() {
     setCleared({}); setHelpUsed(0); setScoreSum({correct:0,total:0});
     setPreResult(null); setPostResult(null);
   };
-
-  const addScore = (r) => {
-    setScoreSum(prev => ({ correct: prev.correct + r.correct, total: prev.total + r.total }));
-  };
+  const addScore = (r) => setScoreSum(prev => ({ correct: prev.correct + r.correct, total: prev.total + r.total }));
 
   const progress =
     step === "start" ? 0 :
-    step === "pre"   ? 0.1 :
-    step === "map"   ? 0.2 + 0.5 * (Object.keys(cleared).length / AREAS.length) :
-    step === "concept" || step === "quiz" ? 0.2 + 0.5 * (Object.keys(cleared).length / AREAS.length) + 0.05 :
-    step === "post" ? 0.85 :
+    step === "pre" ? 0.1 :
+    step === "map" ? 0.2 + 0.5 * (Object.keys(cleared).length / AREAS.length) :
+    (step === "concept" || step === "quiz") ? 0.2 + 0.5 * (Object.keys(cleared).length / AREAS.length) + 0.05 :
+    step === "post" ? 0.9 :
     step === "cert" ? 1 : 0;
 
   return (
@@ -1188,14 +1441,10 @@ function App() {
       {step !== "start" && (
         <TopBar name={name} speakerOn={speakerOn} setSpeakerOn={setSpeakerOn} onHome={reset} progress={progress}/>
       )}
-
       <AnimatePresence mode="wait">
         {step === "start" && (
           <motion.div key="start" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="absolute inset-0">
-            <StartScreen
-              onStart={(n)=>{ setName(n); setStep("pre"); }}
-              onShowTutorial={()=>setShowTutorial(true)}
-            />
+            <StartScreen onStart={(n)=>{ setName(n); setStep("pre"); }} onShowTutorial={()=>setShowTutorial(true)}/>
           </motion.div>
         )}
         {step === "pre" && (
@@ -1203,11 +1452,7 @@ function App() {
             <RecordBlock
               prompt="오늘 알고 있는 안전 규칙을 말해 봐요"
               helpText="모르면 '잘 모르겠어요' 라고 말해도 괜찮아요!"
-              onSubmit={(r)=>{
-                setPreResult(r);
-                saveToGAS("pre_record", { name, text:r.text, time: new Date().toISOString() });
-                setStep("map");
-              }}/>
+              onSubmit={(r)=>{ setPreResult(r); saveToGAS("pre_record", { name, text:r.text, time: new Date().toISOString() }); setStep("map"); }}/>
           </motion.div>
         )}
         {step === "map" && (
@@ -1219,8 +1464,7 @@ function App() {
         )}
         {step === "concept" && (
           <motion.div key="concept" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="absolute inset-0">
-            <ConceptLearn area={currentArea}
-              onDone={()=> setStep("quiz")}/>
+            <ConceptLearn area={currentArea} onDone={()=> setStep("quiz")}/>
           </motion.div>
         )}
         {step === "quiz" && (
@@ -1228,10 +1472,7 @@ function App() {
             <Quiz area={currentArea} name={name}
               helpUsed={helpUsed} setHelpUsed={setHelpUsed}
               addScore={addScore}
-              onDone={()=>{
-                setCleared(c=>({...c, [currentArea]: true}));
-                setStep("map");
-              }}/>
+              onDone={()=>{ setCleared(c=>({...c, [currentArea]: true})); setStep("map"); }}/>
           </motion.div>
         )}
         {step === "post" && (
@@ -1242,11 +1483,7 @@ function App() {
               askStars={true}
               onSubmit={(r)=>{
                 setPostResult(r);
-                saveToGAS("post_record", {
-                  name, text:r.text, stars:r.stars, sticker:r.sticker,
-                  score: scoreSum.correct, total: scoreSum.total, helpUsed,
-                  time: new Date().toISOString()
-                });
+                saveToGAS("post_record", { name, text:r.text, stars:r.stars, sticker:r.sticker, score: scoreSum.correct, total: scoreSum.total, helpUsed, time: new Date().toISOString() });
                 setStep("cert");
               }}/>
           </motion.div>
@@ -1256,12 +1493,10 @@ function App() {
             <Certificate name={name}
               score={scoreSum.correct} total={scoreSum.total}
               stars={postResult?.stars || 0} sticker={postResult?.sticker}
-              helpUsed={helpUsed}
-              onHome={reset}/>
+              helpUsed={helpUsed} onHome={reset}/>
           </motion.div>
         )}
       </AnimatePresence>
-
       <AnimatePresence>
         {showTutorial && <Tutorial onClose={()=>setShowTutorial(false)}/>}
       </AnimatePresence>
