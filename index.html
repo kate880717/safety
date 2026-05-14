@@ -1110,8 +1110,9 @@ function App() {
           <motion.div key="pre" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="absolute inset-0">
             <RecordBlock
               prompt="오늘 알고 있는 안전 규칙을 말해 봐요"
-              helpText="모르면 '잘 모르겠어요' 라고 말해도 괜찮아요!"
-              onSubmit={(r)=>{ setPreResult(r); saveToGAS("pre_record", { name, text:r.text, time: new Date().toISOString() }); setStep("map"); }}/>
+              helpText="말하기, 글쓰기, 건너뛰기 모두 괜찮아요!"
+              canSkip={true}
+              onSubmit={(r)=>{ setPreResult(r); saveToGAS("pre_record", { name, text:r.text, skipped:!!r.skipped, time: new Date().toISOString() }); setStep("map"); }}/>
           </motion.div>
         )}
         {step === "map" && (
