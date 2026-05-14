@@ -1110,8 +1110,8 @@ function App() {
           <motion.div key="pre" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="absolute inset-0">
             <RecordBlock
               prompt="오늘 알고 있는 안전 규칙을 말해 봐요"
-              helpText="말하기, 글쓰기, 건너뛰기 모두 괜찮아요!"
               canSkip={true}
+              examples={["횡단보도에서는 좌우를 잘 살펴봐요","빨간 불일 때는 멈춰서 기다려요","불이 나면 119에 전화해요","낯선 사람은 따라가지 않아요"]}
               onSubmit={(r)=>{ setPreResult(r); saveToGAS("pre_record", { name, text:r.text, skipped:!!r.skipped, time: new Date().toISOString() }); setStep("map"); }}/>
           </motion.div>
         )}
@@ -1139,8 +1139,8 @@ function App() {
           <motion.div key="post" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="absolute inset-0">
             <RecordBlock
               prompt="오늘 배운 것 한 가지와 다짐을 말해요"
-              helpText="가장 기억에 남는 안전 규칙을 자랑해 봐요!"
               askStars={true}
+              examples={["앞으로 신호를 꼭 지킬게요","위험할 때 큰 소리로 도움을 요청할게요","안전벨트를 항상 맬 거예요","어려운 일은 어른께 알릴게요"]}
               onSubmit={(r)=>{
                 setPostResult(r);
                 saveToGAS("post_record", { name, text:r.text, stars:r.stars, sticker:r.sticker, score: scoreSum.correct, total: scoreSum.total, helpUsed, time: new Date().toISOString() });
