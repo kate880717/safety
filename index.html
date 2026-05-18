@@ -87,6 +87,7 @@ import { createRoot } from "react-dom/client";
 import { motion, AnimatePresence } from "framer-motion";
 import { Volume2, VolumeX, Mic, Star, Home, Check, X, HelpCircle, Square, Trash2 } from "lucide-react";
 
+/* ⚠️ 배포한 code.gs 웹 앱 URL — code.gs 새 배포 시 URL이 바뀌면 여기도 교체 */
 const GAS_URL = "https://script.google.com/macros/s/AKfycbzuI75nXwyIpIlMPdvWlCcm3OHuOnSnv86DUDcfmUEaS87ln_Pl3Jw0KksFOHSqP5pJ/exec";
 
 /* ===== 스피커 OFF면 모든 소리 차단 ===== */
@@ -121,6 +122,7 @@ const speak = (text) => {
     window.speechSynthesis.speak(u);
   } catch(e){}
 };
+/* code.gs 액션: saveAnswer / saveRecording / saveResult — 전송 후 응답을 기다리지 않음 */
 const saveToGAS = (action, payload) => {
   if (!GAS_URL) return Promise.resolve({ok:false});
   return fetch(GAS_URL, { method:"POST", body: JSON.stringify({ action, payload }), headers:{"Content-Type":"text/plain;charset=utf-8"} })
@@ -177,6 +179,13 @@ const AREAS = [
   { id: "disaster", name: "재난안전", emoji: "🌪️", color: "from-sky-400 to-blue-500",    ring: "ring-sky-300" },
   { id: "life",     name: "생활안전", emoji: "🏠", color: "from-emerald-400 to-green-500",ring: "ring-emerald-300" },
   { id: "int",      name: "통합탐험", emoji: "🧚", color: "from-purple-400 to-fuchsia-500",ring: "ring-purple-300" }
+];
+
+/* 🎯 패턴 1 - 학습목표 (백워드 설계, 구체적 수행 동사) */
+const GOALS = [
+  "위험한 행동과 안전한 행동을 구별",
+  "상황에 맞는 안전한 행동을 고를",
+  "내가 지킬 안전 약속을 말할"
 ];
 
 const QUESTIONS = [
@@ -275,6 +284,27 @@ function FloatingDeco() {
   );
 }
 
+/* 📌 패턴 2 - 사전/사후 녹음 의미 안내 박스 */
+function RecordNotice({ kind }) {
+  if (kind === "pre") return (
+    <div className="bg-blue-50 border-4 border-blue-300 rounded-2xl px-4 py-2 text-center w-full max-w-2xl">
+      <p className="font-cafe24 t-base text-blue-900">📌 활동 전 녹음이에요!</p>
+      <p className="font-cafe24 t-sm text-blue-700 leading-snug">
+        지금 아는 만큼만 말해도 괜찮아요. 활동이 끝나고 다시 녹음해서 비교할 거예요 🌱
+      </p>
+    </div>
+  );
+  if (kind === "post") return (
+    <div className="bg-emerald-50 border-4 border-emerald-300 rounded-2xl px-4 py-2 text-center w-full max-w-2xl">
+      <p className="font-cafe24 t-base text-emerald-900">🌟 활동 후 녹음이에요!</p>
+      <p className="font-cafe24 t-sm text-emerald-700 leading-snug">
+        처음 녹음과 비교해서, 새롭게 알게 된 점을 말해주세요 🌱
+      </p>
+    </div>
+  );
+  return null;
+}
+
 function TopBar({ name, speakerOn, setSpeakerOn, onHome, progress }) {
   return (
     <div className="absolute top-0 left-0 right-0 px-4 flex items-center justify-between z-30 bg-white/70 backdrop-blur-md border-b border-white/40"
@@ -303,11 +333,11 @@ function TopBar({ name, speakerOn, setSpeakerOn, onHome, progress }) {
 
 /* ===== 튜토리얼 ===== */
 const TUTORIAL_PAGES = [
-  { emoji:"👋", title:"안녕!", text:"우리 이름을 골라 보자.", tts:"안녕! 이름을 골라 볼까요?" },
+  { emoji:"🎯", title:"오늘의 목표", text:"이 활동이 끝나면 안전을 말할 수 있어요!", tts:"오늘의 목표를 확인해요." },
   { emoji:"🎤", title:"녹음하기", text:"말하기·글쓰기·건너뛰기 중 골라요.", tts:"말하기, 글쓰기, 건너뛰기 중에 골라요." },
   { emoji:"🗺️", title:"지도 탐험", text:"다섯 영역을 모두 탐험해요!", tts:"지도에서 다섯 영역을 모두 탐험해요." },
   { emoji:"💜", title:"도움받기", text:"모르면 💜 버튼을 눌러요.", tts:"모르면 도움받기 버튼을 눌러요." },
-  { emoji:"⭐", title:"별점 주기", text:"마지막에 별점을 줘요.", tts:"마지막에 별점을 줘요." },
+  { emoji:"⭐", title:"별점 주기", text:"내 녹음을 듣고 나서 별점을 줘요.", tts:"내 녹음을 듣고 나서 별점을 줘요." },
   { emoji:"🏆", title:"수료증!", text:"다 마치면 수료증을 받아요!", tts:"수료증을 받아요!" }
 ];
 
@@ -349,31 +379,44 @@ function Tutorial({ onClose }) {
   );
 }
 
-/* ===== 시작 화면 ===== */
+/* ===== 시작 화면 (🎯 학습목표 박스 포함) ===== */
 function StartScreen({ onStart, onShowTutorial }) {
   const [name, setName] = useState("");
   const [customName, setCustomName] = useState("");
   const students = ["김민준","이서연","박지호","최예린","정도윤","장하은","윤시우","강유나","직접 입력"];
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
+    <div className="absolute inset-0 flex flex-col items-center justify-center p-5">
       <FloatingDeco/>
       <motion.h1 initial={{y:-40,opacity:0}} animate={{y:0,opacity:1}}
-        className="font-cafe24 t-3xl mb-1 text-center">
+        className="font-cafe24 t-2xl mb-3 text-center">
         <span className="hi-yellow text-rose-500">안전탐험</span> <span className="bounce-soft inline-block">🛡️</span>
       </motion.h1>
-      <p className="font-cafe24 t-lg text-gray-600 mb-6">우리 함께 안전하게! ✨</p>
-      <div className="bg-white/90 rounded-[32px] shadow-2xl p-7 w-full max-w-lg backdrop-blur">
-        <label className="font-cafe24 t-lg text-pink-500 block mb-3">내 이름을 골라요</label>
-        <select value={name} onChange={e=>setName(e.target.value)}
-          className="w-full p-3 rounded-2xl border-4 border-pink-200 font-cafe24 t-md bg-white">
-          <option value="">— 이름을 골라주세요 —</option>
-          {students.map(s=> <option key={s} value={s}>{s}</option>)}
-        </select>
-        {name === "직접 입력" && (
-          <input value={customName} onChange={e=>setCustomName(e.target.value)} placeholder="이름을 적어주세요"
-            className="w-full mt-3 p-3 rounded-2xl border-4 border-yellow-200 font-cafe24 t-md"/>
-        )}
-        <div className="flex gap-3 mt-5">
+      <div className="bg-white/90 rounded-[32px] shadow-2xl p-5 w-full max-w-lg backdrop-blur flex flex-col gap-3">
+        {/* 🎯 패턴 1 - 학습목표 (백워드 설계) */}
+        <div className="bg-yellow-100 border-4 border-yellow-300 rounded-2xl p-3">
+          <div className="font-cafe24 t-md text-yellow-900 text-center mb-1">🎯 오늘의 목표</div>
+          <p className="font-cafe24 t-sm text-yellow-900 text-center leading-relaxed">
+            이 활동이 끝나면 우리는<br/>
+            👉 <span className="bg-white px-1.5 py-0.5 rounded">{GOALS[0]}</span>할 수 있어요<br/>
+            👉 <span className="bg-white px-1.5 py-0.5 rounded">{GOALS[1]}</span> 수 있어요<br/>
+            👉 <span className="bg-white px-1.5 py-0.5 rounded">{GOALS[2]}</span> 수 있어요
+          </p>
+        </div>
+        {/* 이름 선택 */}
+        <div>
+          <label className="font-cafe24 t-base text-pink-500 block mb-2">내 이름을 골라요</label>
+          <select value={name} onChange={e=>setName(e.target.value)}
+            className="w-full p-3 rounded-2xl border-4 border-pink-200 font-cafe24 t-md bg-white">
+            <option value="">— 이름을 골라주세요 —</option>
+            {students.map(s=> <option key={s} value={s}>{s}</option>)}
+          </select>
+          {name === "직접 입력" && (
+            <input value={customName} onChange={e=>setCustomName(e.target.value)} placeholder="이름을 적어주세요"
+              className="w-full mt-2 p-3 rounded-2xl border-4 border-yellow-200 font-cafe24 t-md"/>
+          )}
+        </div>
+        {/* 버튼 */}
+        <div className="flex gap-3">
           <button onClick={onShowTutorial}
             className="flex-1 py-3 rounded-2xl font-cafe24 t-md bg-purple-100 text-purple-700 hover:bg-purple-200 card-hover">📖 사용법</button>
           <button
@@ -388,23 +431,28 @@ function StartScreen({ onStart, onShowTutorial }) {
   );
 }
 
-/* ===== 녹음 (방식 선택 → 입력) ===== */
-function RecordBlock({ prompt, onSubmit, askStars=false, canSkip=false, examples=[] }) {
+/* ===== 녹음 (방식 선택 → 입력) =====
+   - 음성 녹음은 base64로 변환해 onSubmit으로 전달 (code.gs saveRecording → 드라이브 저장)
+   - noticeKind: "pre"=활동 전(평가X), "post"=활동 후(녹음·들어보기 후 별점)         */
+function RecordBlock({ prompt, onSubmit, askStars=false, canSkip=false, examples=[], noticeKind=null }) {
   const [mode, setMode] = useState(null); // null | 'voice' | 'keyboard' | 'none'
   const [showExamples, setShowExamples] = useState(false);
   const [recording, setRecording] = useState(false);
   const [audioURL, setAudioURL] = useState(null);
-  const [text, setText] = useState("");          // STT·키보드 공용 단일 입력값 (편집 가능)
+  const [audioB64, setAudioB64] = useState("");   // 드라이브 전송용 base64 (data URL)
+  const [played, setPlayed] = useState(false);    // 🔊 내 녹음 들어봤는지 (별점 잠금 해제 조건)
+  const [text, setText] = useState("");           // STT·키보드 공용 단일 입력값 (편집 가능)
   const [stars, setStars] = useState(0);
   const [stickerPicked, setStickerPicked] = useState(null);
   const recRef = useRef(null);
   const chunksRef = useRef([]);
   const recogRef = useRef(null);
+  const audioRef = useRef(null);
 
   useEffect(()=>{ speak(prompt); },[prompt]);
 
   const startRec = async () => {
-    setText(""); setAudioURL(null); chunksRef.current = [];
+    setText(""); setAudioURL(null); setAudioB64(""); setPlayed(false); chunksRef.current = [];
     try {
       const stream = await navigator.mediaDevices.getUserMedia({audio:true});
       const mr = new MediaRecorder(stream);
@@ -413,6 +461,9 @@ function RecordBlock({ prompt, onSubmit, askStars=false, canSkip=false, examples
       mr.onstop = () => {
         const blob = new Blob(chunksRef.current, {type:"audio/webm"});
         setAudioURL(URL.createObjectURL(blob));
+        const reader = new FileReader();
+        reader.onloadend = () => setAudioB64(typeof reader.result === 'string' ? reader.result : "");
+        reader.readAsDataURL(blob);   // → "data:audio/webm;base64,XXXX"
         stream.getTracks().forEach(t=>t.stop());
       };
       mr.start(); setRecording(true);
@@ -430,26 +481,35 @@ function RecordBlock({ prompt, onSubmit, askStars=false, canSkip=false, examples
     } catch(e) { alert("마이크를 사용할 수 없어요. '글자로 쓰기'로 적어 주세요."); }
   };
   const stopRec = () => { recRef.current?.stop(); recogRef.current?.stop(); setRecording(false); };
-  const reselect = () => { stopRec(); setMode(null); setText(""); setAudioURL(null); };
+  const reselect = () => { stopRec(); setMode(null); setText(""); setAudioURL(null); setAudioB64(""); setPlayed(false); };
+  const clearRec = () => { setAudioURL(null); setAudioB64(""); setText(""); setPlayed(false); };
 
   const finalText = text.trim();
   const needRetry = askStars && stars >= 1 && stars <= 3;
   const hasInput = finalText.length > 0 || audioURL;
+
+  /* 별점 잠금 해제: 음성은 녹음+들어보기 필수 / 키보드는 글자 입력 / 별점만 주기는 바로 */
+  const ratingUnlocked =
+    mode === 'none' ? true :
+    mode === 'keyboard' ? finalText.length > 0 :
+    (!!audioURL && played);
+
   const canSubmit = askStars ? (stars > 0 && (stars <= 3 || stickerPicked)) : hasInput;
 
   const handleSubmit = () => {
-    if (needRetry) { setStars(0); setAudioURL(null); setText(""); return; }
-    onSubmit({ text: finalText, audioURL, stars, sticker: stickerPicked });
+    if (needRetry) { setStars(0); setStickerPicked(null); setAudioURL(null); setAudioB64(""); setText(""); setPlayed(false); return; }
+    onSubmit({ text: finalText, audioURL, audioBase64: audioB64, stars, sticker: stickerPicked });
   };
-  const handleSkip = () => onSubmit({ text: "", audioURL: null, stars: 0, sticker: null, skipped: true });
+  const handleSkip = () => onSubmit({ text: "", audioURL: null, audioBase64: "", stars: 0, sticker: null, skipped: true });
 
-  /* 1단계: 방식 선택 (말로 녹음 / 글자로 쓰기 — 처음부터 둘 다 선택 가능) */
+  /* 1단계: 방식 선택 (말로 / 글자로 — 처음부터 둘 다 선택 가능) */
   if (!mode) {
     return (
-      <div className="absolute inset-0 pt-14 px-6 flex flex-col items-center justify-center gap-4">
+      <div className="absolute inset-0 pt-14 px-6 flex flex-col items-center justify-center gap-3">
         <FloatingDeco/>
-        <div className="t-huge bounce-soft" style={{lineHeight:1}}>🎤</div>
-        <div className="bg-white/95 rounded-[36px] shadow-2xl p-6 max-w-2xl w-full flex flex-col items-center gap-4">
+        <div className="t-2xl bounce-soft" style={{lineHeight:1}}>🎤</div>
+        <div className="bg-white/95 rounded-[36px] shadow-2xl p-5 max-w-2xl w-full flex flex-col items-center gap-3">
+          <RecordNotice kind={noticeKind}/>
           <h2 className="font-cafe24 t-xl text-center text-blue-500">{prompt}</h2>
           <p className="font-cafe24 t-base text-gray-500">어떻게 남길지 골라요!</p>
           <div className="flex flex-wrap justify-center gap-3 w-full">
@@ -522,10 +582,11 @@ function RecordBlock({ prompt, onSubmit, askStars=false, canSkip=false, examples
 
   return (
     <div className="absolute inset-0 pt-14 px-4 pb-3"
-      style={{display:'grid', gridTemplateRows: gridRows, gap:'0.6rem'}}>
+      style={{display:'grid', gridTemplateRows: gridRows, gap:'0.5rem'}}>
       <FloatingDeco/>
-      <div className="text-center">
-        <h2 className="font-cafe24 t-2xl">🎤 <span className="hi-blue">{prompt}</span></h2>
+      <div className="flex flex-col items-center gap-1.5">
+        <h2 className="font-cafe24 t-xl text-center">🎤 <span className="hi-blue">{prompt}</span></h2>
+        <RecordNotice kind={noticeKind}/>
       </div>
 
       {mode !== 'none' && (
@@ -548,19 +609,23 @@ function RecordBlock({ prompt, onSubmit, askStars=false, canSkip=false, examples
               <p className="font-cafe24 t-md text-gray-600">
                 {recording ? "🎙️ 듣고 있어요…" : audioURL ? "✅ 녹음 완료!" : "마이크를 눌러서 말해 봐요"}
               </p>
+              {audioURL && (
+                <div className="w-full flex items-center justify-center gap-2">
+                  <audio ref={audioRef} src={audioURL} onPlay={()=>setPlayed(true)} className="hidden"/>
+                  <button onClick={()=>audioRef.current?.play()}
+                    className={`px-5 py-2.5 rounded-2xl text-white font-cafe24 t-md shadow-lg card-hover ${played?"bg-sky-400":"bg-sky-500 pulse-grow"}`}>
+                    🔊 내 녹음 들어보기
+                  </button>
+                  <button onClick={clearRec} className="p-2.5 bg-gray-100 rounded-2xl card-hover">
+                    <Trash2 size={20}/>
+                  </button>
+                </div>
+              )}
               {(text || audioURL) && (
                 <div className="w-full">
                   <div className="font-cafe24 t-sm text-gray-500 mb-1">📝 말한 내용 (고칠 수 있어요)</div>
                   <textarea value={text} onChange={e=>setText(e.target.value)} rows={2}
                     className="w-full p-2 rounded-2xl border-4 border-yellow-100 font-cafe24 t-base resize-none"/>
-                </div>
-              )}
-              {audioURL && (
-                <div className="w-full flex gap-2">
-                  <audio src={audioURL} controls className="w-full"/>
-                  <button onClick={()=>{ setAudioURL(null); setText(""); }} className="p-2 bg-gray-100 rounded-2xl card-hover">
-                    <Trash2 size={20}/>
-                  </button>
                 </div>
               )}
             </>
@@ -576,31 +641,44 @@ function RecordBlock({ prompt, onSubmit, askStars=false, canSkip=false, examples
         </div>
       )}
 
+      {/* ⭐ 별점 — 패턴 1·2: 내 녹음을 듣고 나서만 평가 가능 (사후 녹음 전용) */}
       {askStars && (
         <div className="bg-white/90 rounded-3xl shadow-xl p-4 flex flex-col justify-center min-h-0 max-w-4xl w-full mx-auto">
-          <p className="font-cafe24 t-md text-center text-gray-700 mb-2 flex-none">⭐ 오늘 나의 안전 약속, 별점을 줘요</p>
-          <div className="flex justify-center gap-2 flex-none">
-            {[1,2,3,4,5].map(n=>(
-              <button key={n} onClick={()=>{ setStars(n); popSound(); }} className="star-btn">
-                <Star size={48} fill={n<=stars?"#FBBF24":"none"} stroke={n<=stars?"#F59E0B":"#D1D5DB"} strokeWidth={2}/>
-              </button>
-            ))}
-          </div>
-          {stars > 0 && stars <= 3 && (
-            <p className="text-center mt-2 font-cafe24 t-base text-rose-500 flex-none">💪 한 번 더 다짐해 볼까요?</p>
-          )}
-          {stars >= 4 && (
-            <div className="mt-2 flex-1 flex flex-col justify-center min-h-0">
-              <p className="text-center font-cafe24 t-base text-emerald-600 mb-2 flex-none">와! 멋져요. 스티커를 골라 주세요! 🎁</p>
-              <div className="flex justify-center flex-wrap gap-2">
-                {STICKERS.map(s=>(
-                  <button key={s} onClick={()=>{ setStickerPicked(s); popSound(); }}
-                    className={`t-2xl p-1 rounded-2xl card-hover ${stickerPicked===s?"bg-yellow-200 scale-110":"bg-white"}`}>
-                    {s}
+          <p className="font-cafe24 t-md text-center text-gray-700 mb-2 flex-none">
+            ⭐ 내 녹음을 듣고 나서, 오늘 나의 약속에 별점을 줘요
+          </p>
+          {!ratingUnlocked ? (
+            <p className="text-center font-cafe24 t-base text-sky-500 flex-none">
+              {mode === 'voice'
+                ? "🔊 먼저 '내 녹음 들어보기'를 눌러서 들어봐요!"
+                : "✏️ 먼저 내용을 적어 주세요!"}
+            </p>
+          ) : (
+            <>
+              <div className="flex justify-center gap-2 flex-none">
+                {[1,2,3,4,5].map(n=>(
+                  <button key={n} onClick={()=>{ setStars(n); popSound(); }} className="star-btn">
+                    <Star size={48} fill={n<=stars?"#FBBF24":"none"} stroke={n<=stars?"#F59E0B":"#D1D5DB"} strokeWidth={2}/>
                   </button>
                 ))}
               </div>
-            </div>
+              {stars > 0 && stars <= 3 && (
+                <p className="text-center mt-2 font-cafe24 t-base text-rose-500 flex-none">💪 한 번 더 다짐해 볼까요?</p>
+              )}
+              {stars >= 4 && (
+                <div className="mt-2 flex-1 flex flex-col justify-center min-h-0">
+                  <p className="text-center font-cafe24 t-base text-emerald-600 mb-2 flex-none">와! 멋져요. 스티커를 골라 주세요! 🎁</p>
+                  <div className="flex justify-center flex-wrap gap-2">
+                    {STICKERS.map(s=>(
+                      <button key={s} onClick={()=>{ setStickerPicked(s); popSound(); }}
+                        className={`t-2xl p-1 rounded-2xl card-hover ${stickerPicked===s?"bg-yellow-200 scale-110":"bg-white"}`}>
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
@@ -818,7 +896,7 @@ function ConceptLearn({ area, onDone }) {
   );
 }
 
-/* ===== 퀴즈 ===== */
+/* ===== 퀴즈 (각 문제 결과를 code.gs saveAnswer로 전송) ===== */
 function Quiz({ area, name, onDone, helpUsed, setHelpUsed, addScore }) {
   const pool = useMemo(()=> QUESTIONS.filter(q=>q.area===area), [area]);
   const [idx, setIdx] = useState(0);
@@ -826,6 +904,7 @@ function Quiz({ area, name, onDone, helpUsed, setHelpUsed, addScore }) {
   const [wrongPicks, setWrongPicks] = useState([]);
   const [wrongHint, setWrongHint] = useState(false);
   const [firstTry, setFirstTry] = useState(true);
+  const [helpThisQ, setHelpThisQ] = useState(false);   // 이 문제에서 도움받기를 썼는지
   const [score, setScore] = useState(0);
   const [bursts, setBursts] = useState([]);
   const [showHelp, setShowHelp] = useState(false);
@@ -853,6 +932,12 @@ function Quiz({ area, name, onDone, helpUsed, setHelpUsed, addScore }) {
       const r = evt.currentTarget.getBoundingClientRect();
       setBursts(b=>[...b, {id:Date.now(), x:r.left+r.width/2, y:r.top+r.height/2}]);
       speak("정답이에요! 잘했어요!");
+      /* 한 문제 결과를 code.gs로 전송 (한 문제당 1회) */
+      saveToGAS("saveAnswer", {
+        student: name, area: q.area, q: q.q,
+        picked: q.opts[q.ans], correctAns: q.opts[q.ans],
+        correct: firstTry, helpUsed: helpThisQ
+      });
     } else {
       setWrongPicks(w => [...w, i]);
       setFirstTry(false); setWrongHint(true);
@@ -861,16 +946,15 @@ function Quiz({ area, name, onDone, helpUsed, setHelpUsed, addScore }) {
     }
   };
   const next = () => {
-    setRevealed(false); setWrongPicks([]); setWrongHint(false); setFirstTry(true);
+    setRevealed(false); setWrongPicks([]); setWrongHint(false); setFirstTry(true); setHelpThisQ(false);
     if (idx + 1 >= pool.length) {
       addScore({correct: score, total: pool.length});
       onDone();
     } else setIdx(i=>i+1);
   };
   const askHelp = () => {
-    setHelpUsed(h=> h+1); setShowHelp(true);
+    setHelpUsed(h=> h+1); setHelpThisQ(true); setShowHelp(true);
     speak(q.tip);
-    saveToGAS("help", { name, area: q.area, q: q.q, time: new Date().toISOString() });
   };
 
   return (
@@ -983,8 +1067,8 @@ function Quiz({ area, name, onDone, helpUsed, setHelpUsed, addScore }) {
   );
 }
 
-/* ===== 수료증 ===== */
-function Certificate({ name, score, total, stars, sticker, helpUsed, onHome }) {
+/* ===== 수료증 (사전·사후 비교 포함) ===== */
+function Certificate({ name, score, total, stars, sticker, helpUsed, preText, postText, onHome }) {
   useEffect(()=>{
     speak(`${name} 친구, 안전탐험을 모두 마쳤어요! 정말 멋져요!`);
     happySound(); setTimeout(happySound, 400); setTimeout(happySound, 900);
@@ -997,37 +1081,45 @@ function Certificate({ name, score, total, stars, sticker, helpUsed, onHome }) {
       <FloatingDeco/>
       <motion.div initial={{scale:0.7, opacity:0, y:30}} animate={{scale:1, opacity:1, y:0}}
         transition={{type:"spring", stiffness:120}}
-        className="w-full max-w-3xl mx-auto bg-white rounded-[40px] shadow-2xl p-6 border-8 border-double border-yellow-300 relative flex flex-col justify-center min-h-0">
+        className="w-full max-w-3xl mx-auto bg-white rounded-[36px] shadow-2xl p-5 border-8 border-double border-yellow-300 relative flex flex-col justify-center min-h-0 overflow-auto no-scrollbar">
         <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-300 to-pink-300 rounded-full px-5 py-1 shadow-lg">
           <span className="font-cafe24 t-md">🏆 안전탐험 수료증 🏆</span>
         </div>
         <div className="text-center">
-          <div className="t-huge mb-2 bounce-soft" style={{lineHeight:1}}>{sticker || "🎉"}</div>
-          <p className="font-cafe24 t-2xl mb-1"><span className="hi-yellow">{name}</span> 친구</p>
-          <p className="font-cafe24 t-base text-gray-600 mb-2">위 어린이는</p>
-          <div className="inline-block px-4 py-1 rounded-full text-white font-cafe24 t-md bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 mb-3 shadow">
-            🛡️ 안전탐험 모든 영역
+          <div className="t-2xl mb-1 bounce-soft" style={{lineHeight:1}}>{sticker || "🎉"}</div>
+          <p className="font-cafe24 t-xl mb-1"><span className="hi-yellow">{name}</span> 친구</p>
+          <div className="inline-block px-4 py-1 rounded-full text-white font-cafe24 t-base bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 mb-2 shadow">
+            🛡️ 안전탐험 모든 영역을 마쳤어요!
           </div>
-          <p className="font-cafe24 t-lg text-gray-700 mb-3">을 끝까지 잘 마쳤음을 칭찬합니다!</p>
-          <div className="grid grid-cols-3 gap-2 max-w-md mx-auto mb-3">
+          {/* 사전·사후 녹음 비교 */}
+          <div className="grid grid-cols-2 gap-2 max-w-xl mx-auto mb-2">
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-2 text-left">
+              <div className="font-cafe24 t-xs text-blue-700 mb-0.5">💡 활동 전 — 내가 알던 것</div>
+              <div className="font-cafe24 t-sm text-gray-700 leading-snug">{(preText && preText.trim()) || "녹음하지 않았어요"}</div>
+            </div>
+            <div className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-2 text-left">
+              <div className="font-cafe24 t-xs text-emerald-700 mb-0.5">🌟 활동 후 — 새로 알게 된 것</div>
+              <div className="font-cafe24 t-sm text-gray-700 leading-snug">{(postText && postText.trim()) || "녹음하지 않았어요"}</div>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-2 max-w-md mx-auto mb-2">
             <div className="bg-rose-50 rounded-2xl p-2">
-              <div className="t-xl mb-1">📝</div>
+              <div className="t-lg mb-0.5">📝</div>
               <div className="font-cafe24 t-xs text-gray-500">맞춘 문제</div>
               <div className="font-cafe24 t-md text-rose-500">{score}/{total}</div>
             </div>
             <div className="bg-yellow-50 rounded-2xl p-2">
-              <div className="t-xl mb-1">⭐</div>
+              <div className="t-lg mb-0.5">⭐</div>
               <div className="font-cafe24 t-xs text-gray-500">자기 별점</div>
               <div className="font-cafe24 t-md text-amber-500">{stars}/5</div>
             </div>
             <div className="bg-purple-50 rounded-2xl p-2">
-              <div className="t-xl mb-1">💜</div>
+              <div className="t-lg mb-0.5">💜</div>
               <div className="font-cafe24 t-xs text-gray-500">도움 횟수</div>
               <div className="font-cafe24 t-md text-purple-500">{helpUsed}</div>
             </div>
           </div>
-          <p className="font-cafe24 t-sm text-gray-500">{dateStr}</p>
-          <p className="font-cafe24 t-sm text-gray-500">안전탐험 🛡️</p>
+          <p className="font-cafe24 t-sm text-gray-500">{dateStr} · 안전탐험 🛡️</p>
         </div>
       </motion.div>
       <div className="text-center">
@@ -1050,6 +1142,7 @@ function App() {
   const [showTutorial, setShowTutorial] = useState(false);
   const [helpUsed, setHelpUsed] = useState(0);
   const [scoreSum, setScoreSum] = useState({correct:0, total:0});
+  const [preResult, setPreResult] = useState(null);
   const [postResult, setPostResult] = useState(null);
 
   useEffect(()=>{ setSPK(speakerOn); }, [speakerOn]);
@@ -1066,7 +1159,7 @@ function App() {
   const reset = () => {
     setStep("start"); setName(""); setCurrentArea("");
     setCleared({}); setHelpUsed(0); setScoreSum({correct:0,total:0});
-    setPostResult(null);
+    setPreResult(null); setPostResult(null);
   };
   const addScore = (r) => {
     if (cleared[currentArea]) return; // 복습 모드: 이미 클리어한 영역은 점수 미반영
@@ -1096,9 +1189,19 @@ function App() {
           <motion.div key="pre" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="absolute inset-0">
             <RecordBlock
               prompt="오늘 알고 있는 안전 규칙을 말해 봐요"
+              noticeKind="pre"
               canSkip={true}
               examples={["횡단보도에서는 좌우를 잘 살펴봐요","빨간 불일 때는 멈춰서 기다려요","불이 나면 119에 전화해요","낯선 사람은 따라가지 않아요"]}
-              onSubmit={(r)=>{ saveToGAS("pre_record", { name, text:r.text, skipped:!!r.skipped, time: new Date().toISOString() }); setStep("map"); }}/>
+              onSubmit={(r)=>{
+                setPreResult(r);
+                saveToGAS("saveRecording", {
+                  student: name, area: "pre", kind: "pre",
+                  prompt: "활동 전 — 오늘 알고 있는 안전 규칙",
+                  transcript: r.text, stars: 0, sticker: "",
+                  audioBase64: r.audioBase64 || "", mimeType: "audio/webm"
+                });
+                setStep("map");
+              }}/>
           </motion.div>
         )}
         {step === "map" && (
@@ -1125,11 +1228,27 @@ function App() {
           <motion.div key="post" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="absolute inset-0">
             <RecordBlock
               prompt="오늘 배운 것 한 가지와 다짐을 말해요"
+              noticeKind="post"
               askStars={true}
               examples={["앞으로 신호를 꼭 지킬게요","위험할 때 큰 소리로 도움을 요청할게요","안전벨트를 항상 맬 거예요","어려운 일은 어른께 알릴게요"]}
               onSubmit={(r)=>{
                 setPostResult(r);
-                saveToGAS("post_record", { name, text:r.text, stars:r.stars, sticker:r.sticker, score: scoreSum.correct, total: scoreSum.total, helpUsed, time: new Date().toISOString() });
+                saveToGAS("saveRecording", {
+                  student: name, area: "post", kind: "post",
+                  prompt: "활동 후 — 배운 것과 다짐",
+                  transcript: r.text, stars: r.stars, sticker: r.sticker || "",
+                  audioBase64: r.audioBase64 || "", mimeType: "audio/webm"
+                });
+                saveToGAS("saveResult", {
+                  student: name,
+                  accuracy: scoreSum.total ? Math.round(scoreSum.correct/scoreSum.total*100) : 0,
+                  stars: scoreSum.correct,
+                  recordings: 2,
+                  areasDone: Object.keys(cleared).map(id => (AREAS.find(a=>a.id===id)||{}).name || id),
+                  selfStars: r.stars,
+                  progress: "완료",
+                  bestStreak: 0
+                });
                 setStep("cert");
               }}/>
           </motion.div>
@@ -1139,7 +1258,9 @@ function App() {
             <Certificate name={name}
               score={scoreSum.correct} total={scoreSum.total}
               stars={postResult?.stars || 0} sticker={postResult?.sticker}
-              helpUsed={helpUsed} onHome={reset}/>
+              helpUsed={helpUsed}
+              preText={preResult?.text} postText={postResult?.text}
+              onHome={reset}/>
           </motion.div>
         )}
       </AnimatePresence>
